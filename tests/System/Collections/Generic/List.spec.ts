@@ -1,5 +1,5 @@
 import { List } from '../../../../src/System/Collections/Generic/List';
-import { CsString } from '../../../../src/Domain/ValueObjects/CsString';
+import { CsString } from '../../../../src/Domain/ValueObjects';
 
 describe('System.Collections.Generic.List<T>', () => {
     

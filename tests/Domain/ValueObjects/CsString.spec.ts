@@ -1,4 +1,4 @@
-import { CsString } from '../src/Domain/ValueObjects/CsString';
+import { CsString } from '../../../src/Domain/ValueObjects';
 
 describe('CsString Value Object', () => {
     test('Should be structurally equal', () => {
