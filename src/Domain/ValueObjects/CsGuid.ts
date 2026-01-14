@@ -1,4 +1,4 @@
-import { IEquatable } from '../Shared/IEquatable';
+import { IEquatable } from '../Interfaces';
 import * as crypto from 'crypto';
 
 export class CsGuid implements IEquatable<CsGuid> {

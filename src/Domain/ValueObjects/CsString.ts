@@ -1,5 +1,4 @@
-import { IEquatable } from '../Shared/IEquatable';
-import { IComparable } from '../Shared/IComparable';
+import { IEquatable, IComparable } from '../Interfaces';
 
 export class CsString implements IEquatable<CsString>, IComparable<CsString> {
     private readonly _value: string;

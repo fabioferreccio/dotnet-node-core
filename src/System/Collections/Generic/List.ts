@@ -1,4 +1,4 @@
-import { isEquatable } from '../../../Domain/Shared/IEquatable';
+import { isEquatable } from '../../../Domain/Interfaces';
 
 export class List<T> {
     private _items: T[];

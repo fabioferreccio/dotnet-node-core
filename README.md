@@ -4,17 +4,17 @@
 
 Foundational implementation of a C# Standard Library for Node.js using strict Domain-Driven Design (DDD) and Clean Architecture.
 
-## Philosophy
+## System Architecture
 
-- **Governance:** Strict MIT Compliance.
-- **Immutability:** All Value Objects are immutable.
-- **Type Safety:** No semantic primitives; strongly typed Value Objects.
+The project strictly follows a Facade pattern:
+- **`src/Domain`**: Contains all business logic and immutable Value Objects.
+- **`src/System`**: Re-exports Domain objects to provide the familiar .NET API.
 
 ## Supported Types
 
 - `System.String` (CsString) - Immutable string wrapper.
 - `System.Guid` (CsGuid) - UUID implementation.
-- `System.DateTime` (CsDateTime) - Date wrapper with 1-based months.
+- `System.DateTime` (CsDateTime) - Date wrapper with `Kind` and Formatting.
 - `System.Int32` (CsInt32) - Enforces 32-bit integer behavior.
 - `System.Collections.Generic.List<T>` - List with C#-style equality.
 
@@ -31,21 +31,22 @@ System.Console.WriteLine(greeting.Trim().ToUpper()); // "HELLO WORLD"
 const id = System.Guid.NewGuid();
 System.Console.WriteLine(id.ToString());
 
-// DateTime
+// DateTime Formatting
 const now = System.DateTime.Now;
-const nextWeek = now.AddDays(7);
-System.Console.WriteLine(nextWeek.ToString());
+console.log(now.ToString("yyyy-MM-dd HH:mm:ss")); 
+// Output: 2026-01-14 12:00:00
 
-// Int32
-const i = new System.Int32(5.9); // Truncates to 5
-const j = new System.Int32(10);
-const sum = i.Add(j);
-System.Console.WriteLine(sum); // 15
+// Time Conversion
+const utc = now.ToUniversalTime();
+
+// List with Value Objects
+const list = new System.Collections.Generic.List<System.Guid>();
+list.Add(System.Guid.NewGuid());
 ```
-
-## Architecture
-
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for strict governance rules.
 
 ### SeedWork
 The project provides a `ValueObject` base class in `src/Domain/SeedWork/ValueObject.ts` for extending your own domain entities.
+
+## Governance
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for strict governance rules.
+See [.cursorrules](./.cursorrules) for AI agent standards.

@@ -1,0 +1,23 @@
+You are an Expert C#/.NET Architect porting the .NET Standard Library to TypeScript.
+
+# Project Philosophy
+- **Architecture**: Strict Clean Architecture + Domain-Driven Design (DDD).
+- **Core Principle**: "The Rule of Immutability". All Value Objects must be immutable.
+
+# Architectural Rules
+1. **Facade Pattern**: `src/System` is a Facade. It MUST NOT contain core logic. All business logic and Value Objects reside in `src/Domain`.
+2. **No Primitives**: Domain concepts MUST NOT use primitives (`string`, `number`, `Date`) directly. Use `CsString`, `CsInt32`, `CsDateTime`, etc.
+3. **Facade Exports**: `src/System/index.ts` re-exports Domain objects to form the public API (e.g., `System.String`).
+
+# Coding Standards
+- **Immutability**: Methods like `Trim()`, `AddDays()` MUST return a NEW instance.
+- **Naming**: Use C# PascalCase for public methods (e.g., `WriteLine`, `ToString`).
+- **Interfaces**: all Value Objects must implement `IEquatable<T>` and `IComparable<T>`.
+
+# Testing Protocols
+- **Mirror Structure**: Tests must mirror the source directory structure.
+- **Tooling**: Use `jest` with `ts-jest`.
+- **Strictness**: Tests must prove immutability and equality behavior.
+
+# License
+- The project is strictly **MIT Licensed**.

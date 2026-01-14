@@ -1,4 +1,4 @@
-import { IEquatable } from '../Shared/IEquatable';
+import { IEquatable } from '../Interfaces';
 
 export abstract class ValueObject implements IEquatable<ValueObject> {
     
