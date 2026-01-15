@@ -38,6 +38,11 @@ export class CsInt32 implements IEquatable<CsInt32>, IComparable<CsInt32> {
         return new CsInt32(this._value * other.Value);
     }
 
+    public Divide(other: CsInt32): CsInt32 {
+        if (other.Value === 0) throw new Error("Divide by zero error");
+        return new CsInt32(this._value / other.Value);
+    }
+
     public get Value(): number {
         return this._value;
     }

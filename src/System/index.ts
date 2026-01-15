@@ -10,7 +10,8 @@ import {
     CsSingle, 
     CsDouble, 
     CsDecimal,
-    CsByte
+    CsByte,
+    CsSByte
 } from '../Domain/ValueObjects';
 
 export const System = {
@@ -24,6 +25,7 @@ export const System = {
     Double: CsDouble,
     Decimal: CsDecimal,
     Byte: CsByte,
+    SByte: CsSByte,
     Console: Console,
     Collections: {
         Generic: {

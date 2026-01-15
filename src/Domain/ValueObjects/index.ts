@@ -8,3 +8,4 @@ export * from './CsSingle';
 export * from './CsDouble';
 export * from './CsDecimal';
 export * from './CsByte';
+export * from './CsSByte';
