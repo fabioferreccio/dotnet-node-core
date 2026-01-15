@@ -2,6 +2,9 @@ import { Console } from "./Console";
 import { List } from "./Collections/Generic/List";
 import { Enumerable } from "./Linq/Enumerable";
 import * as DependencyInjection from "./DependencyInjection";
+import { Exception } from "../Domain/SeedWork/Exception";
+import * as IO from "./IO";
+
 import {
     CsDateTime,
     CsGuid,
@@ -16,7 +19,7 @@ import {
     CsSByte,
 } from "../Domain/ValueObjects";
 
-import * as Linq from "./Linq"; // Statically imported namespace
+import * as Linq from "./Linq";
 
 // Registry Wiring
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,6 +47,6 @@ export const System = {
     },
     Linq: Linq,
     DependencyInjection: DependencyInjection,
+    IO: IO,
+    Exception: Exception,
 };
-
-export { DependencyInjection };

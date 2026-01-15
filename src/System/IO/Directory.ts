@@ -1,0 +1,49 @@
+import * as fs from "fs";
+import * as nodePath from "path";
+import { DirectoryNotFoundException } from "./Exceptions/DirectoryNotFoundException";
+import { Exception } from "../../Domain/SeedWork";
+
+export class Directory {
+    public static Exists(path: string): boolean {
+        return fs.existsSync(path) && fs.statSync(path).isDirectory();
+    }
+
+    public static CreateDirectory(path: string): void {
+        if (!Directory.Exists(path)) {
+            fs.mkdirSync(path, { recursive: true });
+        }
+    }
+
+    public static Delete(path: string, recursive: boolean = false): void {
+        if (!Directory.Exists(path)) {
+            throw new DirectoryNotFoundException(`Could not find a part of the path '${path}'.`);
+        }
+        if (recursive) {
+            fs.rmSync(path, { recursive: true, force: true });
+        } else {
+            fs.rmdirSync(path);
+        }
+    }
+
+    public static GetFiles(path: string, searchPattern?: string): string[] {
+        if (!Directory.Exists(path)) {
+            throw new DirectoryNotFoundException(`Could not find a part of the path '${path}'.`);
+        }
+
+        const files = fs.readdirSync(path);
+
+        // Simple Wildcard Implementation
+        if (searchPattern) {
+            // Escape special regex chars but allow *
+            const regexString = "^" + searchPattern.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*") + "$";
+            const regex = new RegExp(regexString);
+            return files.filter((file) => regex.test(file)).map((file) => nodePath.join(path, file));
+        }
+
+        return files.map((file) => nodePath.join(path, file));
+    }
+
+    private constructor() {
+        throw new Exception("Directory is a static class.");
+    }
+}

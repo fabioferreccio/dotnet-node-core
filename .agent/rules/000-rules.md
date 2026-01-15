@@ -49,3 +49,13 @@
 - **Prohibited:** NEVER use `require()`, `module.exports`, or `exports.foo`.
 - **Barrel Files:** Use `index.ts` to aggregate exports.
 - **Namespace Construction:** Import namespaces statically (`import * as Namespace`).
+
+## 8. Code Discipline & Quality (Zero Tolerance)
+- **Zero Suppression Policy:** Usage of `// eslint-disable`, `// @ts-ignore`, or `// @ts-nocheck` is **STRICTLY PROHIBITED**.
+  - **Fix, Don't Hide:** Solve type errors using Generics, `unknown` + Type Guards, or architectural refactoring.
+- **Strong Typing:**
+  - **Prohibited:** `Function` type (use `(...args: any[]) => void` or specific delegates).
+  - **Prohibited:** Unjustified `any`.
+  - **Prohibited:** Empty Interfaces (Exception: DDD Marker Interfaces MUST have a comment explanation).
+- **No Loose TODOs:** Comments like `// TODO: Implement later` are forbidden.
+  - **Rule:** Either implement the feature immediately or omit the comment. Code committed must be complete or explicitly marked as `NotImplementedException`.
