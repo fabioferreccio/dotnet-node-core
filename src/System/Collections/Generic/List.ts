@@ -1,4 +1,5 @@
 import { isEquatable } from '../../../Domain/Interfaces';
+import { Enumerable } from '../../Linq/Enumerable';
 
 export class List<T> {
     private _items: T[];
@@ -78,5 +79,9 @@ export class List<T> {
         }
         
         return -1;
+    }
+
+    public AsEnumerable(): Enumerable<T> {
+        return Enumerable.From(this._items);
     }
 }

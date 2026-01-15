@@ -1,5 +1,6 @@
 import { Console } from './Console';
 import { List } from './Collections/Generic/List';
+import { Enumerable } from './Linq/Enumerable';
 import { 
     CsDateTime, 
     CsGuid, 
@@ -31,5 +32,8 @@ export const System = {
         Generic: {
             List: List
         }
+    },
+    Linq: {
+        Enumerable: Enumerable
     }
 };

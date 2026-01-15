@@ -4,33 +4,42 @@
 ## 1. Architecture & Pattern
 - **Style:** Clean Architecture + Domain-Driven Design (DDD).
 - **Structure:**
-  - `src/Domain/ValueObjects`: Contains the Core Logic (e.g., `CsString`, `CsGuid`).
-  - `src/System`: Facade Layer ONLY. Exports Domain objects (e.g., `export { CsString as String }`).
+  - `src/Domain/ValueObjects`: Core Logic (e.g., `CsString`, `CsGuid`).
+  - `src/System`: Facade Layer ONLY. Exports Domain objects.
   - `tests/`: Mirrors the `src` folder structure.
 
 ## 2. The "No Primitives" Rule
 - **Strict Prohibition:** NEVER use native TypeScript primitives (`string`, `number`, `Date`) for exposed System types.
 - **Enforcement:**
-  - Use `CsString` instead of `string`.
-  - Use `CsInt32` instead of `number`.
-  - Use `CsDateTime` instead of `Date`.
-  - Use `CsGuid` instead of string UUIDs.
+  - `string` -> `CsString`
+  - `number` (int) -> `CsInt32`
+  - `number` (long) -> `CsInt64` (BigInt)
+  - `Date` -> `CsDateTime`
 
 ## 3. Immutability & State
-- All Value Objects must be **Immutable**.
-- Methods that modify data (e.g., `Trim`, `AddDays`) MUST return a `new` instance.
-- Deep Freeze is preferred where performance allows, but logical immutability is mandatory.
+- **Rule:** All Value Objects are **Immutable**.
+- **Behavior:** Methods modifying data (`Trim`, `AddDays`) MUST return a `new` instance.
+- **State:** Never mutate `_value` after the constructor.
 
-## 4. Contracts
+## 4. Contracts & Equality
 - All Domain Types must implement:
-  - `IEquatable<T>` (Logic: `this.value === other.value`)
-  - `IComparable<T>`
+  - `IEquatable<T>`: Structural equality (`new A(1).Equals(new A(1))` is true).
+  - `IComparable<T>`: Returns `-1`, `0`, `1`.
+- **Handling Nulls:** `CompareTo(null)` must return `1` (Standard C# behavior).
 
-## 5. Testing Standards
-- **Framework:** Jest + ts-jest.
-- **Rule:** Test the source `.ts` files, NOT the compiled `.js`.
-- **Integration:** Verify `List<T>` works with `IEquatable` logic (e.g., `List.Remove(new CsString("x"))` must work).
+## 5. Testing Standards (QA Protocol)
+- **Metric:** Aim for **100% Branch Coverage**.
+- **Anti-Hallucination Rule:**
+  - Do not write assertions like `expect(true).toBe(true)`.
+  - Assertions must verify **Side Effects** or **Return Values**.
+  - **Immutability Check:** Always verify that the original object remains unchanged after an operation.
+- **Mandatory Scenarios per Type:**
+  - **Happy Path:** Standard usage.
+  - **Boundary:** MinValue, MaxValue.
+  - **Overflow:** `MaxValue + 1` (Must throw).
+  - **Truncation:** Floating points passed to Int constructors (Must truncate).
+  - **Null/Undefined:** `CompareTo(null)`, `Equals(null)`.
 
 ## 6. Licensing
 - **License:** MIT.
-- Ensure `package.json` and `LICENSE` file stay in sync.
+- `package.json` and `LICENSE` must be in sync.
