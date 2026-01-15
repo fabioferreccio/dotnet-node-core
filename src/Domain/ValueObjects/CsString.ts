@@ -14,6 +14,14 @@ export class CsString implements IEquatable<CsString>, IComparable<CsString> {
         return this._value.length;
     }
 
+    public static IsNullOrEmpty(value: CsString | null | undefined): boolean {
+        return !value || value.Length === 0;
+    }
+
+    public static IsNullOrWhiteSpace(value: CsString | null | undefined): boolean {
+        return !value || value.toString().trim().length === 0;
+    }
+
     public Trim(): CsString {
         return new CsString(this._value.trim());
     }

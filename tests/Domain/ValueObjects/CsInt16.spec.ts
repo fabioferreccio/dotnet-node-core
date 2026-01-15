@@ -1,23 +1,45 @@
 import { CsInt16 } from '../../../src/Domain/ValueObjects/CsInt16';
 
-describe('System.Int16 (CsInt16)', () => {
-    test('Boundary Checks', () => {
-        expect(new CsInt16(-32768).Value).toBe(-32768);
+describe('System.Int16 (CsInt16) - Comprehensive', () => {
+    test('Boundary: MaxValue', () => {
         expect(new CsInt16(32767).Value).toBe(32767);
+        expect(CsInt16.MaxValue).toBe(32767);
     });
 
-    test('Overflow Checks', () => {
-        expect(() => new CsInt16(-32769)).toThrow();
+    test('Boundary: MinValue', () => {
+        expect(new CsInt16(-32768).Value).toBe(-32768);
+        expect(CsInt16.MinValue).toBe(-32768);
+    });
+
+    test('Overflow: > 32767 throws Error', () => {
         expect(() => new CsInt16(32768)).toThrow();
     });
 
-    test('Truncation Checks', () => {
-        expect(new CsInt16(100.9).Value).toBe(100);
-        expect(new CsInt16(-100.9).Value).toBe(-100);
+    test('Underflow: < -32768 throws Error', () => {
+        expect(() => new CsInt16(-32769)).toThrow();
+    });
+
+    test('Truncation: Decimals are truncated', () => {
+        expect(new CsInt16(10.9).Value).toBe(10);
+        expect(new CsInt16(-10.9).Value).toBe(-10);
     });
 
     test('Equality Checks', () => {
-        expect(new CsInt16(1234).Equals(new CsInt16(1234))).toBe(true);
-        expect(new CsInt16(1).Equals(new CsInt16(2))).toBe(false);
+        const a = new CsInt16(100);
+        const b = new CsInt16(100);
+        expect(a.Equals(b)).toBe(true);
+        expect(a.CompareTo(b)).toBe(0);
+    });
+
+    test('CompareTo Coverage', () => {
+        const a = new CsInt16(10);
+        const b = new CsInt16(20);
+        expect(a.CompareTo(b)).toBe(-1);
+        expect(b.CompareTo(a)).toBe(1);
+        expect(a.CompareTo(null)).toBe(1);
+    });
+
+    test('ToString', () => {
+        expect(new CsInt16(12345).ToString()).toBe("12345");
     });
 });

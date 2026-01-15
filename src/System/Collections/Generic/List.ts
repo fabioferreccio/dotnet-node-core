@@ -64,8 +64,6 @@ export class List<T> {
                 const current = this._items[i];
                 if (isEquatable(current)) {
                      if (current.Equals(item)) return i;
-                } else if (current === item) {
-                    return i;
                 }
             }
         } else {

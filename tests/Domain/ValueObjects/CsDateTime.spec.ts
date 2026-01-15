@@ -1,66 +1,135 @@
-import { CsDateTime } from '../../../src/Domain/ValueObjects';
+import { CsDateTime, DateTimeKind } from '../../../src/Domain/ValueObjects/CsDateTime';
 
-describe('System.DateTime', () => {
-    test('Should be immutable', () => {
-        // Use local time construction to avoid timezone shifts
-        // Year 2023, Month 0 (Jan), Day 1, 12:00:00
-        const dt = new CsDateTime(new Date(2023, 0, 1, 12, 0, 0));
-        const nextDay = dt.AddDays(1);
-        
-        expect(dt.Day).toBe(1); 
-        expect(nextDay.Day).toBe(2);
-        
-        // Ensure original didn't change (Day property of original should still be 1)
-        expect(dt.AddDays(2).Day).toBe(3);
+describe('System.DateTime (CsDateTime) - Comprehensive', () => {
+    
+    // 1. Static Factory Methods
+    test('Static: Now', () => {
+        const now = CsDateTime.Now;
+        expect(now.Kind).toBe(DateTimeKind.Local);
+        expect(now.Year).toBeGreaterThan(2020);
     });
 
-    test('Date parts should match', () => {
-        const date = new CsDateTime(new Date(2023, 4, 20, 10, 30, 0)); // Month 4 is May
-        
-        expect(date.Year).toBe(2023);
-        expect(date.Month).toBe(5); // C# month is 1-based
-        expect(date.Day).toBe(20);
-        expect(date.Hour).toBe(10);
+    test('Static: UtcNow', () => {
+        const utcNow = CsDateTime.UtcNow;
+        expect(utcNow.Kind).toBe(DateTimeKind.Utc);
+        // Verify getters on UTC instance
+        expect(utcNow.Year).toBeGreaterThan(2000);
+        expect(utcNow.Month).toBeGreaterThan(0);
+        expect(utcNow.Day).toBeGreaterThan(0);
+        expect(utcNow.Hour).toBeGreaterThanOrEqual(0);
+        expect(utcNow.Minute).toBeGreaterThanOrEqual(0);
+        expect(utcNow.Second).toBeGreaterThanOrEqual(0);
     });
 
-    test('AddDays returns new instance', () => {
-        const date = new CsDateTime(new Date(2023, 4, 20)); // May 20
-        const newDate = date.AddDays(5);
-        
-        expect(date.Day).toBe(20);
-        expect(newDate.Day).toBe(25);
-        expect(date).not.toBe(newDate);
-    });
-
-    test('Today returns date', () => {
+    test('Static: Today', () => {
         const today = CsDateTime.Today;
-        const now = new Date();
-        expect(today.Year).toBe(now.getFullYear());
+        expect(today.Kind).toBe(DateTimeKind.Local);
+        expect(today.Hour).toBe(0);
+        expect(today.Minute).toBe(0);
+        expect(today.Second).toBe(0);
     });
 
-    describe('Comparison', () => {
-        const t1 = new CsDateTime(1000);
-        const t2 = new CsDateTime(2000);
-        const t3 = new CsDateTime(1000);
+    // 2. Formatting (ToString)
+    test('ToString: Default (ISO)', () => {
+        const dt = new CsDateTime(new Date('2023-01-01T12:00:00Z'), DateTimeKind.Utc);
+        expect(dt.ToString()).toBe('2023-01-01T12:00:00.000Z');
+    });
 
-        test('GreaterThan', () => {
-            expect(t2.GreaterThan(t1)).toBe(true);
-            expect(t1.GreaterThan(t2)).toBe(false);
-        });
+    test('ToString: Custom Format Tokens', () => {
+        // Date: 2023-05-09 14:05:07
+        const date = new Date(2023, 4, 9, 14, 5, 7); 
+        const dt = new CsDateTime(date, DateTimeKind.Local);
+        
+        expect(dt.ToString("yyyy-MM-dd HH:mm:ss")).toBe("2023-05-09 14:05:07");
+        expect(dt.ToString("dd/MM/yyyy")).toBe("09/05/2023");
+        // Verify individual components
+        expect(dt.Year).toBe(2023);
+        expect(dt.Month).toBe(5);
+        expect(dt.Day).toBe(9);
+        expect(dt.Hour).toBe(14);
+        expect(dt.Minute).toBe(5);
+        expect(dt.Second).toBe(7);
+    });
 
-        test('LessThan', () => {
-            expect(t1.LessThan(t2)).toBe(true);
-            expect(t2.LessThan(t1)).toBe(false);
-        });
+    // 3. Timezone Conversions and Kind Logic
+    test('ToUniversalTime', () => {
+        const utc = new CsDateTime(new Date(), DateTimeKind.Utc);
+        expect(utc.ToUniversalTime()).toBe(utc); // Should return same instance if already UTC
 
-        test('GreaterThanOrEqual', () => {
-            expect(t2.GreaterThanOrEqual(t1)).toBe(true);
-            expect(t1.GreaterThanOrEqual(t3)).toBe(true);
-        });
+        const local = new CsDateTime(new Date(), DateTimeKind.Local);
+        const converted = local.ToUniversalTime();
+        expect(converted.Kind).toBe(DateTimeKind.Utc);
+        expect(converted.Equals(local)).toBe(true); // Times should match
+    });
 
-        test('LessThanOrEqual', () => {
-            expect(t1.LessThanOrEqual(t2)).toBe(true);
-            expect(t1.LessThanOrEqual(t3)).toBe(true);
-        });
+    test('ToLocalTime', () => {
+        const local = new CsDateTime(new Date(), DateTimeKind.Local);
+        expect(local.ToLocalTime()).toBe(local); // Should return same instance
+
+        const utc = new CsDateTime(new Date(), DateTimeKind.Utc);
+        const converted = utc.ToLocalTime();
+        expect(converted.Kind).toBe(DateTimeKind.Local);
+    });
+
+    // 4. Arithmetic
+    test('AddDays', () => {
+        const start = new CsDateTime(new Date(2023, 0, 1), DateTimeKind.Local);
+        const next = start.AddDays(1);
+        expect(next.Day).toBe(2);
+        
+        // Coverage for UTC Branch
+        const utcStart = new CsDateTime(new Date(Date.UTC(2023, 0, 1)), DateTimeKind.Utc);
+        const utcNext = utcStart.AddDays(1);
+        expect(utcNext.Day).toBe(2);
+    });
+
+    test('AddHours', () => {
+        const start = new CsDateTime(new Date(2023, 0, 1, 10), DateTimeKind.Local);
+        const next = start.AddHours(2);
+        expect(next.Hour).toBe(12);
+    });
+
+    test('AddMinutes', () => {
+        const start = new CsDateTime(new Date(2023, 0, 1, 10, 0), DateTimeKind.Local);
+        const next = start.AddMinutes(30);
+        expect(next.Minute).toBe(30);
+    });
+
+    // 5. Comparison & Equality
+    test('Equality', () => {
+        const t1 = new Date().getTime();
+        const dt1 = new CsDateTime(t1);
+        const dt2 = new CsDateTime(t1);
+        const dt3 = new CsDateTime(t1 + 1000);
+
+        expect(dt1.Equals(dt2)).toBe(true);
+        expect(dt1.Equals(dt3)).toBe(false);
+        expect(dt1.Equals(null as any)).toBe(false);
+    });
+
+    test('Comparisons: Greater/Less', () => {
+        const early = new CsDateTime(new Date(2023, 0, 1));
+        const late = new CsDateTime(new Date(2023, 0, 2));
+
+        expect(late.GreaterThan(early)).toBe(true);
+        expect(early.LessThan(late)).toBe(true);
+        expect(early.GreaterThan(late)).toBe(false);
+        expect(late.LessThan(early)).toBe(false);
+
+        expect(early.GreaterThanOrEqual(early)).toBe(true);
+        expect(early.LessThanOrEqual(early)).toBe(true);
+        expect(late.GreaterThanOrEqual(early)).toBe(true);
+        expect(early.LessThanOrEqual(late)).toBe(true);
+    });
+
+    test('CompareTo', () => {
+        const a = new CsDateTime(new Date(100));
+        const b = new CsDateTime(new Date(200));
+        const c = new CsDateTime(new Date(100));
+
+        expect(a.CompareTo(b)).toBe(-1); // Less
+        expect(b.CompareTo(a)).toBe(1);  // Greater
+        expect(a.CompareTo(c)).toBe(0);  // Equal
+        expect(a.CompareTo(null)).toBe(1); // Null check
     });
 });

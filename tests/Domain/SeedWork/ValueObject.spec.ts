@@ -72,4 +72,20 @@ describe('Domain.SeedWork.ValueObject', () => {
         expect(obj.valueB).toBe("original");
         expect(obj.Equals(new TestValueObject(1, "original"))).toBe(true);
     });
+
+    test('Internal: Shallow Equal Length Mismatch', () => {
+        // To hit the "if (a.length !== b.length)" branch in shallowEqual,
+        // we need instances that pass the constructor Check but return different component arrays.
+        // Since getEqualityComponents is virtual, we can mock it or use a dynamic subclass.
+        class VarArgsObject extends ValueObject {
+            constructor(public items: any[]) { super(); }
+            protected GetEqualityComponents(): any[] { return this.items; }
+        }
+        
+        const o1 = new VarArgsObject([1]);
+        const o2 = new VarArgsObject([1, 2]);
+        // They are same class, so constructor check passes.
+        // shallowEqual will check lengths.
+        expect(o1.Equals(o2)).toBe(false);
+    });
 });
