@@ -19,6 +19,7 @@ import {
 import * as Linq from "./Linq"; // Statically imported namespace
 
 // Registry Wiring
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 Enumerable.registerListFactory((source) => new List(source as any));
 Enumerable.registerOrderedEnumerableFactory((source, context) => new Linq.OrderedEnumerable(source, context));
 Enumerable.registerLookupFactory(() => new Linq.Lookup());

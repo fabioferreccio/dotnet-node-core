@@ -24,6 +24,7 @@ export class Lookup<TKey, TElement>
             // but here 'group' is Grouping<TKey, TElement>.
             // We cast to any to access _source as it's defined in Enumerable.
             // In C# this works for same-class access, in TS protected is less strict but safe here.
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ((group as any)["_source"] as TElement[]).push(element);
         } else {
             this._groupings.push(new Grouping(key, [element]));

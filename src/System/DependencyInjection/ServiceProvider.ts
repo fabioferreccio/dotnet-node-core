@@ -1,29 +1,29 @@
 import { IServiceProvider, IServiceScope, IServiceScopeFactory, IDisposable } from "../../Domain/Interfaces";
-import { ServiceDescriptor, ServiceLifetime } from "../../Domain/DependencyInjection";
+import { ServiceDescriptor, ServiceLifetime, ServiceIdentifier } from "../../Domain/DependencyInjection";
 import { ServiceScope } from "./ServiceScope";
 
 export class ServiceProvider implements IServiceProvider, IServiceScope, IServiceScopeFactory, IDisposable {
-    private readonly _descriptors: Map<any, ServiceDescriptor>;
-    private readonly _singletons: Map<any, any>;
-    private readonly _scopedInstances: Map<any, any>;
+    private readonly _descriptors: Map<ServiceIdentifier, ServiceDescriptor>;
+    private readonly _singletons: Map<ServiceIdentifier, unknown>;
+    private readonly _scopedInstances: Map<ServiceIdentifier, unknown>;
     private readonly _root: ServiceProvider;
-    private _isDisposed: boolean = false;
+    private _isDisposed = false;
 
-    constructor(descriptors: Map<any, ServiceDescriptor>);
-    constructor(descriptors: Map<any, ServiceDescriptor>, root: ServiceProvider);
-    constructor(descriptors: Map<any, ServiceDescriptor>, root?: ServiceProvider) {
+    constructor(descriptors: Map<ServiceIdentifier, ServiceDescriptor>);
+    constructor(descriptors: Map<ServiceIdentifier, ServiceDescriptor>, root: ServiceProvider);
+    constructor(descriptors: Map<ServiceIdentifier, ServiceDescriptor>, root?: ServiceProvider) {
         this._descriptors = descriptors;
 
         if (root) {
             // Scoped Provider
             this._root = root;
             this._singletons = root._singletons; // Share singletons
-            this._scopedInstances = new Map<any, any>();
+            this._scopedInstances = new Map<ServiceIdentifier, unknown>();
         } else {
             // Root Provider
             this._root = this;
-            this._singletons = new Map<any, any>();
-            this._scopedInstances = new Map<any, any>(); // Root scope
+            this._singletons = new Map<ServiceIdentifier, unknown>();
+            this._scopedInstances = new Map<ServiceIdentifier, unknown>(); // Root scope
         }
     }
 
@@ -42,12 +42,12 @@ export class ServiceProvider implements IServiceProvider, IServiceScope, IServic
 
     // --- IServiceProvider Implementation ---
 
-    public GetService<T>(serviceIdentifier: any): T | null {
+    public GetService<T>(serviceIdentifier: ServiceIdentifier<T>): T | null {
         if (this._isDisposed) {
             throw new Error("Cannot access a disposed object (ServiceProvider).");
         }
 
-        const descriptor = this._descriptors.get(serviceIdentifier);
+        const descriptor = this._descriptors.get(serviceIdentifier as ServiceIdentifier);
         if (!descriptor) {
             return null;
         }
@@ -55,30 +55,31 @@ export class ServiceProvider implements IServiceProvider, IServiceScope, IServic
         // 1. Singleton
         if (descriptor.Lifetime === ServiceLifetime.Singleton) {
             // Access Cache from Root
-            if (this._singletons.has(serviceIdentifier)) {
-                return this._singletons.get(serviceIdentifier);
+            if (this._singletons.has(serviceIdentifier as ServiceIdentifier)) {
+                return this._singletons.get(serviceIdentifier as ServiceIdentifier) as T;
             }
             // Create and Cache
             const instance = this.CreateInstance(descriptor);
-            this._singletons.set(serviceIdentifier, instance);
-            return instance;
+            this._singletons.set(serviceIdentifier as ServiceIdentifier, instance);
+            return instance as T;
         }
 
         // 2. Scoped
         if (descriptor.Lifetime === ServiceLifetime.Scoped) {
-            if (this._scopedInstances.has(serviceIdentifier)) {
-                return this._scopedInstances.get(serviceIdentifier);
+            if (this._scopedInstances.has(serviceIdentifier as ServiceIdentifier)) {
+                return this._scopedInstances.get(serviceIdentifier as ServiceIdentifier) as T;
             }
             const instance = this.CreateInstance(descriptor);
-            this._scopedInstances.set(serviceIdentifier, instance);
-            return instance;
+            this._scopedInstances.set(serviceIdentifier as ServiceIdentifier, instance);
+            return instance as T;
         }
 
         // 3. Transient
-        return this.CreateInstance(descriptor);
+        const transient = this.CreateInstance(descriptor);
+        return transient as T;
     }
 
-    public GetRequiredService<T>(serviceIdentifier: any): T {
+    public GetRequiredService<T>(serviceIdentifier: ServiceIdentifier<T>): T {
         const service = this.GetService<T>(serviceIdentifier);
         if (service === null) {
             throw new Error(`No service for type '${String(serviceIdentifier)}' has been registered.`);
@@ -93,7 +94,7 @@ export class ServiceProvider implements IServiceProvider, IServiceScope, IServic
     }
 
     // ... CreateInstance Logic ...
-    private CreateInstance(descriptor: ServiceDescriptor): any {
+    private CreateInstance(descriptor: ServiceDescriptor): unknown {
         // A. Instance
         if (descriptor.ImplementationInstance !== undefined) {
             return descriptor.ImplementationInstance;
@@ -106,7 +107,15 @@ export class ServiceProvider implements IServiceProvider, IServiceScope, IServic
 
         // C. Implementation Type
         if (descriptor.ImplementationType) {
-            return new descriptor.ImplementationType();
+            // Safe constructor invocation without any.
+            // descriptor.ImplementationType is Constructor<T>.
+            // We can invoke with new.
+            // TypeScript might object if it thinks arguments are missing, but strict assumption for DI is parameterless or handled (here parameterless logic or loose).
+            // Actually, we are NOT injecting dependencies here? 'new descriptor.ImplementationType()'.
+            // In a real DI, we recursively resolve arguments. v0.3 is simplified.
+            // Type assertions: 'as new () => unknown' covers parameterless.
+            const Ctor = descriptor.ImplementationType as new (...args: unknown[]) => unknown;
+            return new Ctor();
         }
 
         throw new Error(`Invalid ServiceDescriptor for ${String(descriptor.ServiceType)}. No implementation found.`);

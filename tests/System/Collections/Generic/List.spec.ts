@@ -1,7 +1,6 @@
 import { List } from "../../../../src/System/Collections/Generic/List";
 import { CsInt32 } from "../../../../src/Domain/ValueObjects/CsInt32";
 import { CsString } from "../../../../src/Domain/ValueObjects/CsString";
-import { IEquatable } from "../../../../src/Domain/Interfaces";
 
 describe("System.Collections.Generic.List<T> - Comprehensive", () => {
     test("Constructor: Empty vs Populated", () => {
@@ -98,15 +97,7 @@ describe("System.Collections.Generic.List<T> - Comprehensive", () => {
     });
 
     test("Mixed Equality Coverage (Line 75 check)", () => {
-        class Wrapper implements IEquatable<Wrapper> {
-            constructor(public val: string) {}
-            Equals(other: Wrapper): boolean {
-                return other && this.val === other.val;
-            }
-        }
-
         // List has an object that is "isEquatable" (CsString)
-        const list = new List<string>();
         // We cheat TS slightly to hold a wrapped object if we want, or just uses CsString.
         // But List<T> enforces T.
         // We know CsString is Equatable.
@@ -120,6 +111,7 @@ describe("System.Collections.Generic.List<T> - Comprehensive", () => {
 
         // However, we need a list of... something that allows both?
         // Let's use List<any> for this specific coverage test to permit mixing types
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const mixedList = new List<any>();
         const csStr = new CsString("test");
         mixedList.Add(csStr);

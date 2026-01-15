@@ -33,6 +33,7 @@ describe("System.Guid (CsGuid) - Comprehensive", () => {
         const g2 = CsGuid.Empty;
         expect(g1.Equals(g2)).toBe(true);
         // Cover "if (!other) return false"
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(g1.Equals(null as any)).toBe(false);
     });
 });

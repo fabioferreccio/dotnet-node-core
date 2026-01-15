@@ -12,6 +12,7 @@ describe("System.Single (CsSingle)", () => {
         const a = new CsSingle(1.5);
         const b = new CsSingle(1.5);
         expect(a.Equals(b)).toBe(true);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(a.Equals(null as any)).toBe(false);
     });
 

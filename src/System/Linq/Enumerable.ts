@@ -2,12 +2,12 @@ import { IEnumerable } from "../../Domain/Interfaces/IEnumerable";
 import { IOrderedEnumerable } from "../../Domain/Interfaces/IOrderedEnumerable";
 import { IGrouping } from "../../Domain/Interfaces/IGrouping";
 import { CsInt32, CsDouble, CsDecimal } from "../../Domain/ValueObjects";
-import { isComparable } from "../../Domain/Interfaces/IComparable";
-import { isEquatable } from "../../Domain/Interfaces/IEquatable";
 
 // --- Helper Types ---
 type SortContext<T> = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     keySelector: (item: T) => any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     comparer?: (a: any, b: any) => number;
     descending: boolean;
 };
@@ -152,27 +152,36 @@ export class Enumerable<T> implements IEnumerable<T> {
     // --- Immediate Execution Operators ---
 
     // --- Registry for Circular Dependencies ---
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private static _listFactory: (source: IEnumerable<any>) => any;
     private static _orderedEnumerableFactory: (
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         source: Iterable<any>,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         context: SortContext<any>,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) => IOrderedEnumerable<any>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private static _lookupFactory: () => any; // Lookup<TKey, TElement>
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public static registerListFactory(factory: (source: IEnumerable<any>) => any) {
         this._listFactory = factory;
     }
 
     public static registerOrderedEnumerableFactory(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         factory: (source: Iterable<any>, context: SortContext<any>) => IOrderedEnumerable<any>,
     ) {
         this._orderedEnumerableFactory = factory;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public static registerLookupFactory(factory: () => any) {
         this._lookupFactory = factory;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public ToList(): any {
         if (!Enumerable._listFactory) {
             throw new Error(
@@ -189,6 +198,7 @@ export class Enumerable<T> implements IEnumerable<T> {
     public Count(predicate?: (item: T) => boolean): number {
         let count = 0;
         const iter = predicate ? this.Where(predicate) : this._source;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for (const _ of iter) {
             count++;
         }
@@ -226,6 +236,7 @@ export class Enumerable<T> implements IEnumerable<T> {
         return true;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public Sum(selector?: (item: T) => number | CsInt32 | CsDouble | CsDecimal | any): number {
         let sum = 0;
         for (const item of this._source) {
@@ -233,8 +244,10 @@ export class Enumerable<T> implements IEnumerable<T> {
 
             if (typeof val === "number") {
                 sum += val;
-            } else if (val && typeof val.Value === "number") {
-                sum += val.Value;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } else if (val && typeof (val as any).Value === "number") {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                sum += (val as any).Value;
             }
         }
         return sum;

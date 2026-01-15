@@ -47,6 +47,7 @@ describe("System.Int32 (CsInt32) - Comprehensive", () => {
         const a = new CsInt32(100);
         const b = new CsInt32(100);
         expect(a.Equals(b)).toBe(true);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(a.Equals(null as any)).toBe(false);
     });
 

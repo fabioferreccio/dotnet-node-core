@@ -103,6 +103,7 @@ describe("System.DateTime (CsDateTime) - Comprehensive", () => {
 
         expect(dt1.Equals(dt2)).toBe(true);
         expect(dt1.Equals(dt3)).toBe(false);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(dt1.Equals(null as any)).toBe(false);
     });
 

@@ -1,10 +1,14 @@
 import { IEquatable } from "../Interfaces";
 
 export abstract class ValueObject implements IEquatable<ValueObject> {
-    protected abstract GetEqualityComponents(): any[];
+    protected abstract GetEqualityComponents(): unknown[];
 
-    public Equals(other: ValueObject): boolean {
+    public Equals(other: unknown): boolean {
         if (other === null || other === undefined) {
+            return false;
+        }
+
+        if (!(other instanceof ValueObject)) {
             return false;
         }
 
@@ -15,7 +19,7 @@ export abstract class ValueObject implements IEquatable<ValueObject> {
         return ValueObject.shallowEqual(this.GetEqualityComponents(), other.GetEqualityComponents());
     }
 
-    protected static shallowEqual(a: any[], b: any[]): boolean {
+    protected static shallowEqual(a: unknown[], b: unknown[]): boolean {
         if (a.length !== b.length) {
             return false;
         }

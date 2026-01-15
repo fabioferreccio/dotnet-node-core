@@ -7,6 +7,7 @@ import { Lookup } from "../../../src/System/Linq/Lookup";
 
 describe("System.Linq.Grouping", () => {
     beforeAll(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Enumerable.registerListFactory((source) => new List(source as any));
         Enumerable.registerLookupFactory(() => new Lookup());
     });

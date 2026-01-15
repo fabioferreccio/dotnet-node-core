@@ -3,7 +3,7 @@ import {
     ServiceDescriptor,
     ServiceIdentifier,
     ImplementationFactory,
-    ServiceLifetime,
+    Constructor,
 } from "../../Domain/DependencyInjection";
 import { ServiceProvider } from "./ServiceProvider";
 
@@ -14,41 +14,33 @@ export class ServiceCollection extends Array<ServiceDescriptor> implements IServ
         return this;
     }
 
-    public AddSingleton<T>(
-        serviceType: ServiceIdentifier<T>,
-        implementation: { new (...args: any[]): T },
-    ): IServiceCollection;
+    public AddSingleton<T>(serviceType: ServiceIdentifier<T>, implementation: Constructor<T>): IServiceCollection;
     public AddSingleton<T>(serviceType: ServiceIdentifier<T>, factory: ImplementationFactory<T>): IServiceCollection;
     public AddSingleton<T>(serviceType: ServiceIdentifier<T>, instance: T): IServiceCollection;
-    public AddSingleton(serviceType: any, implOrFactoryOrInstance: any): IServiceCollection {
+    public AddSingleton(serviceType: ServiceIdentifier, implOrFactoryOrInstance: unknown): IServiceCollection {
+        // ServiceDescriptor accepts 'any' which covers 'unknown'.
         this.Add(ServiceDescriptor.Singleton(serviceType, implOrFactoryOrInstance));
         return this;
     }
 
-    public AddScoped<T>(
-        serviceType: ServiceIdentifier<T>,
-        implementation: { new (...args: any[]): T },
-    ): IServiceCollection;
+    public AddScoped<T>(serviceType: ServiceIdentifier<T>, implementation: Constructor<T>): IServiceCollection;
     public AddScoped<T>(serviceType: ServiceIdentifier<T>, factory: ImplementationFactory<T>): IServiceCollection;
-    public AddScoped(serviceType: any, implOrFactory: any): IServiceCollection {
+    public AddScoped(serviceType: ServiceIdentifier, implOrFactory: unknown): IServiceCollection {
         this.Add(ServiceDescriptor.Scoped(serviceType, implOrFactory));
         return this;
     }
 
-    public AddTransient<T>(
-        serviceType: ServiceIdentifier<T>,
-        implementation: { new (...args: any[]): T },
-    ): IServiceCollection;
+    public AddTransient<T>(serviceType: ServiceIdentifier<T>, implementation: Constructor<T>): IServiceCollection;
     public AddTransient<T>(serviceType: ServiceIdentifier<T>, factory: ImplementationFactory<T>): IServiceCollection;
-    public AddTransient(serviceType: any, implOrFactory: any): IServiceCollection {
+    public AddTransient(serviceType: ServiceIdentifier, implOrFactory: unknown): IServiceCollection {
         this.Add(ServiceDescriptor.Transient(serviceType, implOrFactory));
         return this;
     }
 
-    public TryAddSingleton<T>(serviceType: ServiceIdentifier<T>, implementation: { new (...args: any[]): T }): boolean;
+    public TryAddSingleton<T>(serviceType: ServiceIdentifier<T>, implementation: Constructor<T>): boolean;
     public TryAddSingleton<T>(serviceType: ServiceIdentifier<T>, factory: ImplementationFactory<T>): boolean;
     public TryAddSingleton<T>(serviceType: ServiceIdentifier<T>, instance: T): boolean;
-    public TryAddSingleton(serviceType: any, implOrFactoryOrInstance: any): boolean {
+    public TryAddSingleton(serviceType: ServiceIdentifier, implOrFactoryOrInstance: unknown): boolean {
         // Check if exists
         const exists = this.some((d) => d.ServiceType === serviceType);
         if (exists) return false;
@@ -61,7 +53,7 @@ export class ServiceCollection extends Array<ServiceDescriptor> implements IServ
 
     public BuildServiceProvider(): IServiceProvider {
         // Convert list to Map for cleaner lookup O(1)
-        const map = new Map<any, ServiceDescriptor>();
+        const map = new Map<ServiceIdentifier, ServiceDescriptor>();
         for (const desc of this) {
             // Last registration wins usually? Or first?
             // MS DI: Last wins for resolution of single, but IEnumerable resolves all.

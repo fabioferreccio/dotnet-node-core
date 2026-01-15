@@ -8,6 +8,7 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "build": "tsc",
+    "typecheck": "tsc --noEmit --skipLibCheck",
     "lint": "eslint src/**/*.ts tests/**/*.ts",
     "lint:fix": "eslint src/**/*.ts tests/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts tests/**/*.ts"

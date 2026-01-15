@@ -2,7 +2,9 @@ import { CsString } from "../../../src/Domain/ValueObjects/CsString";
 
 describe("System.String (CsString)", () => {
     test("Construction: Null/Undefined throws", () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(() => new CsString(null as any)).toThrow();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(() => new CsString(undefined as any)).toThrow();
     });
 
@@ -50,6 +52,7 @@ describe("System.String (CsString)", () => {
 
         expect(a.Equals(b)).toBe(true);
         expect(a.Equals(c)).toBe(false);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(a.Equals(null as any)).toBe(false);
     });
 

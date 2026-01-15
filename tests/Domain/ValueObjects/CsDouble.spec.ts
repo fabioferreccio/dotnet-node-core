@@ -11,6 +11,7 @@ describe("System.Double (CsDouble)", () => {
         const c = new CsDouble(1.24);
         expect(a.Equals(b)).toBe(true);
         expect(a.Equals(c)).toBe(false);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(a.Equals(null as any)).toBe(false);
     });
 

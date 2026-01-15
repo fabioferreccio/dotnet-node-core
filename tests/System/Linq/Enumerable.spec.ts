@@ -4,6 +4,7 @@ import { CsInt32 } from "../../../src/Domain/ValueObjects/CsInt32";
 
 describe("System.Linq.Enumerable", () => {
     beforeAll(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Enumerable.registerListFactory((source) => new List(source as any));
     });
 
@@ -12,7 +13,7 @@ describe("System.Linq.Enumerable", () => {
         let executed = false;
 
         // This predicate throws if executed
-        const throwingPredicate = (x: number) => {
+        const throwingPredicate = () => {
             executed = true;
             throw new Error("Should not execute yet");
         };
@@ -91,6 +92,7 @@ describe("System.Linq.Enumerable", () => {
         // If selector returns undefined/null or object without Value, it shouldn't crash, but won't add.
         // Line 178 "Fallback or error?"
         // We need to hit the "else" block of line 176.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const mixedList = new List<any>(["a", "b"]);
         expect(mixedList.AsEnumerable().Sum((x) => x)).toBe(0);
     });

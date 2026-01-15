@@ -5,6 +5,7 @@ import { OrderedEnumerable } from "../../../src/System/Linq/OrderedEnumerable";
 
 describe("System.Linq.OrderedEnumerable", () => {
     beforeAll(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Enumerable.registerListFactory((source) => new List(source as any));
         Enumerable.registerOrderedEnumerableFactory((source, context) => new OrderedEnumerable(source, context));
     });

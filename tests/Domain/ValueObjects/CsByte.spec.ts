@@ -27,6 +27,7 @@ describe("System.Byte (CsByte) - Comprehensive", () => {
         expect(a.Equals(new CsByte(100))).toBe(true);
         expect(a.Equals(new CsByte(50))).toBe(false);
         // Cover "if (!other) return false"
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(a.Equals(null as any)).toBe(false);
     });
 

@@ -23,6 +23,7 @@ describe("System.Decimal (CsDecimal)", () => {
         const a = new CsDecimal(10.0);
         const b = new CsDecimal(10.0);
         expect(a.Equals(b)).toBe(true);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(a.Equals(null as any)).toBe(false);
     });
 

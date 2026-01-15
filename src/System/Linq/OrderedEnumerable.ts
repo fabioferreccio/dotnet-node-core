@@ -3,7 +3,9 @@ import { isComparable } from "../../Domain/Interfaces/IComparable";
 import { Enumerable } from "./Enumerable";
 
 export type SortContext<T> = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     keySelector: (item: T) => any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     comparer?: (a: any, b: any) => number;
     descending: boolean;
 };
@@ -20,6 +22,7 @@ export class OrderedEnumerable<T> extends Enumerable<T> implements IOrderedEnume
 
     public *[Symbol.iterator](): Iterator<T> {
         const contexts: SortContext<T>[] = [];
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         let item: OrderedEnumerable<T> | undefined = this;
         let rootSource: Iterable<T> | undefined;
 
@@ -27,6 +30,7 @@ export class OrderedEnumerable<T> extends Enumerable<T> implements IOrderedEnume
         while (item) {
             contexts.unshift(item._sortContext);
             if (!item._parent) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 rootSource = (item as any)["_source"];
             }
             item = item._parent;

@@ -1,5 +1,5 @@
 import { ServiceCollection } from "../../../src/System/DependencyInjection/ServiceCollection";
-import { IServiceProvider, IServiceScope, IServiceScopeFactory } from "../../../src/Domain/Interfaces";
+import { IServiceProvider, IServiceScopeFactory } from "../../../src/Domain/Interfaces";
 
 describe("System.DependencyInjection", () => {
     // ... classes ...
@@ -85,6 +85,7 @@ describe("System.DependencyInjection", () => {
     test("TryAddSingleton: Prevents duplicates", () => {
         const services = new ServiceCollection();
         services.AddSingleton<string>("key", "val1");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const added = services.TryAddSingleton<string>("key", "val2" as any); // Cast to any to satisfy signature constraint if needed, checking pure logic
 
         expect(added).toBe(false);
@@ -116,6 +117,7 @@ describe("System.DependencyInjection", () => {
     test("Scope Disposal: Clears resources and prevents access", () => {
         const services = new ServiceCollection();
         services.AddScoped(ServiceC, ServiceC);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const root = services.BuildServiceProvider() as any;
         const scope = root.CreateScope();
 
@@ -134,6 +136,7 @@ describe("System.DependencyInjection", () => {
     test("ServiceProvider: Throws if used after dispose", () => {
         const services = new ServiceCollection();
         const provider = services.BuildServiceProvider();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (provider as any).Dispose();
 
         expect(() => provider.GetService(ServiceA)).toThrow();
@@ -149,6 +152,7 @@ describe("System.DependencyInjection", () => {
             ImplementationInstance: undefined,
         };
         // Hack to inject invalid descriptor for testing defensive code
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         services.push(invalidDescriptor as any);
 
         const provider = services.BuildServiceProvider();

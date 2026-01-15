@@ -23,7 +23,8 @@ export class CsGuid implements IEquatable<CsGuid> {
         throw new Error("Invalid GUID format");
     }
 
-    public static TryParse(input: string, result: any): boolean {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public static TryParse(input: string, result?: unknown): boolean {
         const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         return regex.test(input);
     }

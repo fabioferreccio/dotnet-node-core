@@ -9,7 +9,7 @@ class TestValueObject extends ValueObject {
         super();
     }
 
-    protected GetEqualityComponents(): any[] {
+    protected GetEqualityComponents(): unknown[] {
         return [this.valueA, this.valueB];
     }
 }
@@ -18,7 +18,7 @@ class AnotherTestValueObject extends ValueObject {
     public constructor(public readonly valueA: number) {
         super();
     }
-    protected GetEqualityComponents(): any[] {
+    protected GetEqualityComponents(): unknown[] {
         return [this.valueA];
     }
 }
@@ -56,12 +56,15 @@ describe("Domain.SeedWork.ValueObject", () => {
         const obj2 = new AnotherTestValueObject(1);
 
         // Even if components matched (not possible here due to length), type check fails
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(obj1.Equals(obj2 as any)).toBe(false);
     });
 
     test("Equals - Null/Undefined", () => {
         const obj1 = new TestValueObject(1, "test");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(obj1.Equals(null as any)).toBe(false);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(obj1.Equals(undefined as any)).toBe(false);
     });
 
@@ -81,10 +84,10 @@ describe("Domain.SeedWork.ValueObject", () => {
         // we need instances that pass the constructor Check but return different component arrays.
         // Since getEqualityComponents is virtual, we can mock it or use a dynamic subclass.
         class VarArgsObject extends ValueObject {
-            constructor(public items: any[]) {
+            constructor(public items: unknown[]) {
                 super();
             }
-            protected GetEqualityComponents(): any[] {
+            protected GetEqualityComponents(): unknown[] {
                 return this.items;
             }
         }

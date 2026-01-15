@@ -1,5 +1,4 @@
 import { IEnumerable } from "./IEnumerable";
-import { IComparable } from "./IComparable";
 
 export interface IOrderedEnumerable<T> extends IEnumerable<T> {
     CreateOrderedEnumerable<TKey>(
