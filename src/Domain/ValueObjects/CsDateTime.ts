@@ -128,4 +128,20 @@ export class CsDateTime implements IEquatable<CsDateTime>, IComparable<CsDateTim
         if (thisTime > otherTime) return 1;
         return 0;
     }
+
+    public GreaterThan(other: CsDateTime): boolean {
+        return this._date.getTime() > other._date.getTime();
+    }
+
+    public LessThan(other: CsDateTime): boolean {
+        return this._date.getTime() < other._date.getTime();
+    }
+
+    public GreaterThanOrEqual(other: CsDateTime): boolean {
+        return this._date.getTime() >= other._date.getTime();
+    }
+
+    public LessThanOrEqual(other: CsDateTime): boolean {
+        return this._date.getTime() <= other._date.getTime();
+    }
 }

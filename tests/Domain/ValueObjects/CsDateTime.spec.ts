@@ -37,4 +37,30 @@ describe('System.DateTime', () => {
         const now = new Date();
         expect(today.Year).toBe(now.getFullYear());
     });
+
+    describe('Comparison', () => {
+        const t1 = new CsDateTime(1000);
+        const t2 = new CsDateTime(2000);
+        const t3 = new CsDateTime(1000);
+
+        test('GreaterThan', () => {
+            expect(t2.GreaterThan(t1)).toBe(true);
+            expect(t1.GreaterThan(t2)).toBe(false);
+        });
+
+        test('LessThan', () => {
+            expect(t1.LessThan(t2)).toBe(true);
+            expect(t2.LessThan(t1)).toBe(false);
+        });
+
+        test('GreaterThanOrEqual', () => {
+            expect(t2.GreaterThanOrEqual(t1)).toBe(true);
+            expect(t1.GreaterThanOrEqual(t3)).toBe(true);
+        });
+
+        test('LessThanOrEqual', () => {
+            expect(t1.LessThanOrEqual(t2)).toBe(true);
+            expect(t1.LessThanOrEqual(t3)).toBe(true);
+        });
+    });
 });
