@@ -67,7 +67,7 @@ describe("MemoryStream", () => {
         ms.Dispose(true);
         ms.Dispose(true); // Should be fine
     });
-    
+
     test("SetLength works and updates position", () => {
         const ms = new MemoryStream();
         ms.SetLength(10);
@@ -83,13 +83,15 @@ describe("MemoryStream", () => {
     test("Capacity validation", () => {
         const ms = new MemoryStream();
         ms.Write(new Uint8Array([1]), 0, 1);
-        expect(() => { ms.Capacity = 0; }).toThrow("Capacity cannot be less than current length.");
+        expect(() => {
+            ms.Capacity = 0;
+        }).toThrow("Capacity cannot be less than current length.");
     });
-    
+
     test("Constructor capacity", () => {
-         const ms = new MemoryStream(100);
-         expect(ms.Capacity).toBe(100);
-         expect(ms.Length).toBe(0);
+        const ms = new MemoryStream(100);
+        expect(ms.Capacity).toBe(100);
+        expect(ms.Length).toBe(0);
     });
 
     test("ToArray returns copy", () => {
@@ -97,7 +99,7 @@ describe("MemoryStream", () => {
         ms.Write(new Uint8Array([1, 2]), 0, 2);
         const arr = ms.ToArray();
         arr[0] = 99;
-        
+
         ms.Position = 0;
         const buf = new Uint8Array(1);
         ms.Read(buf, 0, 1);
@@ -116,25 +118,25 @@ describe("MemoryStream", () => {
         expect(ms.Length).toBe(3);
         expect(ms.Capacity).toBeGreaterThanOrEqual(3);
     });
-    
+
     test("SetLength smaller than position updates position", () => {
-         const ms = new MemoryStream();
-         ms.Write(new Uint8Array([1, 2, 3, 4, 5]), 0, 5);
-         expect(ms.Position).toBe(5);
-         
-         ms.SetLength(3);
-         expect(ms.Length).toBe(3);
-         expect(ms.Position).toBe(3);
-         
-         // Verify we can read from new end? No, at end.
-         ms.Position = 0;
-         expect(ms.Length).toBe(3);
+        const ms = new MemoryStream();
+        ms.Write(new Uint8Array([1, 2, 3, 4, 5]), 0, 5);
+        expect(ms.Position).toBe(5);
+
+        ms.SetLength(3);
+        expect(ms.Length).toBe(3);
+        expect(ms.Position).toBe(3);
+
+        // Verify we can read from new end? No, at end.
+        ms.Position = 0;
+        expect(ms.Length).toBe(3);
     });
     test("Seek Current works", () => {
-         const ms = new MemoryStream();
-         ms.Write(new Uint8Array([1, 2, 3]), 0, 3);
-         ms.Position = 1;
-         expect(ms.Seek(1, SeekOrigin.Current)).toBe(2);
+        const ms = new MemoryStream();
+        ms.Write(new Uint8Array([1, 2, 3]), 0, 3);
+        ms.Position = 1;
+        expect(ms.Seek(1, SeekOrigin.Current)).toBe(2);
     });
 
     test("Capacity expansion preserves data", () => {
@@ -161,7 +163,7 @@ describe("MemoryStream", () => {
 
     test("Position setter throws on negative", () => {
         const ms = new MemoryStream();
-        expect(() => ms.Position = -1).toThrow("Position cannot be negative.");
+        expect(() => (ms.Position = -1)).toThrow("Position cannot be negative.");
     });
 
     test("Read throws on invalid args", () => {
@@ -179,14 +181,14 @@ describe("MemoryStream", () => {
         expect(() => ms.Write(buf, 0, -1)).toThrow("Offset and count must be non-negative.");
         expect(() => ms.Write(buf, 0, 10)).toThrow("Invalid offset/count.");
     });
-    
+
     test("EnsureCapacity logic (doubling)", () => {
         const ms = new MemoryStream(2);
         // Force capacity increase
         ms.Write(new Uint8Array([1, 2, 3]), 0, 3);
         // 2 -> 256 (min) or double?
         expect(ms.Capacity).toBeGreaterThanOrEqual(256);
-        
+
         // Large expansion doubling
         const ms3 = new MemoryStream(1000);
         ms3.SetLength(1500); // Trigger EnsureCapacity(1500)

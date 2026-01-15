@@ -23,7 +23,7 @@ describe("System.DependencyInjection", () => {
     class ServiceWithDep {
         constructor(public dependency: ServiceA) {}
     }
-    
+
     class DisposableService {
         public isDisposed = false;
         public Dispose(): void {
@@ -185,10 +185,10 @@ describe("System.DependencyInjection", () => {
 
         let svc: DisposableService;
         {
-             const scope = factory.CreateScope();
-             svc = scope.ServiceProvider.GetRequiredService(DisposableService);
-             expect(svc.isDisposed).toBe(false);
-             scope.Dispose();
+            const scope = factory.CreateScope();
+            svc = scope.ServiceProvider.GetRequiredService(DisposableService);
+            expect(svc.isDisposed).toBe(false);
+            scope.Dispose();
         }
         expect(svc!.isDisposed).toBe(true);
     });
@@ -197,21 +197,21 @@ describe("System.DependencyInjection", () => {
         const services = new ServiceCollection();
         services.AddSingleton(DisposableService, DisposableService);
         const provider = services.BuildServiceProvider();
-        
+
         const svc = provider.GetRequiredService(DisposableService);
         expect(svc.isDisposed).toBe(false);
-        
+
         // Dispose provider
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (provider as any).Dispose();
-        
+
         expect(svc.isDisposed).toBe(true);
     });
 
     test("ServiceProvider can be used with 'using'", () => {
         const services = new ServiceCollection();
         services.AddSingleton(DisposableService, DisposableService);
-        
+
         let svcRef: DisposableService;
         {
             using provider = services.BuildServiceProvider() as unknown as IDisposable;
@@ -224,30 +224,34 @@ describe("System.DependencyInjection", () => {
     test("Multiple Scoped Services are disposed when scope is disposed", () => {
         const services = new ServiceCollection();
         services.AddScoped(DisposableService, DisposableService);
-        services.AddScoped(DisposableService, DisposableService); // Added twice? No, same type. 
-        // Need distinct types or Transient to simulate multiple instances if Scoped? 
-        // Logic: Get service twice -> same instance (Scoped). 
+        services.AddScoped(DisposableService, DisposableService); // Added twice? No, same type.
+        // Need distinct types or Transient to simulate multiple instances if Scoped?
+        // Logic: Get service twice -> same instance (Scoped).
         // To test multiple *different* services, register another class.
         class DisposableService2 {
             public isDisposed = false;
-            public Dispose() { this.isDisposed = true; }
-            public [Symbol.dispose]() { this.Dispose(); }
+            public Dispose() {
+                this.isDisposed = true;
+            }
+            public [Symbol.dispose]() {
+                this.Dispose();
+            }
         }
         services.AddScoped(DisposableService2, DisposableService2);
 
         const root = services.BuildServiceProvider() as unknown as IServiceScopeFactory;
-        
+
         let d1: DisposableService;
         let d2: DisposableService2;
-        
+
         {
             using scope = root.CreateScope() as unknown as IDisposable;
             d1 = (scope as unknown as any).ServiceProvider.GetRequiredService(DisposableService);
             d2 = (scope as unknown as any).ServiceProvider.GetRequiredService(DisposableService2);
-            
+
             // Spy on Dispose
-            jest.spyOn(d1, 'Dispose');
-            jest.spyOn(d2, 'Dispose');
+            jest.spyOn(d1, "Dispose");
+            jest.spyOn(d2, "Dispose");
         } // Scope disposed here
 
         expect(d1!.isDisposed).toBe(true);
@@ -258,26 +262,26 @@ describe("System.DependencyInjection", () => {
     });
 
     test("ServiceScope.DisposeAsync calls Dispose and disposes services", async () => {
-         const services = new ServiceCollection();
-         services.AddScoped(DisposableService, DisposableService);
-         const root = services.BuildServiceProvider() as unknown as IServiceScopeFactory;
-         
-         let svc: DisposableService;
-         {
-             await using scope = root.CreateScope() as unknown as IAsyncDisposable;
-             svc = (scope as unknown as any).ServiceProvider.GetRequiredService(DisposableService);
-         }
-         expect(svc!.isDisposed).toBe(true);
+        const services = new ServiceCollection();
+        services.AddScoped(DisposableService, DisposableService);
+        const root = services.BuildServiceProvider() as unknown as IServiceScopeFactory;
+
+        let svc: DisposableService;
+        {
+            await using scope = root.CreateScope() as unknown as IAsyncDisposable;
+            svc = (scope as unknown as any).ServiceProvider.GetRequiredService(DisposableService);
+        }
+        expect(svc!.isDisposed).toBe(true);
     });
 
     test("ServiceProvider.DisposeAsync calls Dispose and disposes singletons", async () => {
         const services = new ServiceCollection();
         services.AddSingleton(DisposableService, DisposableService);
         const provider = services.BuildServiceProvider();
-        
+
         const svc = provider.GetRequiredService(DisposableService);
         await (provider as unknown as IAsyncDisposable).DisposeAsync();
-        
+
         expect(svc.isDisposed).toBe(true);
     });
 });

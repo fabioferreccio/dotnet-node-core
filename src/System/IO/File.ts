@@ -50,7 +50,7 @@ export class File {
         fs.renameSync(sourceFileName, destFileName);
     }
 
-    public static async ReadAllTextAsync(path: string): Task<CsString> { 
+    public static async ReadAllTextAsync(path: string): Task<CsString> {
         try {
             const content = await fs.promises.readFile(path, "utf-8");
             return new CsString(content);
@@ -63,7 +63,11 @@ export class File {
         }
     }
 
-    public static async WriteAllTextAsync(path: string, contents: string, encoding: BufferEncoding = "utf-8"): Task<void> {
+    public static async WriteAllTextAsync(
+        path: string,
+        contents: string,
+        encoding: BufferEncoding = "utf-8",
+    ): Task<void> {
         await fs.promises.writeFile(path, contents, { encoding });
     }
 
@@ -73,7 +77,11 @@ export class File {
         }
     }
 
-    public static async CopyAsync(sourceFileName: string, destFileName: string, overwrite: boolean = false): Task<void> {
+    public static async CopyAsync(
+        sourceFileName: string,
+        destFileName: string,
+        overwrite: boolean = false,
+    ): Task<void> {
         if (!(await File.ExistsAsync(sourceFileName))) {
             throw new FileNotFoundException(`Could not find file '${sourceFileName}'.`, sourceFileName);
         }

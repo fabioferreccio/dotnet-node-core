@@ -35,9 +35,9 @@ export class StreamWriter implements IDisposable, IAsyncDisposable {
 
     public Dispose(disposing: boolean = true): void {
         if (disposing && this._isOpen) {
-             this.Flush();
-             this._isOpen = false;
-             this._stream.Close();
+            this.Flush();
+            this._isOpen = false;
+            this._stream.Close();
         }
     }
 
@@ -49,7 +49,7 @@ export class StreamWriter implements IDisposable, IAsyncDisposable {
         if (this._stream instanceof Stream) {
             await (this._stream as unknown as IAsyncDisposable).DisposeAsync();
         } else {
-             this.Dispose(true);
+            this.Dispose(true);
         }
     }
 

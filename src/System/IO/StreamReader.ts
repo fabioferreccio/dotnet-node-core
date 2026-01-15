@@ -7,13 +7,15 @@ import { Task } from "../../Domain/Threading/Tasks/Task";
 export class StreamReader implements IDisposable, IAsyncDisposable {
     private _stream: Stream;
     private _encoding: string;
+    private _leaveOpen: boolean;
     private _isOpen: boolean;
 
-    constructor(stream: Stream, encoding: string = "utf-8") {
+    constructor(stream: Stream, encoding: string = "utf-8", leaveOpen: boolean = false) {
         if (!stream) throw new Exception("Stream cannot be null.");
         if (!stream.CanRead) throw new Exception("Stream is not readable.");
         this._stream = stream;
         this._encoding = encoding;
+        this._leaveOpen = leaveOpen;
         this._isOpen = true;
     }
 
@@ -24,7 +26,9 @@ export class StreamReader implements IDisposable, IAsyncDisposable {
     public Dispose(disposing: boolean = true): void {
         if (disposing && this._isOpen) {
             this._isOpen = false;
-            this._stream.Close();
+            if (!this._leaveOpen) {
+                this._stream.Close();
+            }
         }
     }
 
@@ -34,9 +38,9 @@ export class StreamReader implements IDisposable, IAsyncDisposable {
 
     public async DisposeAsync(): Task<void> {
         if (this._stream instanceof Stream) {
-             await this._stream.DisposeAsync();
+            await this._stream.DisposeAsync();
         } else {
-             this.Dispose(true);
+            this.Dispose(true);
         }
     }
 
@@ -47,6 +51,27 @@ export class StreamReader implements IDisposable, IAsyncDisposable {
     public get EndOfStream(): boolean {
         this.EnsureNotDisposed();
         return this._stream.Position >= this._stream.Length;
+    }
+
+    public Peek(): number {
+        this.EnsureNotDisposed();
+        if (this.EndOfStream) return -1;
+
+        const pos = this._stream.Position;
+        const buffer = new Uint8Array(1);
+        const read = this._stream.Read(buffer, 0, 1);
+        if (read === 0) return -1;
+
+        this._stream.Position = pos; // Reset position
+        return buffer[0]; // Assuming ASCII/UTF-8 single byte for now as per minimal impl
+    }
+
+    public Read(): number {
+        this.EnsureNotDisposed();
+        const buffer = new Uint8Array(1);
+        const read = this._stream.Read(buffer, 0, 1);
+        if (read === 0) return -1;
+        return buffer[0];
     }
 
     public ReadLine(): string | null {
@@ -100,6 +125,36 @@ export class StreamReader implements IDisposable, IAsyncDisposable {
         const buffer = new Uint8Array(len);
         this._stream.Read(buffer, 0, len);
         return Buffer.from(buffer).toString(this._encoding as BufferEncoding);
+    }
+
+    public async ReadToEndAsync(): Task<string> {
+        this.EnsureNotDisposed();
+        // Since we don't have exact length if it's a network stream, we read until 0 bytes.
+        // But for MemoryStream we might know.
+        // Logic: Read chunks until 0.
+
+        const chunks: Uint8Array[] = [];
+        const buffer = new Uint8Array(4096);
+        let totalLen = 0;
+
+        while (true) {
+            const bytesRead = await this._stream.ReadAsync(buffer, 0, buffer.length);
+            if (bytesRead === 0) break;
+
+            const chunk = new Uint8Array(bytesRead);
+            chunk.set(buffer.subarray(0, bytesRead));
+            chunks.push(chunk);
+            totalLen += bytesRead;
+        }
+
+        const result = new Uint8Array(totalLen);
+        let offset = 0;
+        for (const chunk of chunks) {
+            result.set(chunk, offset);
+            offset += chunk.length;
+        }
+
+        return Buffer.from(result).toString(this._encoding as BufferEncoding);
     }
 
     private EnsureNotDisposed(): void {

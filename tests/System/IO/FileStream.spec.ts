@@ -90,7 +90,7 @@ describe("FileStream", () => {
     test("Seek and Position work correctly", () => {
         using stream = new FileStream(TestFilePath, FileMode.Create);
         stream.Write(new Uint8Array([1, 2, 3, 4, 5]), 0, 5);
-        
+
         // Seek Begin
         expect(stream.Seek(0, SeekOrigin.Begin)).toBe(0);
         expect(stream.Position).toBe(0);
@@ -102,7 +102,7 @@ describe("FileStream", () => {
         // Seek End
         expect(stream.Seek(-1, SeekOrigin.End)).toBe(4);
         expect(stream.Position).toBe(4);
-        
+
         // Set Position
         stream.Position = 1;
         expect(stream.Position).toBe(1);
@@ -112,7 +112,7 @@ describe("FileStream", () => {
         using stream = new FileStream(TestFilePath, FileMode.Create);
         // Invalid origin (cast to simulate runtime error or bad JS usage)
         expect(() => stream.Seek(0, 99 as SeekOrigin)).toThrow(); // IOException expected but our code might throw generic Error if not specific in switch default
-        
+
         // Before begin
         expect(() => stream.Seek(-1, SeekOrigin.Begin)).toThrow("Seek before begin.");
     });
@@ -121,7 +121,7 @@ describe("FileStream", () => {
         // CreateNew throws if exists
         File.WriteAllText(TestFilePath, "exists");
         expect(() => new FileStream(TestFilePath, FileMode.CreateNew)).toThrow(); // checking generic throw or specific? Code throws IOException? "EEXIST" -> IOException usually.
-        
+
         // Append
         {
             using stream = new FileStream(TestFilePath, FileMode.Append);
@@ -132,7 +132,7 @@ describe("FileStream", () => {
         // Truncate
         {
             using stream = new FileStream(TestFilePath, FileMode.Truncate);
-             // Truncate opens and wipes content.
+            // Truncate opens and wipes content.
         }
         expect(File.ReadAllText(TestFilePath)).toBe("");
     });
@@ -148,11 +148,9 @@ describe("FileStream", () => {
         await expect(stream.DisposeAsync()).resolves.not.toThrow();
     });
 
-
-
     test("WriteAsync handles errors correctly", async () => {
         await using stream = new FileStream(TestFilePath, FileMode.Create);
-        
+
         // Spy on fs.write to simulate error
         const writeSpy = jest.spyOn(require("fs"), "write").mockImplementation((...args: any[]) => {
             const callback = args[args.length - 1];
@@ -163,9 +161,9 @@ describe("FileStream", () => {
         // Verify we catch IOException (or wrapper if we wrapped it? Current code wraps generic error in IOException if sync, but async?)
         // Async impl just calls reject(err). So it passes through.
         // User asked "assert IOException is caught".
-        // But fs.write returns "SystemException" (Node Error). 
+        // But fs.write returns "SystemException" (Node Error).
         // FileStream.ts:153 `if (err) reject(err);`. It does NOT wrap in IOException in async path currently!
-        // Wait, if compliance requires IOException, I should probably check if my FileStream wraps it. 
+        // Wait, if compliance requires IOException, I should probably check if my FileStream wraps it.
         // Looking at FileStream.ts lines 153-162. It just rejects `err`.
         // So it will be the error thrown by fs.
         // I will assert the error message/type. If I need strict IOException, I would need to modify FileStream.ts.
@@ -174,7 +172,7 @@ describe("FileStream", () => {
         // "Assert IOException is caught" usually means "the component catches it and rethrows IOException" OR "The test catches IOException".
         // Given current FileStream implementation does NOT wrap async errors, I will assert the Error is passed through.
         // To be safe and compliant with "Assert... IOException", I'll check instance if possible, or simple throw check.
-        
+
         await expect(stream.WriteAsync(content, 0, content.length)).rejects.toThrow("Simulated Write Error");
 
         writeSpy.mockRestore();
@@ -182,10 +180,10 @@ describe("FileStream", () => {
 
     test("ReadAsync handles errors correctly", async () => {
         await using stream = new FileStream(TestFilePath, FileMode.Create);
-        
+
         const readSpy = jest.spyOn(require("fs"), "read").mockImplementation((...args: any[]) => {
-             const callback = args[args.length - 1];
-             callback(new Error("Simulated Read Error"), 0, null);
+            const callback = args[args.length - 1];
+            callback(new Error("Simulated Read Error"), 0, null);
         });
 
         const buffer = new Uint8Array(10);
@@ -195,22 +193,22 @@ describe("FileStream", () => {
     });
 
     test("FlushAsync handles errors correctly", async () => {
-         await using stream = new FileStream(TestFilePath, FileMode.Create);
-         
-         const fsyncSpy = jest.spyOn(require("fs"), "fsync").mockImplementation((...args: any[]) => {
-              const callback = args[args.length - 1];
-              callback(new Error("Simulated Flush Error"));
-         });
+        await using stream = new FileStream(TestFilePath, FileMode.Create);
 
-         await expect(stream.FlushAsync()).rejects.toThrow("Simulated Flush Error");
+        const fsyncSpy = jest.spyOn(require("fs"), "fsync").mockImplementation((...args: any[]) => {
+            const callback = args[args.length - 1];
+            callback(new Error("Simulated Flush Error"));
+        });
 
-         fsyncSpy.mockRestore();
+        await expect(stream.FlushAsync()).rejects.toThrow("Simulated Flush Error");
+
+        fsyncSpy.mockRestore();
     });
-    
+
     test("FileMode Combinations (Coverage)", () => {
         // We already tested Create, CreateNew, Append, Truncate in basic forms.
         // We need to hit the switch cases in GetNodeFlags.
-        
+
         // 1. Open + Read
         File.WriteAllText(TestFilePath, "content");
         {
@@ -238,26 +236,25 @@ describe("FileStream", () => {
             expect(s.CanRead).toBe(true);
             expect(s.CanWrite).toBe(true);
         }
-        
     });
     test("Sync Read/Write/Flush properties", () => {
         // Use synchronous methods explicitly
         File.WriteAllText(TestFilePath, "SyncContent");
         {
-             using stream = new FileStream(TestFilePath, FileMode.Open, FileAccess.ReadWrite);
-             expect(stream.CanSeek).toBe(true);
-             
-             // Read Sync
-             const buf = new Uint8Array(4);
-             const read = stream.Read(buf, 0, 4);
-             expect(read).toBe(4);
-             expect(Buffer.from(buf).toString()).toBe("Sync");
-             
-             // Write Sync
-             stream.Position = 0;
-             const writeBuf = Buffer.from("NewC");
-             stream.Write(writeBuf, 0, 4);
-             stream.Flush(); // Flush Sync
+            using stream = new FileStream(TestFilePath, FileMode.Open, FileAccess.ReadWrite);
+            expect(stream.CanSeek).toBe(true);
+
+            // Read Sync
+            const buf = new Uint8Array(4);
+            const read = stream.Read(buf, 0, 4);
+            expect(read).toBe(4);
+            expect(Buffer.from(buf).toString()).toBe("Sync");
+
+            // Write Sync
+            stream.Position = 0;
+            const writeBuf = Buffer.from("NewC");
+            stream.Write(writeBuf, 0, 4);
+            stream.Flush(); // Flush Sync
         }
         expect(File.ReadAllText(TestFilePath)).toBe("NewCContent");
     });
@@ -266,7 +263,7 @@ describe("FileStream", () => {
         using stream = new FileStream(TestFilePath, FileMode.Create);
         stream.Write(new Uint8Array([1, 2, 3, 4, 5]), 0, 5);
         expect(stream.Position).toBe(5);
-        
+
         stream.SetLength(2);
         expect(stream.Length).toBe(2);
         expect(stream.Position).toBe(2); // Should be truncated
@@ -274,7 +271,7 @@ describe("FileStream", () => {
 
     test("FileNotFoundException thrown on missing file", () => {
         const missingPath = "missing_file_" + crypto.randomUUID();
-        expect(() => new FileStream(missingPath, FileMode.Open)).toThrow("Could not find file"); 
+        expect(() => new FileStream(missingPath, FileMode.Open)).toThrow("Could not find file");
         // Checks message or type? toThrow checks substring or class.
         // FileNotFoundException inherits IOException -> Error.
     });

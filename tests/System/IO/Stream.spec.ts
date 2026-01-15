@@ -25,6 +25,20 @@ describe("Stream Base Class (via MemoryStream)", () => {
         expect(dest.ToArray()).toEqual(data);
     });
 
+    test("CopyToAsync copies data correctly", async () => {
+        const source = new MemoryStream();
+        const dest = new MemoryStream();
+        const data = new Uint8Array([1, 2, 3, 4, 5]);
+
+        source.Write(data, 0, 5);
+        source.Position = 0;
+
+        await source.CopyToAsync(dest);
+
+        expect(dest.Length).toBe(5);
+        expect(dest.ToArray()).toEqual(data);
+    });
+
     test("CopyTo throws if destination is null (mocked check)", () => {
         const source = new MemoryStream();
         expect(() => source.CopyTo(null as unknown as Stream)).toThrow("Destination stream cannot be null.");
@@ -34,7 +48,7 @@ describe("Stream Base Class (via MemoryStream)", () => {
         const source = new MemoryStream();
         source.Close(); // Make it unreadable
         const dest = new MemoryStream();
-        
+
         expect(() => {
             // Re-create closed source to be safe
             const s = new MemoryStream();
@@ -62,28 +76,48 @@ describe("Stream Base Class (via MemoryStream)", () => {
         class MockStream extends Stream {
             public isDisposed = false;
             public wasDisposing = false;
-            
+
             // Methods required by abstract
-            public get CanRead() { return true; }
-            public get CanSeek() { return true; }
-            public get CanWrite() { return true; }
-            public get Length() { return 0; }
-            public get Position() { return 0; }
-            public set Position(v: number) { }
-            public Flush() { }
-            public override async FlushAsync() { return super.FlushAsync(); } // Call base
-            public Read(buffer: Uint8Array, offset: number, count: number): number { return 0; }
-            public override async ReadAsync(buffer: Uint8Array, offset: number, count: number): Promise<number> { return super.ReadAsync(buffer, offset, count); } // Call base
-            public Seek(offset: number, origin: number): number { return 0; }
-            public SetLength(value: number) { }
-            public Write(buffer: Uint8Array, offset: number, count: number) { }
-            public override async WriteAsync(buffer: Uint8Array, offset: number, count: number) { return super.WriteAsync(buffer, offset, count); } // Call base
+            public get CanRead() {
+                return true;
+            }
+            public get CanSeek() {
+                return true;
+            }
+            public get CanWrite() {
+                return true;
+            }
+            public get Length() {
+                return 0;
+            }
+            public get Position() {
+                return 0;
+            }
+            public set Position(_v: number) {}
+            public Flush() {}
+            public override async FlushAsync() {
+                return super.FlushAsync();
+            } // Call base
+            public Read(_buffer: Uint8Array, _offset: number, _count: number): number {
+                return 0;
+            }
+            public override async ReadAsync(buffer: Uint8Array, offset: number, count: number): Promise<number> {
+                return super.ReadAsync(buffer, offset, count);
+            } // Call base
+            public Seek(_offset: number, _origin: number): number {
+                return 0;
+            }
+            public SetLength(_value: number) {}
+            public Write(_buffer: Uint8Array, _offset: number, _count: number) {}
+            public override async WriteAsync(buffer: Uint8Array, offset: number, count: number) {
+                return super.WriteAsync(buffer, offset, count);
+            } // Call base
 
             // Expose protected method
             public override Dispose(disposing: boolean = true) {
-                 this.isDisposed = true;
-                 this.wasDisposing = disposing;
-                 super.Dispose(disposing);
+                this.isDisposed = true;
+                this.wasDisposing = disposing;
+                super.Dispose(disposing);
             }
         }
 
@@ -91,51 +125,65 @@ describe("Stream Base Class (via MemoryStream)", () => {
         s.Dispose(); // calls Dispose(true)
         expect(s.isDisposed).toBe(true);
         expect(s.wasDisposing).toBe(true);
-        
+
         const s2 = new MockStream();
         // @ts-ignore call protected if needed, but here we override publically or call internal
-        // The base Close calls Dispose(true). 
+        // The base Close calls Dispose(true).
         s2.Close();
         expect(s2.isDisposed).toBe(true);
         expect(s2.wasDisposing).toBe(true);
     });
 
     test("Base Stream.ReadAsync/WriteAsync/FlushAsync call synchronous counterparts", async () => {
-         // MemoryStream does not override these, so it uses Base Stream implementation.
-         const ms = new MemoryStream();
-         
-         // WriteAsync -> Write
-         await ms.WriteAsync(new Uint8Array([1, 2]), 0, 2);
-         expect(ms.Length).toBe(2);
-         
-         ms.Position = 0;
-         
-         // ReadAsync -> Read
-         const buffer = new Uint8Array(2);
-         const read = await ms.ReadAsync(buffer, 0, 2);
-         expect(read).toBe(2);
-         expect(buffer[0]).toBe(1);
-         expect(buffer[1]).toBe(2);
-         
-         // FlushAsync -> Flush (No-op in MemoryStream but shouldn't throw)
-         await ms.FlushAsync();
+        // MemoryStream does not override these, so it uses Base Stream implementation.
+        const ms = new MemoryStream();
+
+        // WriteAsync -> Write
+        await ms.WriteAsync(new Uint8Array([1, 2]), 0, 2);
+        expect(ms.Length).toBe(2);
+
+        ms.Position = 0;
+
+        // ReadAsync -> Read
+        const buffer = new Uint8Array(2);
+        const read = await ms.ReadAsync(buffer, 0, 2);
+        expect(read).toBe(2);
+        expect(buffer[0]).toBe(1);
+        expect(buffer[1]).toBe(2);
+
+        // FlushAsync -> Flush (No-op in MemoryStream but shouldn't throw)
+        await ms.FlushAsync();
     });
 
     test("Stream.DisposeAsync calls Dispose(true)", async () => {
         let disposed = false;
         class DisposeAsyncStream extends Stream {
-            public get CanRead() { return true; }
-            public get CanSeek() { return true; }
-            public get CanWrite() { return true; }
-            public get Length() { return 0; }
-            public get Position() { return 0; }
-            public set Position(v: number) {}
+            public get CanRead() {
+                return true;
+            }
+            public get CanSeek() {
+                return true;
+            }
+            public get CanWrite() {
+                return true;
+            }
+            public get Length() {
+                return 0;
+            }
+            public get Position() {
+                return 0;
+            }
+            public set Position(_v: number) {}
             public Flush() {}
-            public Read(buffer: Uint8Array, offset: number, count: number) { return 0; }
-            public Seek(offset: number, origin: number) { return 0; }
-            public SetLength(value: number) {}
-            public Write(buffer: Uint8Array, offset: number, count: number) {}
-            
+            public Read(_buffer: Uint8Array, _offset: number, _count: number) {
+                return 0;
+            }
+            public Seek(_offset: number, _origin: number) {
+                return 0;
+            }
+            public SetLength(_value: number) {}
+            public Write(_buffer: Uint8Array, _offset: number, _count: number) {}
+
             public override Dispose(disposing: boolean) {
                 if (disposing) disposed = true;
                 super.Dispose(disposing);
@@ -165,9 +213,8 @@ describe("Stream Base Class (via MemoryStream)", () => {
     test("Stream[Symbol.asyncDispose] calls DisposeAsync", async () => {
         const ms = new MemoryStream();
         {
-             await using s = ms;
+            await using s = ms;
         }
         expect(ms.CanRead).toBe(false);
     });
 });
-

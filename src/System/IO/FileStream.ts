@@ -160,7 +160,7 @@ export class FileStream extends Stream implements IDisposable, IAsyncDisposable 
                 else resolve();
             });
         });
-        this._position += count; // fs.write returns written bytes, safe to assume all written or error? fs.write callback has written bytes. 
+        this._position += count; // fs.write returns written bytes, safe to assume all written or error? fs.write callback has written bytes.
         // Sync implementation assumed count. Let's correct Sync logic if needed, but for now matching existing behavior + async correctness.
         // Actually fs.write returns (err, written, buffer).
     }
@@ -188,12 +188,12 @@ export class FileStream extends Stream implements IDisposable, IAsyncDisposable 
 
     public async DisposeAsync(): Task<void> {
         if (this._isOpen) {
-             this._isOpen = false;
-             try {
-                 await new Promise<void>((resolve) => fs.close(this._fd, () => resolve()));
-             } catch {
-                 // Ignore
-             }
+            this._isOpen = false;
+            try {
+                await new Promise<void>((resolve) => fs.close(this._fd, () => resolve()));
+            } catch {
+                // Ignore
+            }
         }
     }
 

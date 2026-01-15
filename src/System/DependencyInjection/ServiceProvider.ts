@@ -1,9 +1,17 @@
-import { IServiceProvider, IServiceScope, IServiceScopeFactory, IDisposable, IAsyncDisposable } from "../../Domain/Interfaces";
+import {
+    IServiceProvider,
+    IServiceScope,
+    IServiceScopeFactory,
+    IDisposable,
+    IAsyncDisposable,
+} from "../../Domain/Interfaces";
 import { Task } from "../../Domain/Threading/Tasks/Task";
 import { ServiceDescriptor, ServiceLifetime, ServiceIdentifier } from "../../Domain/DependencyInjection";
 import { ServiceScope } from "./ServiceScope";
 
-export class ServiceProvider implements IServiceProvider, IServiceScope, IServiceScopeFactory, IDisposable, IAsyncDisposable {
+export class ServiceProvider
+    implements IServiceProvider, IServiceScope, IServiceScopeFactory, IDisposable, IAsyncDisposable
+{
     private readonly _descriptors: Map<ServiceIdentifier, ServiceDescriptor>;
     private readonly _singletons: Map<ServiceIdentifier, unknown>;
     private readonly _scopedInstances: Map<ServiceIdentifier, unknown>;
@@ -57,11 +65,11 @@ export class ServiceProvider implements IServiceProvider, IServiceScope, IServic
 
     private DisposeInstance(instance: unknown): void {
         if (instance && typeof (instance as IDisposable).Dispose === "function") {
-             try {
+            try {
                 (instance as IDisposable).Dispose();
-             } catch {
-                 // Ignore disposal errors
-             }
+            } catch {
+                // Ignore disposal errors
+            }
         }
     }
 

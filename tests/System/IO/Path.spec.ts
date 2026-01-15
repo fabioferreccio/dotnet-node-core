@@ -12,7 +12,7 @@ describe("Path", () => {
         expect(Path.GetExtension("file.txt")).toBe(".txt");
         expect(Path.GetExtension("archive.tar.gz")).toBe(".gz"); // Node path.extname returns last extension
         expect(Path.GetExtension("no_ext")).toBe("");
-        expect(Path.GetExtension(".dotfile")).toBe(""); 
+        expect(Path.GetExtension(".dotfile")).toBe("");
     });
 
     test("GetFileName returns file name", () => {

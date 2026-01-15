@@ -58,7 +58,7 @@ describe("StreamReader", () => {
         const ms = new MemoryStream();
         ms.Write(Buffer.from("A"), 0, 1);
         ms.Position = 0;
-        
+
         const reader = new StreamReader(ms);
         expect(reader.ReadLine()).toBe("A");
         expect(reader.ReadLine()).toBeNull();
@@ -86,6 +86,24 @@ describe("StreamReader", () => {
         expect(reader.ReadLine()).toBe("C");
         expect(reader.ReadLine()).toBeNull();
     });
+    test("Peek Logic", () => {
+        const ms = new MemoryStream();
+        const content = "ABC";
+        ms.Write(Buffer.from(content), 0, content.length);
+        ms.Position = 0;
+
+        const reader = new StreamReader(ms);
+
+        // Peek should not consume
+        expect(reader.Peek()).toBe(65); // 'A'
+        expect(reader.Peek()).toBe(65);
+
+        // Read should consume
+        expect(reader.Read()).toBe(65);
+
+        // Peek next
+        expect(reader.Peek()).toBe(66); // 'B'
+    });
     test("Reads CR without LF correctly (macOS 9 style)", () => {
         const ms = new MemoryStream();
         const content = "Line1\rLine2"; // \r only
@@ -100,7 +118,9 @@ describe("StreamReader", () => {
     test("DisposeAsync calls underlying DisposeAsync", async () => {
         const ms = new MemoryStream();
         let disposeAsyncCalled = false;
-        (ms as any).DisposeAsync = async () => { disposeAsyncCalled = true; };
+        (ms as any).DisposeAsync = async () => {
+            disposeAsyncCalled = true;
+        };
 
         const reader = new StreamReader(ms);
         await reader.DisposeAsync();
@@ -112,7 +132,7 @@ describe("StreamReader", () => {
             CanRead: true,
             Read: () => 0,
             Close: jest.fn(),
-            Dispose: jest.fn()
+            Dispose: jest.fn(),
         };
 
         const reader = new StreamReader(mockStream as any);
@@ -133,7 +153,7 @@ describe("StreamReader", () => {
         // The previous test code had: expect(mockStream.Dispose).toHaveBeenCalledWith(true); AND expect(mockStream.Close).toHaveBeenCalled();
         // One of them is likely failing.
         // Since Reader calls Close(), checking Close() is correct. Checking Dispose() is WRONG for this mock.
-        
+
         expect(mockStream.Close).toHaveBeenCalled();
         // expect(mockStream.Dispose).toHaveBeenCalledWith(true); // Remove this expectation as logic depends on stream impl
     });

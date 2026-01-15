@@ -7,7 +7,8 @@ const TEST_FILE = path.join(TEST_DIR, "test.txt");
 
 describe("File", () => {
     beforeAll(() => {
-        if (!File.Exists(TEST_DIR)) { // Use fs really or File.Exists? File.Exists wraps fs.existsSync
+        if (!File.Exists(TEST_DIR)) {
+            // Use fs really or File.Exists? File.Exists wraps fs.existsSync
             // We need to make dir for verify
             require("fs").mkdirSync(TEST_DIR, { recursive: true });
         }
@@ -16,9 +17,9 @@ describe("File", () => {
     afterEach(() => {
         if (File.Exists(TEST_FILE)) File.Delete(TEST_FILE);
     });
-    
+
     afterAll(() => {
-         require("fs").rmSync(TEST_DIR, { recursive: true, force: true });
+        require("fs").rmSync(TEST_DIR, { recursive: true, force: true });
     });
 
     test("Negative Tests: ReadAllText throws FileNotFoundException", () => {
@@ -31,20 +32,20 @@ describe("File", () => {
         const dest = path.join(TEST_DIR, "dest.txt");
         expect(() => File.Copy(missing, dest)).toThrow(FileNotFoundException);
     });
-    
+
     test("Negative Tests: Move throws FileNotFoundException for missing source", () => {
-         const missing = path.join(TEST_DIR, "missing_move.txt");
-         const dest = path.join(TEST_DIR, "dest_move.txt");
-         expect(() => File.Move(missing, dest)).toThrow(FileNotFoundException);
+        const missing = path.join(TEST_DIR, "missing_move.txt");
+        const dest = path.join(TEST_DIR, "dest_move.txt");
+        expect(() => File.Move(missing, dest)).toThrow(FileNotFoundException);
     });
 
     test("Copy throws Error if destination exists and overwrite false (EEXIST)", () => {
         File.WriteAllText(TEST_FILE, "content");
         const dest = path.join(TEST_DIR, "dest_exist.txt");
         File.WriteAllText(dest, "existing");
-        
+
         expect(() => File.Copy(TEST_FILE, dest, false)).toThrow(/already exists/);
-        
+
         File.Delete(dest);
     });
 
@@ -56,11 +57,11 @@ describe("File", () => {
     test("WriteAllTextAsync and ReadAllTextAsync work correctly", async () => {
         const pathAsync = path.join(TEST_DIR, "async_test.txt");
         await File.WriteAllTextAsync(pathAsync, "Hello Async");
-        
+
         expect(await File.ExistsAsync(pathAsync)).toBe(true);
         const content = await File.ReadAllTextAsync(pathAsync);
         expect(content.toString()).toBe("Hello Async");
-        
+
         await File.DeleteAsync(pathAsync);
         expect(await File.ExistsAsync(pathAsync)).toBe(false);
     });
@@ -69,9 +70,9 @@ describe("File", () => {
         const src = path.join(TEST_DIR, "src_async.txt");
         const dest = path.join(TEST_DIR, "dest_async.txt");
         await File.WriteAllTextAsync(src, "copy me");
-        
+
         await File.CopyAsync(src, dest);
-        
+
         expect(await File.ExistsAsync(dest)).toBe(true);
         expect((await File.ReadAllTextAsync(dest)).toString()).toBe("copy me");
 
@@ -90,12 +91,12 @@ describe("File", () => {
         await File.WriteAllTextAsync(src, "move me");
 
         await File.MoveAsync(src, dest);
-        
+
         expect(await File.ExistsAsync(src)).toBe(false);
         expect(await File.ExistsAsync(dest)).toBe(true);
         expect((await File.ReadAllTextAsync(dest)).toString()).toBe("move me");
     });
-    
+
     test("ReadAllTextAsync throws FileNotFoundException", async () => {
         const missing = path.join(TEST_DIR, "missing_async.txt");
         await expect(File.ReadAllTextAsync(missing)).rejects.toThrow(FileNotFoundException);

@@ -33,8 +33,8 @@ export class ServiceScope implements IServiceScope, IDisposable, IAsyncDisposabl
     }
 
     public async DisposeAsync(): Task<void> {
-         this.Dispose();
-         return Promise.resolve();
+        this.Dispose();
+        return Promise.resolve();
     }
 
     public async [Symbol.asyncDispose](): Task<void> {

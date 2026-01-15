@@ -4,7 +4,6 @@ import { Enumerable } from "./Linq/Enumerable";
 import * as DependencyInjection from "./DependencyInjection";
 import { Exception } from "../Domain/SeedWork/Exception";
 import * as IO from "./IO";
-
 import {
     CsDateTime,
     CsGuid,
@@ -18,7 +17,8 @@ import {
     CsByte,
     CsSByte,
 } from "../Domain/ValueObjects";
-
+import { Version } from "./Version";
+import * as Net from "./Net/Http";
 import * as Linq from "./Linq";
 
 // Registry Wiring
@@ -49,4 +49,6 @@ export const System = {
     DependencyInjection: DependencyInjection,
     IO: IO,
     Exception: Exception,
+    Version: Version,
+    Net: Net,
 };
