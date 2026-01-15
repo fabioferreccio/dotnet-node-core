@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as nodePath from "path";
-import { DirectoryNotFoundException } from "./Exceptions/DirectoryNotFoundException";
+import { DirectoryNotFoundException } from "./DirectoryNotFoundException";
 import { Exception } from "../../Domain/SeedWork";
 
 export class Directory {

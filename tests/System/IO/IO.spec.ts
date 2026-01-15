@@ -3,7 +3,8 @@ import * as path from "path";
 import { File } from "../../../src/System/IO/File";
 import { Directory } from "../../../src/System/IO/Directory";
 import { Path } from "../../../src/System/IO/Path";
-import { FileNotFoundException, DirectoryNotFoundException } from "../../../src/System/IO/Exceptions";
+import { FileNotFoundException } from "../../../src/System/IO/FileNotFoundException";
+import { DirectoryNotFoundException } from "../../../src/System/IO/DirectoryNotFoundException";
 
 const TEST_DIR = path.join(__dirname, "test_temp_io");
 

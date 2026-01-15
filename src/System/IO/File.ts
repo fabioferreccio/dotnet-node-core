@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { FileNotFoundException } from "./Exceptions/FileNotFoundException";
+import { FileNotFoundException } from "./FileNotFoundException";
 import { Exception } from "../../Domain/SeedWork";
 
 export class File {
