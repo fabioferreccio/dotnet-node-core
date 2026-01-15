@@ -1,19 +1,27 @@
-import { Console } from './Console';
-import { List } from './Collections/Generic/List';
-import { Enumerable } from './Linq/Enumerable';
-import { 
-    CsDateTime, 
-    CsGuid, 
-    CsInt32, 
-    CsString, 
-    CsInt16, 
-    CsInt64, 
-    CsSingle, 
-    CsDouble, 
+import { Console } from "./Console";
+import { List } from "./Collections/Generic/List";
+import { Enumerable } from "./Linq/Enumerable";
+import * as DependencyInjection from "./DependencyInjection";
+import {
+    CsDateTime,
+    CsGuid,
+    CsInt32,
+    CsString,
+    CsInt16,
+    CsInt64,
+    CsSingle,
+    CsDouble,
     CsDecimal,
     CsByte,
-    CsSByte
-} from '../Domain/ValueObjects';
+    CsSByte,
+} from "../Domain/ValueObjects";
+
+import * as Linq from "./Linq"; // Statically imported namespace
+
+// Registry Wiring
+Enumerable.registerListFactory((source) => new List(source as any));
+Enumerable.registerOrderedEnumerableFactory((source, context) => new Linq.OrderedEnumerable(source, context));
+Enumerable.registerLookupFactory(() => new Linq.Lookup());
 
 export const System = {
     String: CsString,
@@ -30,10 +38,11 @@ export const System = {
     Console: Console,
     Collections: {
         Generic: {
-            List: List
-        }
+            List: List,
+        },
     },
-    Linq: {
-        Enumerable: Enumerable
-    }
+    Linq: Linq,
+    DependencyInjection: DependencyInjection,
 };
+
+export { DependencyInjection };

@@ -43,3 +43,9 @@
 ## 6. Licensing
 - **License:** MIT.
 - `package.json` and `LICENSE` must be in sync.
+
+## 7. Module System & Code Style
+- **Strict ES6 Modules:** Use `import` and `export` ONLY.
+- **Prohibited:** NEVER use `require()`, `module.exports`, or `exports.foo`.
+- **Barrel Files:** Use `index.ts` to aggregate exports.
+- **Namespace Construction:** Import namespaces statically (`import * as Namespace`).

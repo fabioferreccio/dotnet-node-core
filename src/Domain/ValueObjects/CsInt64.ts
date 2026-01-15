@@ -1,4 +1,4 @@
-import { IEquatable, IComparable } from '../Interfaces';
+import { IEquatable, IComparable } from "../Interfaces";
 
 export class CsInt64 implements IEquatable<CsInt64>, IComparable<CsInt64> {
     private readonly _value: bigint;
@@ -24,7 +24,7 @@ export class CsInt64 implements IEquatable<CsInt64>, IComparable<CsInt64> {
     }
 
     public Divide(other: CsInt64): CsInt64 {
-         if (other._value === 0n) throw new Error("Divide by zero error");
+        if (other._value === 0n) throw new Error("Divide by zero error");
         return new CsInt64(this._value / other._value);
     }
 

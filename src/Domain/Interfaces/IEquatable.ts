@@ -3,5 +3,5 @@ export interface IEquatable<T> {
 }
 
 export function isEquatable(obj: any): obj is IEquatable<any> {
-    return obj !== null && obj !== undefined && typeof obj.Equals === 'function';
+    return obj !== null && obj !== undefined && typeof obj.Equals === "function";
 }

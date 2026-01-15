@@ -3,5 +3,5 @@ export interface IComparable<T> {
 }
 
 export function isComparable(obj: any): obj is IComparable<any> {
-    return obj && typeof obj.CompareTo === 'function';
+    return obj && typeof obj.CompareTo === "function";
 }

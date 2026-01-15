@@ -1,7 +1,6 @@
-import { IEquatable } from '../Interfaces';
+import { IEquatable } from "../Interfaces";
 
 export abstract class ValueObject implements IEquatable<ValueObject> {
-    
     protected abstract GetEqualityComponents(): any[];
 
     public Equals(other: ValueObject): boolean {

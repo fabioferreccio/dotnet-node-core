@@ -1,5 +1,5 @@
-import { isEquatable } from '../../../Domain/Interfaces';
-import { Enumerable } from '../../Linq/Enumerable';
+import { isEquatable } from "../../../Domain/Interfaces";
+import { Enumerable } from "../../Linq/Enumerable";
 
 export class List<T> {
     private _items: T[];
@@ -64,20 +64,20 @@ export class List<T> {
             for (let i = 0; i < this._items.length; i++) {
                 const current = this._items[i];
                 if (isEquatable(current)) {
-                     if (current.Equals(item)) return i;
+                    if (current.Equals(item)) return i;
                 }
             }
         } else {
-             for (let i = 0; i < this._items.length; i++) {
+            for (let i = 0; i < this._items.length; i++) {
                 const current = this._items[i];
                 if (isEquatable(current)) {
-                     if (current.Equals(item)) return i;
+                    if (current.Equals(item)) return i;
                 } else {
                     if (current === item) return i;
                 }
             }
         }
-        
+
         return -1;
     }
 

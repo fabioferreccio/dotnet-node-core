@@ -1,10 +1,9 @@
-import { IEnumerable } from '../../Domain/Interfaces/IEnumerable';
-import { IOrderedEnumerable } from '../../Domain/Interfaces/IOrderedEnumerable';
-import { IGrouping } from '../../Domain/Interfaces/IGrouping';
-// List import removed from static imports to break circular dependency
-import { CsInt32, CsDouble, CsDecimal } from '../../Domain/ValueObjects';
-import { IComparable, isComparable } from '../../Domain/Interfaces/IComparable';
-import { isEquatable } from '../../Domain/Interfaces/IEquatable';
+import { IEnumerable } from "../../Domain/Interfaces/IEnumerable";
+import { IOrderedEnumerable } from "../../Domain/Interfaces/IOrderedEnumerable";
+import { IGrouping } from "../../Domain/Interfaces/IGrouping";
+import { CsInt32, CsDouble, CsDecimal } from "../../Domain/ValueObjects";
+import { isComparable } from "../../Domain/Interfaces/IComparable";
+import { isEquatable } from "../../Domain/Interfaces/IEquatable";
 
 // --- Helper Types ---
 type SortContext<T> = {
@@ -42,7 +41,7 @@ export class Enumerable<T> implements IEnumerable<T> {
                         yield item;
                     }
                 }
-            }
+            },
         });
     }
 
@@ -53,7 +52,7 @@ export class Enumerable<T> implements IEnumerable<T> {
                 for (const item of source) {
                     yield selector(item);
                 }
-            }
+            },
         });
     }
 
@@ -69,7 +68,7 @@ export class Enumerable<T> implements IEnumerable<T> {
                     }
                     yield item;
                 }
-            }
+            },
         });
     }
 
@@ -79,13 +78,13 @@ export class Enumerable<T> implements IEnumerable<T> {
             *[Symbol.iterator]() {
                 let taken = 0;
                 if (count <= 0) return;
-                
+
                 for (const item of source) {
                     yield item;
                     taken++;
                     if (taken >= count) break;
                 }
-            }
+            },
         });
     }
 
@@ -100,23 +99,35 @@ export class Enumerable<T> implements IEnumerable<T> {
                         yield item;
                     }
                 }
-            }
+            },
         });
     }
 
-    public OrderBy<TKey>(keySelector: (item: T) => TKey, comparer?: (a: TKey, b: TKey) => number): IOrderedEnumerable<T> {
-        return new OrderedEnumerable<T>(this._source, {
+    public OrderBy<TKey>(
+        keySelector: (item: T) => TKey,
+        comparer?: (a: TKey, b: TKey) => number,
+    ): IOrderedEnumerable<T> {
+        if (!Enumerable._orderedEnumerableFactory) {
+            throw new Error("System.Linq.Enumerable: OrderedEnumerable factory not registered.");
+        }
+        return Enumerable._orderedEnumerableFactory(this._source, {
             keySelector,
             comparer,
-            descending: false
+            descending: false,
         });
     }
 
-    public OrderByDescending<TKey>(keySelector: (item: T) => TKey, comparer?: (a: TKey, b: TKey) => number): IOrderedEnumerable<T> {
-        return new OrderedEnumerable<T>(this._source, {
+    public OrderByDescending<TKey>(
+        keySelector: (item: T) => TKey,
+        comparer?: (a: TKey, b: TKey) => number,
+    ): IOrderedEnumerable<T> {
+        if (!Enumerable._orderedEnumerableFactory) {
+            throw new Error("System.Linq.Enumerable: OrderedEnumerable factory not registered.");
+        }
+        return Enumerable._orderedEnumerableFactory(this._source, {
             keySelector,
             comparer,
-            descending: true
+            descending: true,
         });
     }
 
@@ -124,23 +135,51 @@ export class Enumerable<T> implements IEnumerable<T> {
         const source = this._source;
         return new Enumerable<IGrouping<TKey, T>>({
             *[Symbol.iterator]() {
-                const lookup = new Lookup<TKey, T>();
+                if (!Enumerable._lookupFactory) {
+                    throw new Error("System.Linq.Enumerable: Lookup factory not registered.");
+                }
+                const lookup = Enumerable._lookupFactory();
                 for (const item of source) {
                     lookup.Add(keySelector(item), item);
                 }
                 for (const group of lookup) {
                     yield group;
                 }
-            }
+            },
         });
     }
 
     // --- Immediate Execution Operators ---
 
+    // --- Registry for Circular Dependencies ---
+    private static _listFactory: (source: IEnumerable<any>) => any;
+    private static _orderedEnumerableFactory: (
+        source: Iterable<any>,
+        context: SortContext<any>,
+    ) => IOrderedEnumerable<any>;
+    private static _lookupFactory: () => any; // Lookup<TKey, TElement>
+
+    public static registerListFactory(factory: (source: IEnumerable<any>) => any) {
+        this._listFactory = factory;
+    }
+
+    public static registerOrderedEnumerableFactory(
+        factory: (source: Iterable<any>, context: SortContext<any>) => IOrderedEnumerable<any>,
+    ) {
+        this._orderedEnumerableFactory = factory;
+    }
+
+    public static registerLookupFactory(factory: () => any) {
+        this._lookupFactory = factory;
+    }
+
     public ToList(): any {
-        // Dynamic require to avoid circular dependency with List.ts
-        const { List } = require('../Collections/Generic/List');
-        return new List(this); // Use 'this' (iterator) to preserve ordering chains
+        if (!Enumerable._listFactory) {
+            throw new Error(
+                "System.Linq.Enumerable: List factory not registered. Ensure System.init() or main entry point registers the List factory.",
+            );
+        }
+        return Enumerable._listFactory(this);
     }
 
     public ToArray(): T[] {
@@ -188,149 +227,16 @@ export class Enumerable<T> implements IEnumerable<T> {
     }
 
     public Sum(selector?: (item: T) => number | CsInt32 | CsDouble | CsDecimal | any): number {
-        let sum = 0; 
+        let sum = 0;
         for (const item of this._source) {
-             const val = selector ? selector(item) : item;
-             
-             if (typeof val === 'number') {
-                 sum += val;
-             } else if (val && typeof val.Value === 'number') {
-                 sum += val.Value;
-             }
+            const val = selector ? selector(item) : item;
+
+            if (typeof val === "number") {
+                sum += val;
+            } else if (val && typeof val.Value === "number") {
+                sum += val.Value;
+            }
         }
         return sum;
-    }
-}
-
-// --- OrderedEnumerable Implementation ---
-
-export class OrderedEnumerable<T> extends Enumerable<T> implements IOrderedEnumerable<T> {
-    private _parent?: OrderedEnumerable<T>;
-    private _sortContext: SortContext<T>;
-
-    constructor(source: Iterable<T>, context: SortContext<T>, parent?: OrderedEnumerable<T>) {
-        super(source); 
-        this._sortContext = context;
-        this._parent = parent;
-    }
-
-    public *[Symbol.iterator](): Iterator<T> {
-        const contexts: SortContext<T>[] = [];
-        let item: OrderedEnumerable<T> | undefined = this;
-        let rootSource: Iterable<T> | undefined;
-
-        // Traverse up to find the root and collect contexts
-        while (item) {
-            contexts.unshift(item._sortContext);
-            if (!item._parent) {
-                rootSource = (item as any)['_source']; 
-            }
-            item = item._parent;
-        }
-
-        if (!rootSource) return;
-
-        const buffer = Array.from(rootSource);
-
-        buffer.sort((a, b) => {
-            for (const ctx of contexts) {
-                const keyA = ctx.keySelector(a);
-                const keyB = ctx.keySelector(b);
-                
-                let comparison = 0;
-                
-                if (ctx.comparer) {
-                    comparison = ctx.comparer(keyA, keyB);
-                } else {
-                     if (keyA === keyB) {
-                         comparison = 0;
-                     } else if (keyA === null || keyA === undefined) {
-                         comparison = (keyB === null || keyB === undefined) ? 0 : -1;
-                     } else if (keyB === null || keyB === undefined) {
-                         comparison = 1; 
-                     } else if (isComparable(keyA)) { 
-                         comparison = keyA.CompareTo(keyB);
-                     } else {
-                         comparison = keyA < keyB ? -1 : keyA > keyB ? 1 : 0;
-                     }
-                }
-
-                if (comparison !== 0) {
-                    return ctx.descending ? -comparison : comparison;
-                }
-            }
-            return 0;
-        });
-
-        for (const item of buffer) {
-            yield item;
-        }
-    }
-
-    public CreateOrderedEnumerable<TKey>(
-        keySelector: (item: T) => TKey,
-        comparer?: (a: TKey, b: TKey) => number,
-        descending?: boolean
-    ): IOrderedEnumerable<T> {
-        return new OrderedEnumerable<T>(this, {
-            keySelector,
-            comparer,
-            descending: descending || false
-        }, this); 
-    }
-
-    public ThenBy<TKey>(keySelector: (item: T) => TKey, comparer?: (a: TKey, b: TKey) => number): IOrderedEnumerable<T> {
-        return this.CreateOrderedEnumerable(keySelector, comparer, false);
-    }
-
-    public ThenByDescending<TKey>(keySelector: (item: T) => TKey, comparer?: (a: TKey, b: TKey) => number): IOrderedEnumerable<T> {
-        return this.CreateOrderedEnumerable(keySelector, comparer, true);
-    }
-}
-
-// --- Grouping Implementation ---
-
-export class Grouping<TKey, TElement> extends Enumerable<TElement> implements IGrouping<TKey, TElement> {
-    private readonly _key: TKey;
-    
-    constructor(key: TKey, elements: TElement[]) {
-        super(elements);
-        this._key = key;
-    }
-
-    public get Key(): TKey {
-        return this._key;
-    }
-}
-
-export class Lookup<TKey, TElement> extends Enumerable<IGrouping<TKey, TElement>> implements IEnumerable<IGrouping<TKey, TElement>> {
-    private _groupings: Grouping<TKey, TElement>[] = [];
-
-    constructor() {
-        const groupings: Grouping<TKey, TElement>[] = [];
-        super(groupings);
-        this._groupings = groupings;
-    }
-
-    public Add(key: TKey, element: TElement): void {
-        const group = this._findGroup(key);
-        if (group) {
-            // Grouping extends Enumerable. _source is protected.
-            ((group as any)['_source'] as TElement[]).push(element);
-        } else {
-            this._groupings.push(new Grouping(key, [element]));
-        }
-    }
-
-    private _findGroup(key: TKey): Grouping<TKey, TElement> | undefined {
-        if (isEquatable(key)) {
-            return this._groupings.find(g => {
-                if (isEquatable(g.Key)) {
-                    return g.Key.Equals(key);
-                } 
-                return g.Key === key;
-            });
-        }
-        return this._groupings.find(g => g.Key === key);
     }
 }

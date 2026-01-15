@@ -1,12 +1,12 @@
-import { CsString } from '../../../src/Domain/ValueObjects/CsString';
+import { CsString } from "../../../src/Domain/ValueObjects/CsString";
 
-describe('System.String (CsString)', () => {
-    test('Construction: Null/Undefined throws', () => {
+describe("System.String (CsString)", () => {
+    test("Construction: Null/Undefined throws", () => {
         expect(() => new CsString(null as any)).toThrow();
         expect(() => new CsString(undefined as any)).toThrow();
     });
 
-    test('Immutability: Trim and ToUpper', () => {
+    test("Immutability: Trim and ToUpper", () => {
         const original = new CsString("  test  ");
         const trimmed = original.Trim();
         const upper = trimmed.ToUpper();
@@ -17,7 +17,7 @@ describe('System.String (CsString)', () => {
         expect(trimmed).not.toBe(original);
     });
 
-    test('Static: IsNullOrEmpty', () => {
+    test("Static: IsNullOrEmpty", () => {
         expect(CsString.IsNullOrEmpty(null)).toBe(true);
         expect(CsString.IsNullOrEmpty(undefined)).toBe(true);
         expect(CsString.IsNullOrEmpty(new CsString(""))).toBe(true);
@@ -25,13 +25,13 @@ describe('System.String (CsString)', () => {
         expect(CsString.IsNullOrEmpty(new CsString("a"))).toBe(false);
     });
 
-    test('Static: IsNullOrWhiteSpace', () => {
-         expect(CsString.IsNullOrWhiteSpace(null)).toBe(true);
-         expect(CsString.IsNullOrWhiteSpace(new CsString("   "))).toBe(true);
-         expect(CsString.IsNullOrWhiteSpace(new CsString(" a "))).toBe(false);
+    test("Static: IsNullOrWhiteSpace", () => {
+        expect(CsString.IsNullOrWhiteSpace(null)).toBe(true);
+        expect(CsString.IsNullOrWhiteSpace(new CsString("   "))).toBe(true);
+        expect(CsString.IsNullOrWhiteSpace(new CsString(" a "))).toBe(false);
     });
 
-    test('Substring', () => {
+    test("Substring", () => {
         const s = new CsString("Hello World");
         // Branch 1: Length provided
         expect(s.Substring(0, 5).toString()).toBe("Hello");
@@ -39,11 +39,11 @@ describe('System.String (CsString)', () => {
         expect(s.Substring(6).toString()).toBe("World");
     });
 
-    test('Length', () => {
+    test("Length", () => {
         expect(new CsString("abc").Length).toBe(3);
     });
 
-    test('Equals', () => {
+    test("Equals", () => {
         const a = new CsString("foo");
         const b = new CsString("foo");
         const c = new CsString("bar");
@@ -53,17 +53,17 @@ describe('System.String (CsString)', () => {
         expect(a.Equals(null as any)).toBe(false);
     });
 
-    test('CompareTo', () => {
+    test("CompareTo", () => {
         const a = new CsString("a");
         const b = new CsString("b");
-        
+
         expect(a.CompareTo(b)).toBe(-1);
         expect(b.CompareTo(a)).toBe(1);
         expect(a.CompareTo(new CsString("a"))).toBe(0);
         expect(a.CompareTo(null)).toBe(1);
     });
-    
-    test('Addition (Concat)', () => {
+
+    test("Addition (Concat)", () => {
         // Assuming + operator overload isn't possible, but maybe an Add/Concat method exists?
         // Standard TS doesn't support operator overloading.
         // We test standard string coercion if applicable, or explicit methods if they existed.

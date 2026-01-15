@@ -1,11 +1,11 @@
-import { CsDouble } from '../../../src/Domain/ValueObjects/CsDouble';
+import { CsDouble } from "../../../src/Domain/ValueObjects/CsDouble";
 
-describe('System.Double (CsDouble)', () => {
-    test('Construction', () => {
+describe("System.Double (CsDouble)", () => {
+    test("Construction", () => {
         expect(new CsDouble(3.14).Value).toBe(3.14);
     });
 
-    test('Equals', () => {
+    test("Equals", () => {
         const a = new CsDouble(1.23);
         const b = new CsDouble(1.23);
         const c = new CsDouble(1.24);
@@ -14,7 +14,7 @@ describe('System.Double (CsDouble)', () => {
         expect(a.Equals(null as any)).toBe(false);
     });
 
-    test('CompareTo', () => {
+    test("CompareTo", () => {
         const a = new CsDouble(1.0);
         const b = new CsDouble(2.0);
         expect(a.CompareTo(b)).toBe(-1);
@@ -23,7 +23,7 @@ describe('System.Double (CsDouble)', () => {
         expect(a.CompareTo(null)).toBe(1);
     });
 
-    test('ToString', () => {
+    test("ToString", () => {
         expect(new CsDouble(3.5).ToString()).toBe("3.5");
     });
 });

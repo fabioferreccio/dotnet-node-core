@@ -1,9 +1,9 @@
-import { IEquatable, IComparable } from '../Interfaces';
+import { IEquatable, IComparable } from "../Interfaces";
 
 export enum DateTimeKind {
     Unspecified = 0,
     Utc = 1,
-    Local = 2
+    Local = 2,
 }
 
 export class CsDateTime implements IEquatable<CsDateTime>, IComparable<CsDateTime> {
@@ -58,27 +58,27 @@ export class CsDateTime implements IEquatable<CsDateTime>, IComparable<CsDateTim
 
     public AddDays(value: number): CsDateTime {
         const newDate = new Date(this._date.getTime());
-        // Add days using UTC to avoid DST shifts causing issues if we just added milliseconds? 
+        // Add days using UTC to avoid DST shifts causing issues if we just added milliseconds?
         // Best approach for "AddDays" in C# style is "Add 24 hours * value"? No, it's adding calendar days.
         // JS setDate handles calendar days.
         if (this._kind === DateTimeKind.Utc) {
             newDate.setUTCDate(newDate.getUTCDate() + value);
         } else {
-             newDate.setDate(newDate.getDate() + value);
+            newDate.setDate(newDate.getDate() + value);
         }
         return new CsDateTime(newDate, this._kind);
     }
 
     public AddHours(value: number): CsDateTime {
         const newDate = new Date(this._date.getTime());
-        newDate.setTime(newDate.getTime() + (value * 60 * 60 * 1000));
+        newDate.setTime(newDate.getTime() + value * 60 * 60 * 1000);
         return new CsDateTime(newDate, this._kind);
     }
 
     public AddMinutes(value: number): CsDateTime {
-       const newDate = new Date(this._date.getTime());
-       newDate.setTime(newDate.getTime() + (value * 60 * 1000));
-       return new CsDateTime(newDate, this._kind);
+        const newDate = new Date(this._date.getTime());
+        newDate.setTime(newDate.getTime() + value * 60 * 1000);
+        return new CsDateTime(newDate, this._kind);
     }
 
     public ToUniversalTime(): CsDateTime {
@@ -97,11 +97,11 @@ export class CsDateTime implements IEquatable<CsDateTime>, IComparable<CsDateTim
         }
 
         const yyyy = this.Year.toString();
-        const MM = this.Month.toString().padStart(2, '0');
-        const dd = this.Day.toString().padStart(2, '0');
-        const HH = this.Hour.toString().padStart(2, '0');
-        const mm = this.Minute.toString().padStart(2, '0');
-        const ss = this.Second.toString().padStart(2, '0');
+        const MM = this.Month.toString().padStart(2, "0");
+        const dd = this.Day.toString().padStart(2, "0");
+        const HH = this.Hour.toString().padStart(2, "0");
+        const mm = this.Minute.toString().padStart(2, "0");
+        const ss = this.Second.toString().padStart(2, "0");
 
         return format
             .replace(/yyyy/g, yyyy)

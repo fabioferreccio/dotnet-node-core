@@ -1,4 +1,4 @@
-import { IEquatable, IComparable } from '../Interfaces';
+import { IEquatable, IComparable } from "../Interfaces";
 
 export class CsInt16 implements IEquatable<CsInt16>, IComparable<CsInt16> {
     private readonly _value: number;

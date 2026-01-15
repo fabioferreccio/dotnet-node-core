@@ -1,4 +1,4 @@
-import { IEquatable, IComparable } from '../Interfaces';
+import { IEquatable, IComparable } from "../Interfaces";
 
 export class CsString implements IEquatable<CsString>, IComparable<CsString> {
     private readonly _value: string;
@@ -32,7 +32,7 @@ export class CsString implements IEquatable<CsString>, IComparable<CsString> {
 
     public Substring(startIndex: number, length?: number): CsString {
         if (length !== undefined) {
-             return new CsString(this._value.substring(startIndex, startIndex + length));
+            return new CsString(this._value.substring(startIndex, startIndex + length));
         }
         return new CsString(this._value.substring(startIndex));
     }

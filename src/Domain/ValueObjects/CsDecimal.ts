@@ -1,4 +1,4 @@
-import { IEquatable, IComparable } from '../Interfaces';
+import { IEquatable, IComparable } from "../Interfaces";
 
 export class CsDecimal implements IEquatable<CsDecimal>, IComparable<CsDecimal> {
     private readonly _value: number;
@@ -29,7 +29,7 @@ export class CsDecimal implements IEquatable<CsDecimal>, IComparable<CsDecimal> 
         return new CsDecimal(this._value + other._value);
     }
 
-     public Subtract(other: CsDecimal): CsDecimal {
+    public Subtract(other: CsDecimal): CsDecimal {
         return new CsDecimal(this._value - other._value);
     }
 
@@ -38,7 +38,7 @@ export class CsDecimal implements IEquatable<CsDecimal>, IComparable<CsDecimal> 
     }
 
     public Divide(other: CsDecimal): CsDecimal {
-         if (other._value === 0) throw new Error("Divide by zero error");
+        if (other._value === 0) throw new Error("Divide by zero error");
         return new CsDecimal(this._value / other._value);
     }
 

@@ -1,4 +1,4 @@
-import { IEquatable, IComparable } from '../Interfaces';
+import { IEquatable, IComparable } from "../Interfaces";
 
 export class CsSByte implements IEquatable<CsSByte>, IComparable<CsSByte> {
     private readonly _value: number;
@@ -6,7 +6,7 @@ export class CsSByte implements IEquatable<CsSByte>, IComparable<CsSByte> {
     public constructor(value: number) {
         // Enforce integer truncation
         const truncated = value | 0;
-        
+
         // Enforce Range: -128 to 127
         if (truncated < -128 || truncated > 127) {
             throw new Error(`Value ${value} is out of range for SByte (-128 to 127).`);

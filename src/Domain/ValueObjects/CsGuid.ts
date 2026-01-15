@@ -1,5 +1,5 @@
-import { IEquatable } from '../Interfaces';
-import * as crypto from 'crypto';
+import { IEquatable } from "../Interfaces";
+import * as crypto from "crypto";
 
 export class CsGuid implements IEquatable<CsGuid> {
     private readonly _value: string;
