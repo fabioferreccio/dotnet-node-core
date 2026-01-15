@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Project: dotnet-node-core
 # Role: Principal C#/.NET Architect porting to TypeScript.
 
@@ -59,3 +63,19 @@
   - **Prohibited:** Empty Interfaces (Exception: DDD Marker Interfaces MUST have a comment explanation).
 - **No Loose TODOs:** Comments like `// TODO: Implement later` are forbidden.
   - **Rule:** Either implement the feature immediately or omit the comment. Code committed must be complete or explicitly marked as `NotImplementedException`.
+
+## 9. Explicit Resource Management (IDisposable)
+- **Standard:** Use the TypeScript 5.2+ `using` keyword support.
+- **Requirement:** All classes implementing `IDisposable` MUST also implement `[Symbol.dispose]` (and `[Symbol.asyncDispose]` if applicable).
+- **Leak Prevention:** Every `FileStream`, `NetworkStream`, or `DBConnection` MUST be wrapped in a `using` block in the consumer side.
+
+## 10. Asynchrony & Event Loop (TPL Pattern)
+- [cite_start]**Naming:** Asynchronous methods MUST end with the `Async` suffix (e.g., `ReadAsync`). 
+- **Return Type:** Use `Task<T>` as a type alias for `Promise<T>` to maintain .NET naming conventions.
+- **Offloading:** Heavy CPU-bound tasks in the Domain layer SHOULD be avoided or implemented via Worker Threads if they block the Event Loop for >50ms.
+- **I/O Policy:** For high-concurrency implementations, `Async` methods are MANDATORY. `Sync` methods are reserved for CLI tools or initialization phases.
+
+## 11. Memory & Allocation (Performance)
+- [cite_start]**Small Data:** Immutability is mandatory for Value Objects. [cite: 7, 8, 11]
+- **Large Data:** For payloads >1MB, the "Stream-First" policy applies. Use `System.IO.Stream` to process data in chunks instead of loading full `CsString` instances into memory.
+- **Buffers:** Reuse `Uint8Array` via `ArrayBuffer` pools for high-frequency I/O operations to mitigate GC pressure.

@@ -140,7 +140,7 @@ export class MemoryStream extends Stream {
         if (this._position > value) this._position = value;
     }
 
-    public override Dispose(disposing: boolean): void {
+    public override Dispose(disposing: boolean = true): void {
         if (disposing) {
             this._isOpen = false;
             this._expandable = false;

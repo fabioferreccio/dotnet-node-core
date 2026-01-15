@@ -45,7 +45,7 @@ describe("Stream Base Class (via MemoryStream)", () => {
 
     test("Explicit dispose() alias calls Close/Dispose", () => {
         const ms = new MemoryStream();
-        ms.dispose();
+        ms.Dispose();
         expect(ms.CanRead).toBe(false);
     });
 });

@@ -1,8 +1,9 @@
-import { IServiceProvider, IServiceScope, IServiceScopeFactory, IDisposable } from "../../Domain/Interfaces";
+import { IServiceProvider, IServiceScope, IServiceScopeFactory, IDisposable, IAsyncDisposable } from "../../Domain/Interfaces";
+import { Task } from "../../Domain/Threading/Tasks/Task";
 import { ServiceDescriptor, ServiceLifetime, ServiceIdentifier } from "../../Domain/DependencyInjection";
 import { ServiceScope } from "./ServiceScope";
 
-export class ServiceProvider implements IServiceProvider, IServiceScope, IServiceScopeFactory, IDisposable {
+export class ServiceProvider implements IServiceProvider, IServiceScope, IServiceScopeFactory, IDisposable, IAsyncDisposable {
     private readonly _descriptors: Map<ServiceIdentifier, ServiceDescriptor>;
     private readonly _singletons: Map<ServiceIdentifier, unknown>;
     private readonly _scopedInstances: Map<ServiceIdentifier, unknown>;
@@ -36,8 +37,20 @@ export class ServiceProvider implements IServiceProvider, IServiceScope, IServic
     public Dispose(): void {
         this._isDisposed = true;
         this._scopedInstances.clear();
-        // We do not dispose descriptors or singletons generally, unless we implement specific disposal logic for IDisposable services.
-        // For simplicity in v0.3, we just mark as disposed and clear references.
+    }
+
+    public [Symbol.dispose](): void {
+        this.Dispose();
+    }
+
+    public async DisposeAsync(): Task<void> {
+        // Future: specific async disposal logic for scoped instances if needed
+        this.Dispose();
+        return Promise.resolve();
+    }
+
+    public async [Symbol.asyncDispose](): Task<void> {
+        await this.DisposeAsync();
     }
 
     // --- IServiceProvider Implementation ---

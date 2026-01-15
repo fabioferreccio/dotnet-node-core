@@ -7,3 +7,4 @@ export * from "./IServiceCollection";
 export * from "./IServiceProvider";
 export * from "./IServiceScope";
 export * from "./IDisposable";
+export * from "./IAsyncDisposable";

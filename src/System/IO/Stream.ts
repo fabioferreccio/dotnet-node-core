@@ -1,9 +1,10 @@
-import { IDisposable } from "../../Domain/Interfaces/IDisposable";
+import { IDisposable, IAsyncDisposable } from "../../Domain/Interfaces";
 import { SeekOrigin } from "./FileStream";
 import { NotSupportedException } from "../NotSupportedException";
 import { Exception } from "../../Domain/SeedWork";
+import { Task } from "../../Domain/Threading/Tasks/Task";
 
-export abstract class Stream implements IDisposable {
+export abstract class Stream implements IDisposable, IAsyncDisposable {
     public abstract get CanRead(): boolean;
     public abstract get CanSeek(): boolean;
     public abstract get CanWrite(): boolean;
@@ -26,9 +27,18 @@ export abstract class Stream implements IDisposable {
         void _disposing;
     }
 
+    public async DisposeAsync(): Task<void> {
+        this.Dispose(true);
+        return Promise.resolve();
+    }
+
     // Explicit IDisposable implementation
-    public dispose(): void {
-        this.Close();
+    public [Symbol.dispose](): void {
+        this.Dispose(true);
+    }
+
+    public async [Symbol.asyncDispose](): Task<void> {
+        await this.DisposeAsync();
     }
 
     public CopyTo(destination: Stream, bufferSize: number = 81920): void {

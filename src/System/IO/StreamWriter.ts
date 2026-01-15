@@ -1,9 +1,10 @@
 import { Stream } from "./Stream";
 import { ObjectDisposedException } from "../ObjectDisposedException";
-import { IDisposable } from "../../Domain/Interfaces/IDisposable";
+import { IDisposable, IAsyncDisposable } from "../../Domain/Interfaces";
 import { Exception } from "../../Domain/SeedWork";
+import { Task } from "../../Domain/Threading/Tasks/Task";
 
-export class StreamWriter implements IDisposable {
+export class StreamWriter implements IDisposable, IAsyncDisposable {
     private _stream: Stream;
     private _encoding: string;
     private _isOpen: boolean;
@@ -29,15 +30,31 @@ export class StreamWriter implements IDisposable {
     }
 
     public Close(): void {
-        this.Dispose();
+        this.Dispose(true);
     }
 
-    public Dispose(): void {
-        if (this._isOpen) {
-            this.Flush();
-            this._isOpen = false;
-            this._stream.Close();
+    public Dispose(disposing: boolean = true): void {
+        if (disposing && this._isOpen) {
+             this.Flush();
+             this._isOpen = false;
+             this._stream.Close();
         }
+    }
+
+    public [Symbol.dispose](): void {
+        this.Dispose(true);
+    }
+
+    public async DisposeAsync(): Task<void> {
+        if (this._stream instanceof Stream) {
+            await (this._stream as unknown as IAsyncDisposable).DisposeAsync();
+        } else {
+             this.Dispose(true);
+        }
+    }
+
+    public async [Symbol.asyncDispose](): Task<void> {
+        await this.DisposeAsync();
     }
 
     public Flush(): void {

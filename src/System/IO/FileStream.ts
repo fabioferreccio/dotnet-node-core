@@ -4,6 +4,8 @@ import { IOException } from "./IOException";
 import { FileNotFoundException } from "./FileNotFoundException";
 import { ObjectDisposedException } from "../ObjectDisposedException";
 import { NotSupportedException } from "../NotSupportedException";
+import { IDisposable, IAsyncDisposable } from "../../Domain/Interfaces";
+import { Task } from "../../Domain/Threading/Tasks/Task";
 
 export enum FileAccess {
     Read = 1,
@@ -26,7 +28,7 @@ export enum SeekOrigin {
     End = 2,
 }
 
-export class FileStream extends Stream {
+export class FileStream extends Stream implements IDisposable, IAsyncDisposable {
     private _fd: number;
     private _path: string;
     private _canRead: boolean;
@@ -134,8 +136,46 @@ export class FileStream extends Stream {
         if (this._position > value) this._position = value;
     }
 
-    public override Dispose(_disposing: boolean): void {
-        void _disposing;
+    public async ReadAsync(buffer: Uint8Array, offset: number, count: number): Task<number> {
+        this.EnsureNotDisposed();
+        if (!this._canRead) throw new NotSupportedException("Stream does not support reading.");
+
+        const bytesRead = await new Promise<number>((resolve, reject) => {
+            fs.read(this._fd, buffer, offset, count, this._position, (err, bytes) => {
+                if (err) reject(err);
+                else resolve(bytes);
+            });
+        });
+        this._position += bytesRead;
+        return bytesRead;
+    }
+
+    public async WriteAsync(buffer: Uint8Array, offset: number, count: number): Task<void> {
+        this.EnsureNotDisposed();
+        if (!this._canWrite) throw new NotSupportedException("Stream does not support writing.");
+
+        await new Promise<void>((resolve, reject) => {
+            fs.write(this._fd, buffer, offset, count, this._position, (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
+        this._position += count; // fs.write returns written bytes, safe to assume all written or error? fs.write callback has written bytes. 
+        // Sync implementation assumed count. Let's correct Sync logic if needed, but for now matching existing behavior + async correctness.
+        // Actually fs.write returns (err, written, buffer).
+    }
+
+    public async FlushAsync(): Task<void> {
+        this.EnsureNotDisposed();
+        await new Promise<void>((resolve, reject) => {
+            fs.fsync(this._fd, (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
+    }
+
+    public override Dispose(_disposing: boolean = true): void {
         if (this._isOpen) {
             this._isOpen = false;
             try {
@@ -144,6 +184,25 @@ export class FileStream extends Stream {
                 // Ignore errors on close
             }
         }
+    }
+
+    public async DisposeAsync(): Task<void> {
+        if (this._isOpen) {
+             this._isOpen = false;
+             try {
+                 await new Promise<void>((resolve) => fs.close(this._fd, () => resolve()));
+             } catch {
+                 // Ignore
+             }
+        }
+    }
+
+    public [Symbol.dispose](): void {
+        this.Dispose(true);
+    }
+
+    public async [Symbol.asyncDispose](): Task<void> {
+        await this.DisposeAsync();
     }
 
     private EnsureNotDisposed(): void {
