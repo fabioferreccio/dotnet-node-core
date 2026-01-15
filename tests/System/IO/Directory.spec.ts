@@ -41,4 +41,46 @@ describe("Directory Gap Coverage", () => {
          // @ts-ignore
          expect(() => new Directory()).toThrow("Directory is a static class.");
     });
-});
+
+    test("CreateDirectoryAsync and ExistsAsync work correctly", async () => {
+        const subDir = path.join(TEST_DIR, "async_dir");
+        await Directory.CreateDirectoryAsync(subDir);
+        
+        expect(await Directory.ExistsAsync(subDir)).toBe(true);
+        // ExistsAsync returns false for file
+        const file = path.join(subDir, "file.txt");
+        File.WriteAllText(file, "test");
+        expect(await Directory.ExistsAsync(file)).toBe(false);
+    });
+
+    test("GetFilesAsync works correctly", async () => {
+        const subDir = path.join(TEST_DIR, "async_files");
+        await Directory.CreateDirectoryAsync(subDir);
+        File.WriteAllText(path.join(subDir, "a.txt"), "A");
+        File.WriteAllText(path.join(subDir, "b.json"), "B");
+
+        const allFiles = await Directory.GetFilesAsync(subDir);
+        expect(allFiles.length).toBe(2);
+        
+        const jsonFiles = await Directory.GetFilesAsync(subDir, "*.json");
+        expect(jsonFiles.length).toBe(1);
+        expect(jsonFiles[0]).toContain("b.json");
+    });
+
+    test("DeleteAsync works correctly", async () => {
+        const subDir = path.join(TEST_DIR, "async_delete");
+        await Directory.CreateDirectoryAsync(subDir);
+        expect(await Directory.ExistsAsync(subDir)).toBe(true);
+        
+        await Directory.DeleteAsync(subDir);
+        expect(await Directory.ExistsAsync(subDir)).toBe(false);
+        
+        // Recursive
+        const nest = path.join(TEST_DIR, "async_nest");
+        await Directory.CreateDirectoryAsync(nest);
+        File.WriteAllText(path.join(nest, "file.txt"), "data");
+        
+        await Directory.DeleteAsync(nest, true);
+        expect(await Directory.ExistsAsync(nest)).toBe(false);
+    });
+ });

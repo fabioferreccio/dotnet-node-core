@@ -35,8 +35,34 @@ export class ServiceProvider implements IServiceProvider, IServiceScope, IServic
     }
 
     public Dispose(): void {
+        if (this._isDisposed) return;
         this._isDisposed = true;
+
+        // Dispose Scoped Instances
+        this.DisposeMap(this._scopedInstances);
         this._scopedInstances.clear();
+
+        // Dispose Singletons ONLY if we are the root
+        if (this._root === this) {
+            this.DisposeMap(this._singletons);
+            this._singletons.clear();
+        }
+    }
+
+    private DisposeMap(map: Map<ServiceIdentifier, unknown>): void {
+        for (const instance of map.values()) {
+            this.DisposeInstance(instance);
+        }
+    }
+
+    private DisposeInstance(instance: unknown): void {
+        if (instance && typeof (instance as IDisposable).Dispose === "function") {
+             try {
+                (instance as IDisposable).Dispose();
+             } catch {
+                 // Ignore disposal errors
+             }
+        }
     }
 
     public [Symbol.dispose](): void {

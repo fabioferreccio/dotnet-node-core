@@ -58,6 +58,12 @@ describe("Domain.SeedWork.ValueObject", () => {
         // Even if components matched (not possible here due to length), type check fails
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(obj1.Equals(obj2 as any)).toBe(false);
+
+        // Different Type entirely
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expect(obj1.Equals("string" as any)).toBe(false);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expect(obj1.Equals(123 as any)).toBe(false);
     });
 
     test("Equals - Null/Undefined", () => {

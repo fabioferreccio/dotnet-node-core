@@ -37,6 +37,7 @@ describe("System.Int16 (CsInt16) - Comprehensive", () => {
         expect(a.CompareTo(b)).toBe(-1);
         expect(b.CompareTo(a)).toBe(1);
         expect(a.CompareTo(null)).toBe(1);
+        expect(a.CompareTo(new CsInt16(10))).toBe(0);
     });
 
     test("ToString", () => {

@@ -18,6 +18,20 @@ export abstract class Stream implements IDisposable, IAsyncDisposable {
     public abstract Seek(offset: number, origin: SeekOrigin): number;
     public abstract SetLength(value: number): void;
 
+    public async FlushAsync(): Task<void> {
+        this.Flush();
+        return Promise.resolve();
+    }
+
+    public async ReadAsync(buffer: Uint8Array, offset: number, count: number): Task<number> {
+        return Promise.resolve(this.Read(buffer, offset, count));
+    }
+
+    public async WriteAsync(buffer: Uint8Array, offset: number, count: number): Task<void> {
+        this.Write(buffer, offset, count);
+        return Promise.resolve();
+    }
+
     public Close(): void {
         this.Dispose(true);
     }

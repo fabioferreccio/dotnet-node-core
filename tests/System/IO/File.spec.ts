@@ -52,4 +52,52 @@ describe("File", () => {
         // @ts-ignore
         expect(() => new File()).toThrow("File is a static class.");
     });
+
+    test("WriteAllTextAsync and ReadAllTextAsync work correctly", async () => {
+        const pathAsync = path.join(TEST_DIR, "async_test.txt");
+        await File.WriteAllTextAsync(pathAsync, "Hello Async");
+        
+        expect(await File.ExistsAsync(pathAsync)).toBe(true);
+        const content = await File.ReadAllTextAsync(pathAsync);
+        expect(content.toString()).toBe("Hello Async");
+        
+        await File.DeleteAsync(pathAsync);
+        expect(await File.ExistsAsync(pathAsync)).toBe(false);
+    });
+
+    test("CopyAsync works correctly", async () => {
+        const src = path.join(TEST_DIR, "src_async.txt");
+        const dest = path.join(TEST_DIR, "dest_async.txt");
+        await File.WriteAllTextAsync(src, "copy me");
+        
+        await File.CopyAsync(src, dest);
+        
+        expect(await File.ExistsAsync(dest)).toBe(true);
+        expect((await File.ReadAllTextAsync(dest)).toString()).toBe("copy me");
+
+        // Overwrite false throws
+        await expect(File.CopyAsync(src, dest, false)).rejects.toThrow();
+
+        // Overwrite true works
+        await File.WriteAllTextAsync(src, "new content");
+        await File.CopyAsync(src, dest, true);
+        expect((await File.ReadAllTextAsync(dest)).toString()).toBe("new content");
+    });
+
+    test("MoveAsync works correctly", async () => {
+        const src = path.join(TEST_DIR, "move_src_async.txt");
+        const dest = path.join(TEST_DIR, "move_dest_async.txt");
+        await File.WriteAllTextAsync(src, "move me");
+
+        await File.MoveAsync(src, dest);
+        
+        expect(await File.ExistsAsync(src)).toBe(false);
+        expect(await File.ExistsAsync(dest)).toBe(true);
+        expect((await File.ReadAllTextAsync(dest)).toString()).toBe("move me");
+    });
+    
+    test("ReadAllTextAsync throws FileNotFoundException", async () => {
+        const missing = path.join(TEST_DIR, "missing_async.txt");
+        await expect(File.ReadAllTextAsync(missing)).rejects.toThrow(FileNotFoundException);
+    });
 });
