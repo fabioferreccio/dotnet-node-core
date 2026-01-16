@@ -1,4 +1,4 @@
-import { IEquatable, IComparable } from "../Interfaces";
+import { IEquatable, IComparable } from "../../Domain/Interfaces";
 import { CsString } from "./CsString";
 import { CsInt16 } from "./CsInt16";
 import { CsInt32 } from "./CsInt32";
@@ -13,7 +13,8 @@ export class CsBoolean implements IEquatable<CsBoolean>, IComparable<CsBoolean> 
     public static readonly TrueString: string = "True";
     public static readonly FalseString: string = "False";
 
-    public constructor(value: boolean | string | number | CsString | CsInt16 | CsInt32 | CsInt64 | CsByte | CsSByte) {
+    private constructor(value: boolean | string | number | CsString | CsInt16 | CsInt32 | CsInt64 | CsByte | CsSByte) {
+        // Validation logic remains same
         if (value === null || value === undefined) {
              throw new Error("Value cannot be null or undefined for CsBoolean");
         }
@@ -24,6 +25,11 @@ export class CsBoolean implements IEquatable<CsBoolean>, IComparable<CsBoolean> 
         } else {
             throw new Error(`Invalid type or value for CsBoolean constructor: ${value}`);
         }
+        Object.freeze(this);
+    }
+
+    public static From(value: boolean | string | number | CsString | CsInt16 | CsInt32 | CsInt64 | CsByte | CsSByte): CsBoolean {
+        return new CsBoolean(value);
     }
 
     private static TryConvert(value: any): { success: boolean; value: boolean } {
@@ -99,7 +105,7 @@ export class CsBoolean implements IEquatable<CsBoolean>, IComparable<CsBoolean> 
     public static Parse(value: boolean | string | number | CsString | CsInt16 | CsInt32 | CsInt64 | CsByte | CsSByte): CsBoolean {
         const result = CsBoolean.TryConvert(value);
         if (result.success) {
-            return new CsBoolean(result.value);
+            return CsBoolean.From(result.value);
         }
         throw new Error(`Value '${value}' was not recognized as a valid Boolean.`);
     }
@@ -110,7 +116,7 @@ export class CsBoolean implements IEquatable<CsBoolean>, IComparable<CsBoolean> 
     ): boolean {
         const conversion = CsBoolean.TryConvert(value);
         if (conversion.success) {
-            result(new CsBoolean(conversion.value));
+            result(CsBoolean.From(conversion.value));
             return true;
         }
         return false;

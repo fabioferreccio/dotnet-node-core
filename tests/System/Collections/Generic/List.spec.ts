@@ -1,6 +1,6 @@
 import { List } from "../../../../src/System/Collections/Generic/List";
-import { CsInt32 } from "../../../../src/Domain/ValueObjects/CsInt32";
-import { CsString } from "../../../../src/Domain/ValueObjects/CsString";
+import { CsInt32 } from "../../../../src/System/Types/CsInt32";
+import { CsString } from "../../../../src/System/Types/CsString";
 
 describe("System.Collections.Generic.List<T> - Comprehensive", () => {
     test("Constructor: Empty vs Populated", () => {
@@ -78,9 +78,9 @@ describe("System.Collections.Generic.List<T> - Comprehensive", () => {
     });
 
     test("Equality Support (IEquatable)", () => {
-        const v1 = new CsInt32(10);
-        const v2 = new CsInt32(20);
-        const v3 = new CsInt32(10); // Equal to v1
+        const v1 = CsInt32.From(10);
+        const v2 = CsInt32.From(20);
+        const v3 = CsInt32.From(10); // Equal to v1
 
         const list = new List<CsInt32>();
         list.Add(v1);
@@ -88,7 +88,7 @@ describe("System.Collections.Generic.List<T> - Comprehensive", () => {
 
         // Contains using Equals
         expect(list.Contains(v3)).toBe(true);
-        expect(list.Contains(new CsInt32(99))).toBe(false);
+        expect(list.Contains(CsInt32.From(99))).toBe(false);
 
         // Remove using Equals
         expect(list.Remove(v3)).toBe(true);
@@ -113,7 +113,7 @@ describe("System.Collections.Generic.List<T> - Comprehensive", () => {
         // Let's use List<any> for this specific coverage test to permit mixing types
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const mixedList = new List<any>();
-        const csStr = new CsString("test");
+        const csStr = CsString.From("test");
         mixedList.Add(csStr);
 
         // Searching for primitive "test"

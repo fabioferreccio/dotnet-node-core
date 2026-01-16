@@ -1,13 +1,18 @@
-import { IEquatable, IComparable } from "../Interfaces";
+import { IEquatable, IComparable } from "../../Domain/Interfaces";
 
 export class CsInt16 implements IEquatable<CsInt16>, IComparable<CsInt16> {
     private readonly _value: number;
 
-    public constructor(value: number) {
+    private constructor(value: number) {
         if (value < -32768 || value > 32767) {
             throw new Error(`Value ${value} is out of range for Int16.`);
         }
         this._value = value | 0; // Force integer
+        Object.freeze(this);
+    }
+
+    public static From(value: number): CsInt16 {
+        return new CsInt16(value);
     }
 
     public static get MaxValue(): number {

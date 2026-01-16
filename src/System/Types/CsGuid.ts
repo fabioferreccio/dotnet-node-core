@@ -1,4 +1,4 @@
-import { IEquatable } from "../Interfaces";
+import { IEquatable } from "../../Domain/Interfaces";
 import * as crypto from "crypto";
 
 export class CsGuid implements IEquatable<CsGuid> {
@@ -6,6 +6,7 @@ export class CsGuid implements IEquatable<CsGuid> {
 
     private constructor(value: string) {
         this._value = value.toLowerCase();
+        Object.freeze(this);
     }
 
     public static NewGuid(): CsGuid {

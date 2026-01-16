@@ -5,7 +5,7 @@ import { CancellationToken } from "../../Threading/CancellationToken";
 import { Task } from "../../../Domain/Threading/Tasks/Task";
 import { HttpStatusCode } from "./HttpStatusCode";
 import { StringContent } from "./StringContent";
-import { CsString } from "../../../Domain/ValueObjects/CsString";
+import { CsString } from "../../../System/Types/CsString";
 
 export class HttpClientHandler extends HttpMessageHandler {
     public override async SendAsync(
@@ -72,7 +72,7 @@ export class HttpClientHandler extends HttpMessageHandler {
 
         // 4. Convert Response
         const responseMessage = new HttpResponseMessage(response.status as HttpStatusCode);
-        responseMessage.ReasonPhrase = new CsString(response.statusText);
+        responseMessage.ReasonPhrase = CsString.From(response.statusText);
 
         // Headers
         response.headers.forEach((value, key) => {

@@ -1,13 +1,22 @@
-import { IEquatable, IComparable } from "../Interfaces";
+import { IEquatable, IComparable } from "../../Domain/Interfaces";
 
 export class CsString implements IEquatable<CsString>, IComparable<CsString> {
     private readonly _value: string;
 
-    constructor(value: string) {
+    private constructor(value: string) {
         if (value === null || value === undefined) {
             throw new Error("Value cannot be null or undefined for CsString");
         }
         this._value = value;
+        Object.freeze(this);
+    }
+
+    public static get Empty(): CsString {
+        return CsString.From("");
+    }
+
+    public static From(value: string): CsString {
+        return new CsString(value);
     }
 
     public get Length(): number {
@@ -23,18 +32,18 @@ export class CsString implements IEquatable<CsString>, IComparable<CsString> {
     }
 
     public Trim(): CsString {
-        return new CsString(this._value.trim());
+        return CsString.From(this._value.trim());
     }
 
     public ToUpper(): CsString {
-        return new CsString(this._value.toUpperCase());
+        return CsString.From(this._value.toUpperCase());
     }
 
     public Substring(startIndex: number, length?: number): CsString {
         if (length !== undefined) {
-            return new CsString(this._value.substring(startIndex, startIndex + length));
+            return CsString.From(this._value.substring(startIndex, startIndex + length));
         }
-        return new CsString(this._value.substring(startIndex));
+        return CsString.From(this._value.substring(startIndex));
     }
 
     public Equals(other: CsString): boolean {

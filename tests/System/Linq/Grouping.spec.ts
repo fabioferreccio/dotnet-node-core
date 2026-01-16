@@ -1,6 +1,6 @@
 import { Enumerable } from "../../../src/System/Linq/Enumerable";
 import { List } from "../../../src/System/Collections/Generic/List";
-import { CsString } from "../../../src/Domain/ValueObjects/CsString";
+import { CsString } from "../../../src/System/Types/CsString";
 import { IGrouping } from "../../../src/Domain/Interfaces/IGrouping";
 
 import { Lookup } from "../../../src/System/Linq/Lookup";
@@ -29,9 +29,9 @@ describe("System.Linq.Grouping", () => {
 
     test("GroupBy: ValueObject Key (Equality Check)", () => {
         // Critical Test: Grouping must use .Equals() for keys
-        const k1a = new CsString("Key1");
-        const k1b = new CsString("Key1"); // Different instance, same value
-        const k2 = new CsString("Key2");
+        const k1a = CsString.From("Key1");
+        const k1b = CsString.From("Key1"); // Different instance, same value
+        const k2 = CsString.From("Key2");
 
         const list = [
             { id: 1, key: k1a },

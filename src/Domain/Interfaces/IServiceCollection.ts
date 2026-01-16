@@ -4,7 +4,7 @@ import {
     ImplementationFactory,
     Constructor,
 } from "../DependencyInjection/ServiceDescriptor";
-import { CsBoolean } from "../ValueObjects";
+import { CsBoolean } from "../../System/Types";
 import { IServiceProvider } from "./IServiceProvider";
 
 export interface IServiceCollection extends Array<ServiceDescriptor> {

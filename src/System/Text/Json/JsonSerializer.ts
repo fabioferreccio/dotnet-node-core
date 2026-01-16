@@ -52,7 +52,7 @@ export class JsonSerializer {
             // Top level conversion
             const converter = opts.Converters.FirstOrDefault((c) => c.CanConvert(type));
             if (converter) {
-                return converter.Read(parsed, type, opts);
+                return converter.Read(parsed, type, opts) as T;
             }
         }
 

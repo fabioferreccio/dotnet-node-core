@@ -1,10 +1,15 @@
-import { IEquatable, IComparable } from "../Interfaces";
+import { IEquatable, IComparable } from "../../Domain/Interfaces";
 
 export class CsDouble implements IEquatable<CsDouble>, IComparable<CsDouble> {
     private readonly _value: number;
 
-    public constructor(value: number) {
+    private constructor(value: number) {
         this._value = value;
+        Object.freeze(this);
+    }
+
+    public static From(value: number): CsDouble {
+        return new CsDouble(value);
     }
 
     public get Value(): number {

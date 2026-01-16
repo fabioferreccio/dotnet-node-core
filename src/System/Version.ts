@@ -1,5 +1,5 @@
 import { IEquatable, IComparable } from "../Domain/Interfaces";
-import { CsInt32, CsString } from "../Domain/ValueObjects";
+import { CsInt32, CsString } from "../System/Types";
 
 export class Version implements IEquatable<Version>, IComparable<Version> {
     private readonly _major: CsInt32;
@@ -29,10 +29,10 @@ export class Version implements IEquatable<Version>, IComparable<Version> {
         if (build < -1) throw new Error("build must be >= -1");
         if (revision < -1) throw new Error("revision must be >= -1");
 
-        this._major = new CsInt32(major);
-        this._minor = new CsInt32(minor);
-        this._build = new CsInt32(build);
-        this._revision = new CsInt32(revision);
+        this._major = CsInt32.From(major);
+        this._minor = CsInt32.From(minor);
+        this._build = CsInt32.From(build);
+        this._revision = CsInt32.From(revision);
     }
 
     public Equals(other: Version | null): boolean {
@@ -69,7 +69,7 @@ export class Version implements IEquatable<Version>, IComparable<Version> {
                 s += `.${this._revision.ToString()}`;
             }
         }
-        return new CsString(s);
+        return CsString.From(s);
     }
 
     public static Parse(input: string): Version {

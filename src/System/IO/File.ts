@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import { FileNotFoundException } from "./FileNotFoundException";
 import { Exception } from "../../Domain/SeedWork";
-import { CsString } from "../../Domain/ValueObjects";
+import { CsString } from "../../System/Types";
 import { Task } from "../../Domain/Threading/Tasks/Task";
 
 export class File {
@@ -53,7 +53,7 @@ export class File {
     public static async ReadAllTextAsync(path: string): Task<CsString> {
         try {
             const content = await fs.promises.readFile(path, "utf-8");
-            return new CsString(content);
+            return CsString.From(content);
         } catch (error: unknown) {
             const err = error as NodeJS.ErrnoException;
             if (err.code === "ENOENT") {

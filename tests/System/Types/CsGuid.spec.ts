@@ -1,4 +1,4 @@
-import { CsGuid } from "../../../src/Domain/ValueObjects/CsGuid";
+import { CsGuid } from "../../../src/System/Types/CsGuid";
 
 describe("System.Guid (CsGuid) - Comprehensive", () => {
     test("Static: NewGuid", () => {

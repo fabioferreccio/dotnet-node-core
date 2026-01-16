@@ -3,7 +3,7 @@ import { HttpContent } from "./HttpContent";
 import { HttpRequestMessage } from "./HttpRequestMessage";
 import { HttpResponseHeaders } from "./Headers/HttpResponseHeaders";
 import { Version } from "../../Version";
-import { CsString } from "../../../Domain/ValueObjects";
+import { CsString } from "../../../System/Types";
 import { HttpRequestException } from "./HttpRequestException";
 import { IDisposable } from "../../../Domain/Interfaces";
 
@@ -66,7 +66,7 @@ export class HttpResponseMessage implements IDisposable {
         this._version = new Version(1, 1);
         this._content = null;
         this._requestMessage = null;
-        this._reasonPhrase = new CsString(HttpStatusCode[statusCode] || "Unknown");
+        this._reasonPhrase = CsString.From(HttpStatusCode[statusCode] || "Unknown");
     }
 
     public EnsureSuccessStatusCode(): HttpResponseMessage {

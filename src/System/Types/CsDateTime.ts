@@ -1,4 +1,4 @@
-import { IEquatable, IComparable } from "../Interfaces";
+import { IEquatable, IComparable } from "../../Domain/Interfaces";
 
 export enum DateTimeKind {
     Unspecified = 0,
@@ -10,22 +10,27 @@ export class CsDateTime implements IEquatable<CsDateTime>, IComparable<CsDateTim
     private readonly _date: Date;
     private readonly _kind: DateTimeKind;
 
-    public constructor(date: Date | number | string, kind: DateTimeKind = DateTimeKind.Local) {
+    private constructor(date: Date | number | string, kind: DateTimeKind = DateTimeKind.Local) {
         this._date = new Date(date);
         this._kind = kind;
+        Object.freeze(this);
+    }
+
+    public static From(date: Date | number | string, kind: DateTimeKind = DateTimeKind.Local): CsDateTime {
+        return new CsDateTime(date, kind);
     }
 
     public static get Now(): CsDateTime {
-        return new CsDateTime(new Date(), DateTimeKind.Local);
+        return CsDateTime.From(new Date(), DateTimeKind.Local);
     }
 
     public static get UtcNow(): CsDateTime {
-        return new CsDateTime(new Date(), DateTimeKind.Utc);
+        return CsDateTime.From(new Date(), DateTimeKind.Utc);
     }
 
     public static get Today(): CsDateTime {
         const now = new Date();
-        return new CsDateTime(new Date(now.getFullYear(), now.getMonth(), now.getDate()), DateTimeKind.Local);
+        return CsDateTime.From(new Date(now.getFullYear(), now.getMonth(), now.getDate()), DateTimeKind.Local);
     }
 
     public get Kind(): DateTimeKind {
@@ -66,29 +71,29 @@ export class CsDateTime implements IEquatable<CsDateTime>, IComparable<CsDateTim
         } else {
             newDate.setDate(newDate.getDate() + value);
         }
-        return new CsDateTime(newDate, this._kind);
+        return CsDateTime.From(newDate, this._kind);
     }
 
     public AddHours(value: number): CsDateTime {
         const newDate = new Date(this._date.getTime());
         newDate.setTime(newDate.getTime() + value * 60 * 60 * 1000);
-        return new CsDateTime(newDate, this._kind);
+        return CsDateTime.From(newDate, this._kind);
     }
 
     public AddMinutes(value: number): CsDateTime {
         const newDate = new Date(this._date.getTime());
         newDate.setTime(newDate.getTime() + value * 60 * 1000);
-        return new CsDateTime(newDate, this._kind);
+        return CsDateTime.From(newDate, this._kind);
     }
 
     public ToUniversalTime(): CsDateTime {
         if (this._kind === DateTimeKind.Utc) return this;
-        return new CsDateTime(this._date, DateTimeKind.Utc);
+        return CsDateTime.From(this._date, DateTimeKind.Utc);
     }
 
     public ToLocalTime(): CsDateTime {
         if (this._kind === DateTimeKind.Local) return this;
-        return new CsDateTime(this._date, DateTimeKind.Local);
+        return CsDateTime.From(this._date, DateTimeKind.Local);
     }
 
     public ToString(format?: string): string {

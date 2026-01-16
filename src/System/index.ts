@@ -17,7 +17,7 @@ import {
     CsByte,
     CsSByte,
     CsBoolean,
-} from "../Domain/ValueObjects";
+} from "./Types";
 import { Version } from "./Version";
 import * as Net from "./Net/Http";
 import * as Linq from "./Linq";

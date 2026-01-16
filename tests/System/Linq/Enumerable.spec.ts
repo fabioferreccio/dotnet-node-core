@@ -1,6 +1,6 @@
 import { Enumerable } from "../../../src/System/Linq/Enumerable";
 import { List } from "../../../src/System/Collections/Generic/List";
-import { CsInt32 } from "../../../src/Domain/ValueObjects/CsInt32";
+import { CsInt32 } from "../../../src/System/Types/CsInt32";
 
 describe("System.Linq.Enumerable", () => {
     beforeAll(() => {
@@ -98,7 +98,7 @@ describe("System.Linq.Enumerable", () => {
     });
 
     test("Sum: CsInt32 Integration", () => {
-        const list = new List<CsInt32>([new CsInt32(10), new CsInt32(20)]);
+        const list = new List<CsInt32>([CsInt32.From(10), CsInt32.From(20)]);
         // The Sum implementation unwraps .Value if it detects it
         expect(list.AsEnumerable().Sum()).toBe(30);
     });

@@ -1,12 +1,17 @@
-import { IEquatable, IComparable } from "../Interfaces";
+import { IEquatable, IComparable } from "../../Domain/Interfaces";
 
 export class CsSingle implements IEquatable<CsSingle>, IComparable<CsSingle> {
     private readonly _value: number;
 
-    public constructor(value: number) {
+    private constructor(value: number) {
         // In JS, validation for 'Single' precision is tricky without TypedArrays,
         // but generally we simulate the API surface here.
         this._value = Math.fround(value); // Enforce single precision
+        Object.freeze(this);
+    }
+
+    public static From(value: number): CsSingle {
+        return new CsSingle(value);
     }
 
     public get Value(): number {

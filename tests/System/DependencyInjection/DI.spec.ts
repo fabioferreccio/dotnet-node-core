@@ -106,7 +106,7 @@ describe("System.DependencyInjection", () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const added = services.TryAddSingleton<string>("key", "val2" as any); // Cast to any to satisfy signature constraint if needed, checking pure logic
 
-        expect(added).toBe(false);
+        expect(added.Value).toBe(false);
 
         const provider = services.BuildServiceProvider();
         expect(provider.GetService("key")).toBe("val1");
@@ -127,7 +127,7 @@ describe("System.DependencyInjection", () => {
     test("TryAddSingleton: Adds if not exists", () => {
         const services = new ServiceCollection();
         const result = services.TryAddSingleton("newKey", "newValue");
-        expect(result).toBe(true);
+        expect(result.Value).toBe(true);
         const provider = services.BuildServiceProvider();
         expect(provider.GetService("newKey")).toBe("newValue");
     });

@@ -1,7 +1,7 @@
 import { IEnumerable } from "../../Domain/Interfaces/IEnumerable";
 import { IOrderedEnumerable } from "../../Domain/Interfaces/IOrderedEnumerable";
 import { IGrouping } from "../../Domain/Interfaces/IGrouping";
-import { CsInt32, CsDouble, CsDecimal } from "../../Domain/ValueObjects";
+import { CsInt32, CsDouble, CsDecimal } from "../../System/Types";
 
 // --- Helper Types ---
 type SortContext<T> = {

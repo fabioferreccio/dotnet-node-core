@@ -1,31 +1,36 @@
-import { IEquatable, IComparable } from "../Interfaces";
+import { IEquatable, IComparable } from "../../Domain/Interfaces";
 
 export class CsInt64 implements IEquatable<CsInt64>, IComparable<CsInt64> {
     private readonly _value: bigint;
 
-    public constructor(value: bigint | number | string) {
+    private constructor(value: bigint | number | string) {
         this._value = BigInt(value);
+        Object.freeze(this);
+    }
+
+    public static From(value: bigint | number | string): CsInt64 {
+        return new CsInt64(value);
     }
 
     public static get Zero(): CsInt64 {
-        return new CsInt64(0);
+        return CsInt64.From(0);
     }
 
     public Add(other: CsInt64): CsInt64 {
-        return new CsInt64(this._value + other._value);
+        return CsInt64.From(this._value + other._value);
     }
 
     public Subtract(other: CsInt64): CsInt64 {
-        return new CsInt64(this._value - other._value);
+        return CsInt64.From(this._value - other._value);
     }
 
     public Multiply(other: CsInt64): CsInt64 {
-        return new CsInt64(this._value * other._value);
+        return CsInt64.From(this._value * other._value);
     }
 
     public Divide(other: CsInt64): CsInt64 {
         if (other._value === 0n) throw new Error("Divide by zero error");
-        return new CsInt64(this._value / other._value);
+        return CsInt64.From(this._value / other._value);
     }
 
     public get Value(): bigint {

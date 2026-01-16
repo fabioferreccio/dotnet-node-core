@@ -1,4 +1,4 @@
-import { CsDateTime, DateTimeKind } from "../../../src/Domain/ValueObjects/CsDateTime";
+import { CsDateTime, DateTimeKind } from "../../../src/System/Types/CsDateTime";
 
 describe("System.DateTime (CsDateTime) - Comprehensive", () => {
     // 1. Static Factory Methods
@@ -30,14 +30,14 @@ describe("System.DateTime (CsDateTime) - Comprehensive", () => {
 
     // 2. Formatting (ToString)
     test("ToString: Default (ISO)", () => {
-        const dt = new CsDateTime(new Date("2023-01-01T12:00:00Z"), DateTimeKind.Utc);
+        const dt = CsDateTime.From(new Date("2023-01-01T12:00:00Z"), DateTimeKind.Utc);
         expect(dt.ToString()).toBe("2023-01-01T12:00:00.000Z");
     });
 
     test("ToString: Custom Format Tokens", () => {
         // Date: 2023-05-09 14:05:07
         const date = new Date(2023, 4, 9, 14, 5, 7);
-        const dt = new CsDateTime(date, DateTimeKind.Local);
+        const dt = CsDateTime.From(date, DateTimeKind.Local);
 
         expect(dt.ToString("yyyy-MM-dd HH:mm:ss")).toBe("2023-05-09 14:05:07");
         expect(dt.ToString("dd/MM/yyyy")).toBe("09/05/2023");
@@ -52,44 +52,44 @@ describe("System.DateTime (CsDateTime) - Comprehensive", () => {
 
     // 3. Timezone Conversions and Kind Logic
     test("ToUniversalTime", () => {
-        const utc = new CsDateTime(new Date(), DateTimeKind.Utc);
+        const utc = CsDateTime.From(new Date(), DateTimeKind.Utc);
         expect(utc.ToUniversalTime()).toBe(utc); // Should return same instance if already UTC
 
-        const local = new CsDateTime(new Date(), DateTimeKind.Local);
+        const local = CsDateTime.From(new Date(), DateTimeKind.Local);
         const converted = local.ToUniversalTime();
         expect(converted.Kind).toBe(DateTimeKind.Utc);
         expect(converted.Equals(local)).toBe(true); // Times should match
     });
 
     test("ToLocalTime", () => {
-        const local = new CsDateTime(new Date(), DateTimeKind.Local);
+        const local = CsDateTime.From(new Date(), DateTimeKind.Local);
         expect(local.ToLocalTime()).toBe(local); // Should return same instance
 
-        const utc = new CsDateTime(new Date(), DateTimeKind.Utc);
+        const utc = CsDateTime.From(new Date(), DateTimeKind.Utc);
         const converted = utc.ToLocalTime();
         expect(converted.Kind).toBe(DateTimeKind.Local);
     });
 
     // 4. Arithmetic
     test("AddDays", () => {
-        const start = new CsDateTime(new Date(2023, 0, 1), DateTimeKind.Local);
+        const start = CsDateTime.From(new Date(2023, 0, 1), DateTimeKind.Local);
         const next = start.AddDays(1);
         expect(next.Day).toBe(2);
 
         // Coverage for UTC Branch
-        const utcStart = new CsDateTime(new Date(Date.UTC(2023, 0, 1)), DateTimeKind.Utc);
+        const utcStart = CsDateTime.From(new Date(Date.UTC(2023, 0, 1)), DateTimeKind.Utc);
         const utcNext = utcStart.AddDays(1);
         expect(utcNext.Day).toBe(2);
     });
 
     test("AddHours", () => {
-        const start = new CsDateTime(new Date(2023, 0, 1, 10), DateTimeKind.Local);
+        const start = CsDateTime.From(new Date(2023, 0, 1, 10), DateTimeKind.Local);
         const next = start.AddHours(2);
         expect(next.Hour).toBe(12);
     });
 
     test("AddMinutes", () => {
-        const start = new CsDateTime(new Date(2023, 0, 1, 10, 0), DateTimeKind.Local);
+        const start = CsDateTime.From(new Date(2023, 0, 1, 10, 0), DateTimeKind.Local);
         const next = start.AddMinutes(30);
         expect(next.Minute).toBe(30);
     });
@@ -97,9 +97,9 @@ describe("System.DateTime (CsDateTime) - Comprehensive", () => {
     // 5. Comparison & Equality
     test("Equality", () => {
         const t1 = new Date().getTime();
-        const dt1 = new CsDateTime(t1);
-        const dt2 = new CsDateTime(t1);
-        const dt3 = new CsDateTime(t1 + 1000);
+        const dt1 = CsDateTime.From(t1);
+        const dt2 = CsDateTime.From(t1);
+        const dt3 = CsDateTime.From(t1 + 1000);
 
         expect(dt1.Equals(dt2)).toBe(true);
         expect(dt1.Equals(dt3)).toBe(false);
@@ -108,8 +108,8 @@ describe("System.DateTime (CsDateTime) - Comprehensive", () => {
     });
 
     test("Comparisons: Greater/Less", () => {
-        const early = new CsDateTime(new Date(2023, 0, 1));
-        const late = new CsDateTime(new Date(2023, 0, 2));
+        const early = CsDateTime.From(new Date(2023, 0, 1));
+        const late = CsDateTime.From(new Date(2023, 0, 2));
 
         expect(late.GreaterThan(early)).toBe(true);
         expect(early.LessThan(late)).toBe(true);
@@ -123,9 +123,9 @@ describe("System.DateTime (CsDateTime) - Comprehensive", () => {
     });
 
     test("CompareTo", () => {
-        const a = new CsDateTime(new Date(100));
-        const b = new CsDateTime(new Date(200));
-        const c = new CsDateTime(new Date(100));
+        const a = CsDateTime.From(new Date(100));
+        const b = CsDateTime.From(new Date(200));
+        const c = CsDateTime.From(new Date(100));
 
         expect(a.CompareTo(b)).toBe(-1); // Less
         expect(b.CompareTo(a)).toBe(1); // Greater

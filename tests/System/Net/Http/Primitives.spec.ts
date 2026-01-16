@@ -7,7 +7,7 @@ if (!(Symbol as unknown as { asyncDispose: symbol }).asyncDispose) {
 }
 
 import { Version } from "../../../../src/System/Version";
-import { CsString } from "../../../../src/Domain/ValueObjects/CsString";
+import { CsString } from "../../../../src/System/Types/CsString";
 import { HttpHeaders } from "../../../../src/System/Net/Http/Headers/HttpHeaders";
 import { StringContent } from "../../../../src/System/Net/Http/StringContent";
 import { HttpRequestMessage } from "../../../../src/System/Net/Http/HttpRequestMessage";
@@ -109,7 +109,7 @@ describe("System.Net.Http Primitives Coverage", () => {
 
         test("EnsureSuccessStatusCode - Failure", () => {
             const response = new HttpResponseMessage(HttpStatusCode.NotFound);
-            response.ReasonPhrase = new CsString("Not Found");
+            response.ReasonPhrase = CsString.From("Not Found");
 
             expect(() => response.EnsureSuccessStatusCode()).toThrow(HttpRequestException);
 
