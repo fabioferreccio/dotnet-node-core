@@ -97,8 +97,8 @@ export class CsDateTime implements IEquatable<CsDateTime>, IComparable<CsDateTim
     }
 
     public ToString(format?: string): string {
-        if (!format) {
-            return this._date.toISOString(); // Default behavior
+        if (!format || format === "O") {
+            return this._date.toISOString(); // Default behavior / Round-trip
         }
 
         const yyyy = this.Year.toString();
