@@ -1,81 +1,82 @@
 ---
 trigger: always_on
+description: Anti-Escape Contract and Governance Rules
 ---
 
-# Project: dotnet-node-core
-# Role: Principal C#/.NET Architect porting to TypeScript.
+# ARCHITECTURAL ANTI-ESCAPE CONTRACT
 
-## 1. Architecture & Pattern
-- **Style:** Clean Architecture + Domain-Driven Design (DDD).
-- **Structure:**
-  - `src/Domain/ValueObjects`: Core Logic (e.g., `CsString`, `CsGuid`).
-  - `src/System`: Facade Layer ONLY. Exports Domain objects.
-  - `tests/`: Mirrors the `src` folder structure.
+**Scope:** Global Governance
+**Enforcement:** Absolute
+**Status:** Inviolate
 
-## 2. The "No Primitives" Rule
-- **Strict Prohibition:** NEVER use native TypeScript primitives (`string`, `number`, `Date`) for exposed System types.
-- **Enforcement:**
-  - `string` -> `CsString`
-  - `number` (int) -> `CsInt32`
-  - `number` (long) -> `CsInt64` (BigInt)
-  - `Date` -> `CsDateTime`
+## 1. Introduction
+This document defines the **Anti-Escape Rules** for the project. These rules are axioms and admit **NO EXCEPTION**. They bind both human contributors and AI agents to prevent architectural drift and semantic corruption.
 
-## 3. Immutability & State
-- **Rule:** All Value Objects are **Immutable**.
-- **Behavior:** Methods modifying data (`Trim`, `AddDays`) MUST return a `new` instance.
-- **State:** Never mutate `_value` after the constructor.
+## 2. Terminology
+- **MUST / MUST NOT:** As defined in RFC 2119. Non-negotiable restrictions.
+- **Escape Hatch:** Any mechanism (e.g., `any`, `@ts-ignore`) that bypasses the type system or architectural constraints.
+- **Contamination:** The presence of concrete runtime logic in the Domain layer or business logic in the System layer.
 
-## 4. Contracts & Equality
-- All Domain Types must implement:
-  - `IEquatable<T>`: Structural equality (`new A(1).Equals(new A(1))` is true).
-  - `IComparable<T>`: Returns `-1`, `0`, `1`.
-- **Handling Nulls:** `CompareTo(null)` must return `1` (Standard C# behavior).
+## 3. ABSOLUTE RULES
 
-## 5. Testing Standards (QA Protocol)
-- **Metric:** Aim for **100% Branch Coverage**.
-- **Anti-Hallucination Rule:**
-  - Do not write assertions like `expect(true).toBe(true)`.
-  - Assertions must verify **Side Effects** or **Return Values**.
-  - **Immutability Check:** Always verify that the original object remains unchanged after an operation.
-- **Mandatory Scenarios per Type:**
-  - **Happy Path:** Standard usage.
-  - **Boundary:** MinValue, MaxValue.
-  - **Overflow:** `MaxValue + 1` (Must throw).
-  - **Truncation:** Floating points passed to Int constructors (Must truncate).
-  - **Null/Undefined:** `CompareTo(null)`, `Equals(null)`.
+### Rule 1: The Domain Purity Axiom
+**Requirement:** The Domain Layer (`src/Domain`) **MUST** contain ONLY conceptual contracts, interfaces, and abstractions.
+**Prohibition:** It **MUST NOT** contain concrete runtime types, implementations, or logic.
+**Specific Constraint:** `src/Domain` **MUST NOT** contain `Cs*` classes (e.g., `CsString`). These **MUST** reside in `src/System/Types`.
+**Reason:** To strictly separate the *definition* of the type system from its *execution*.
 
-## 6. Licensing
-- **License:** MIT.
-- `package.json` and `LICENSE` must be in sync.
+### Rule 2: The System Runtime Axiom
+**Requirement:** The System Layer (`src/System`) **MUST** contain the concrete implementation of runtime semantics (e.g., `CsString`, `CsInt32`).
+**Role:** It is the **Core Runtime Implementation**, NOT a facade.
+**Prohibition:** It **MUST NOT** import or depend on business domain concepts (which do not exist in this technical platform).
+**Reason:** The System layer emulates the .NET BCL and provides the actual executable behavior.
 
-## 7. Module System & Code Style
-- **Strict ES6 Modules:** Use `import` and `export` ONLY.
-- **Prohibited:** NEVER use `require()`, `module.exports`, or `exports.foo`.
-- **Barrel Files:** Use `index.ts` to aggregate exports.
-- **Namespace Construction:** Import namespaces statically (`import * as Namespace`).
+### Rule 3: The "No Primitives" Access Rule
+**Requirement:** Public APIs of System Types **MUST NOT** accept or return native JavaScript primitives (`string`, `number`, `boolean`, `Date`) directly.
+**Enforcement:**
+- Input arguments **MUST** be strongly typed (e.g., `CsString`, `CsInt32`).
+- Return values **MUST** be strongly typed.
+**Reason:** To prevent semantic mismatch between TypeScript primitives and .NET semantics.
 
-## 8. Code Discipline & Quality (Zero Tolerance)
-- **Zero Suppression Policy:** Usage of `// eslint-disable`, `// @ts-ignore`, or `// @ts-nocheck` is **STRICTLY PROHIBITED**.
-  - **Fix, Don't Hide:** Solve type errors using Generics, `unknown` + Type Guards, or architectural refactoring.
-- **Strong Typing:**
-  - **Prohibited:** `Function` type (use `(...args: any[]) => void` or specific delegates).
-  - **Prohibited:** Unjustified `any`.
-  - **Prohibited:** Empty Interfaces (Exception: DDD Marker Interfaces MUST have a comment explanation).
-- **No Loose TODOs:** Comments like `// TODO: Implement later` are forbidden.
-  - **Rule:** Either implement the feature immediately or omit the comment. Code committed must be complete or explicitly marked as `NotImplementedException`.
+### Rule 4: The Immutability Mandate
+**Requirement:** All System Types **MUST** be structurally immutable.
+**Enforcement:**
+- `Object.freeze(this)` **MUST** be called at the end of every constructor.
+- Mutating methods (e.g., `Trim`, `Add`) **MUST** return a new instance.
+- Internal state (`_value`) **MUST** be `readonly` and private.
+**Reason:** To guarantee thread-safety and side-effect-free behavior standard in Value Objects.
 
-## 9. Explicit Resource Management (IDisposable)
-- **Standard:** Use the TypeScript 5.2+ `using` keyword support.
-- **Requirement:** All classes implementing `IDisposable` MUST also implement `[Symbol.dispose]` (and `[Symbol.asyncDispose]` if applicable).
-- **Leak Prevention:** Every `FileStream`, `NetworkStream`, or `DBConnection` MUST be wrapped in a `using` block in the consumer side.
+### Rule 5: The Zero-Escape Clause
+**Requirement:** The codebase **MUST** be free of type system suppressions.
+**Prohibition:**
+- usage of `any` is **FORBIDDEN**.
+- usage of `// @ts-ignore` is **FORBIDDEN**.
+- usage of `// eslint-disable` is **FORBIDDEN**.
+- usage of `require()` is **FORBIDDEN**.
+**Reason:** A single suppression compromises the integrity of the entire type system.
 
-## 10. Asynchrony & Event Loop (TPL Pattern)
-- [cite_start]**Naming:** Asynchronous methods MUST end with the `Async` suffix (e.g., `ReadAsync`). 
-- **Return Type:** Use `Task<T>` as a type alias for `Promise<T>` to maintain .NET naming conventions.
-- **Offloading:** Heavy CPU-bound tasks in the Domain layer SHOULD be avoided or implemented via Worker Threads if they block the Event Loop for >50ms.
-- **I/O Policy:** For high-concurrency implementations, `Async` methods are MANDATORY. `Sync` methods are reserved for CLI tools or initialization phases.
+### Rule 6: The Strict Construction Rule
+**Requirement:** System Types **MUST NOT** expose public constructors.
+**Enforcement:**
+- Constructors **MUST** be `private` or `protected`.
+- Instantiation **MUST** occur via static factories (e.g., `From()`, `Create()`).
+**Reason:** To enable flyweight patterns, validation caches, and object pooling without breaking client code.
 
-## 11. Memory & Allocation (Performance)
-- [cite_start]**Small Data:** Immutability is mandatory for Value Objects. [cite: 7, 8, 11]
-- **Large Data:** For payloads >1MB, the "Stream-First" policy applies. Use `System.IO.Stream` to process data in chunks instead of loading full `CsString` instances into memory.
-- **Buffers:** Reuse `Uint8Array` via `ArrayBuffer` pools for high-frequency I/O operations to mitigate GC pressure.
+### Rule 7: The Explicit Interop Rule
+**Requirement:** Interoperability with JavaScript **MUST** be strict and explicit.
+**Enforcement:**
+- Implicit coercion is **FORBIDDEN** except via strictly defined `[Symbol.toPrimitive]`.
+- All interop boundaries **MUST** be explicitly documented.
+**Reason:** To prevent accidental behavioral bleed (e.g., JS `0` falsiness vs .NET `0` truthiness).
+
+### Rule 8: The Testing Semantics Rule
+**Requirement:** Tests **MUST** verify observable behavior and side effects, NOT internal state.
+**Prohibition:**
+- Tests **MUST NOT** use tautological assertions (e.g., `expect(true).toBe(true)`).
+- Tests **MUST NOT** violate encapsulation to inspect private state.
+**Reason:** To ensure tests validate the *contract*, not the *implementation*.
+
+---
+
+**AUTHORITY NOTE:**
+In the event of any perceived ambiguity, `ARCHITECTURE.md` is the final authority. Use of this document constitutes agreement to these binding rules.
