@@ -1,4 +1,5 @@
 export * from "./CsString";
+export * from "./CsBoolean";
 export * from "./CsGuid";
 export * from "./CsDateTime";
 export * from "./CsInt32";

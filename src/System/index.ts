@@ -16,6 +16,7 @@ import {
     CsDecimal,
     CsByte,
     CsSByte,
+    CsBoolean,
 } from "../Domain/ValueObjects";
 import { Version } from "./Version";
 import * as Net from "./Net/Http";
@@ -39,6 +40,7 @@ export const System = {
     Decimal: CsDecimal,
     Byte: CsByte,
     SByte: CsSByte,
+    Boolean: CsBoolean,
     Console: Console,
     Collections: {
         Generic: {
