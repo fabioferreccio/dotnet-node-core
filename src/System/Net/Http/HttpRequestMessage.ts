@@ -2,7 +2,7 @@ import { HttpMethod } from "./HttpMethod";
 import { HttpContent } from "./HttpContent";
 import { HttpRequestHeaders } from "./Headers/HttpRequestHeaders";
 import { Version } from "../../Version";
-import { CsString } from "../../../Domain/ValueObjects";
+import { CsString } from "../../../System/Types";
 import { IDisposable } from "../../../Domain/Interfaces";
 
 export class HttpRequestMessage implements IDisposable {
@@ -52,7 +52,7 @@ export class HttpRequestMessage implements IDisposable {
         this._content = null;
 
         if (typeof requestUri === "string") {
-            this._requestUri = new CsString(requestUri);
+            this._requestUri = CsString.From(requestUri);
         } else {
             this._requestUri = requestUri;
         }

@@ -1,6 +1,6 @@
 import { Enumerable } from "../../../src/System/Linq/Enumerable";
 import { List } from "../../../src/System/Collections/Generic/List";
-import { CsInt32 } from "../../../src/Domain/ValueObjects/CsInt32";
+import { CsInt32 } from "../../../src/System/Types/CsInt32";
 import { OrderedEnumerable } from "../../../src/System/Linq/OrderedEnumerable";
 
 describe("System.Linq.OrderedEnumerable", () => {
@@ -27,7 +27,7 @@ describe("System.Linq.OrderedEnumerable", () => {
     });
 
     test("OrderBy: ValueObject (IComparable)", () => {
-        const list = [new CsInt32(3), new CsInt32(1), new CsInt32(2)];
+        const list = [CsInt32.From(3), CsInt32.From(1), CsInt32.From(2)];
         const sorted = Enumerable.From(list)
             .OrderBy((x: CsInt32) => x)
             .ToArray();

@@ -3,9 +3,15 @@ import { Enumerable } from "../../Linq/Enumerable";
 
 export class List<T> {
     private _items: T[];
+    private readonly _elementType?: Function & { prototype: T };
 
-    constructor(items?: T[]) {
+    constructor(items?: T[], elementType?: Function & { prototype: T }) {
         this._items = items ? [...items] : [];
+        this._elementType = elementType;
+    }
+
+    public get ElementType(): (Function & { prototype: T }) | undefined {
+        return this._elementType;
     }
 
     public get Count(): number {
@@ -51,6 +57,10 @@ export class List<T> {
             return result === undefined ? null : result;
         }
         return this._items.length > 0 ? this._items[0] : null;
+    }
+
+    public toJSON(): T[] {
+        return this._items;
     }
 
     public *[Symbol.iterator](): Iterator<T> {

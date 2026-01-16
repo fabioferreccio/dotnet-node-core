@@ -6,6 +6,7 @@ import {
     Constructor,
 } from "../../Domain/DependencyInjection";
 import { ServiceProvider } from "./ServiceProvider";
+import { CsBoolean } from "../../System/Types";
 
 export class ServiceCollection extends Array<ServiceDescriptor> implements IServiceCollection {
     // Explicitly implementing the Add method since Array.prototype.push exists but signature differs slightly in logic usage (we return this).
@@ -25,6 +26,7 @@ export class ServiceCollection extends Array<ServiceDescriptor> implements IServ
 
     public AddScoped<T>(serviceType: ServiceIdentifier<T>, implementation: Constructor<T>): IServiceCollection;
     public AddScoped<T>(serviceType: ServiceIdentifier<T>, factory: ImplementationFactory<T>): IServiceCollection;
+    public AddScoped<T>(serviceType: ServiceIdentifier<T>, instance: T): IServiceCollection;
     public AddScoped(serviceType: ServiceIdentifier, implOrFactory: unknown): IServiceCollection {
         this.Add(ServiceDescriptor.Scoped(serviceType, implOrFactory));
         return this;
@@ -32,24 +34,52 @@ export class ServiceCollection extends Array<ServiceDescriptor> implements IServ
 
     public AddTransient<T>(serviceType: ServiceIdentifier<T>, implementation: Constructor<T>): IServiceCollection;
     public AddTransient<T>(serviceType: ServiceIdentifier<T>, factory: ImplementationFactory<T>): IServiceCollection;
+    public AddTransient<T>(serviceType: ServiceIdentifier<T>, instance: T): IServiceCollection;
     public AddTransient(serviceType: ServiceIdentifier, implOrFactory: unknown): IServiceCollection {
         this.Add(ServiceDescriptor.Transient(serviceType, implOrFactory));
         return this;
     }
 
-    public TryAddSingleton<T>(serviceType: ServiceIdentifier<T>, implementation: Constructor<T>): boolean;
-    public TryAddSingleton<T>(serviceType: ServiceIdentifier<T>, factory: ImplementationFactory<T>): boolean;
-    public TryAddSingleton<T>(serviceType: ServiceIdentifier<T>, instance: T): boolean;
-    public TryAddSingleton(serviceType: ServiceIdentifier, implOrFactoryOrInstance: unknown): boolean {
-        // Check if exists
+    public TryAddSingleton<T>(serviceType: ServiceIdentifier<T>, implementation: Constructor<T>): CsBoolean;
+    public TryAddSingleton<T>(serviceType: ServiceIdentifier<T>, factory: ImplementationFactory<T>): CsBoolean;
+    public TryAddSingleton<T>(serviceType: ServiceIdentifier<T>, instance: T): CsBoolean;
+    public TryAddSingleton(serviceType: ServiceIdentifier, implOrFactoryOrInstance: unknown): CsBoolean {
         const exists = this.some((d) => d.ServiceType === serviceType);
-        if (exists) return false;
+        if (exists) return CsBoolean.From(false);
 
         this.AddSingleton(serviceType, implOrFactoryOrInstance);
-        return true;
+        return CsBoolean.From(true);
     }
 
-    // TODO: Implement TryAddScoped, TryAddTransient if needed or generic TryAdd
+    public TryAddScoped<T>(serviceType: ServiceIdentifier<T>, implementation: Constructor<T>): CsBoolean;
+    public TryAddScoped<T>(serviceType: ServiceIdentifier<T>, factory: ImplementationFactory<T>): CsBoolean;
+    public TryAddScoped<T>(serviceType: ServiceIdentifier<T>, instance: T): CsBoolean;
+    public TryAddScoped(serviceType: ServiceIdentifier, implOrFactory: unknown): CsBoolean {
+        const exists = this.some((d) => d.ServiceType === serviceType);
+        if (exists) return CsBoolean.From(false);
+
+        this.AddScoped(serviceType, implOrFactory);
+        return CsBoolean.From(true);
+    }
+
+    public TryAddTransient<T>(serviceType: ServiceIdentifier<T>, implementation: Constructor<T>): CsBoolean;
+    public TryAddTransient<T>(serviceType: ServiceIdentifier<T>, factory: ImplementationFactory<T>): CsBoolean;
+    public TryAddTransient<T>(serviceType: ServiceIdentifier<T>, instance: T): CsBoolean;
+    public TryAddTransient(serviceType: ServiceIdentifier, implOrFactory: unknown): CsBoolean {
+        const exists = this.some((d) => d.ServiceType === serviceType);
+        if (exists) return CsBoolean.From(false);
+
+        this.AddTransient(serviceType, implOrFactory);
+        return CsBoolean.From(true);
+    }
+
+    public TryAdd(descriptor: ServiceDescriptor): CsBoolean {
+        const exists = this.some((d) => d.ServiceType === descriptor.ServiceType);
+        if (exists) return CsBoolean.From(false);
+
+        this.Add(descriptor);
+        return CsBoolean.From(true);
+    }
 
     public BuildServiceProvider(): IServiceProvider {
         // Convert list to Map for cleaner lookup O(1)

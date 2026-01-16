@@ -7,8 +7,8 @@ import { HttpContent } from "./HttpContent";
 import { HttpMethod } from "./HttpMethod";
 import { CancellationToken } from "../../Threading/CancellationToken";
 import { Task } from "../../../Domain/Threading/Tasks/Task";
-import { CsString } from "../../../Domain/ValueObjects/CsString";
-import { CsInt32 } from "../../../Domain/ValueObjects/CsInt32";
+import { CsString } from "../../../System/Types/CsString";
+import { CsInt32 } from "../../../System/Types/CsInt32";
 
 export class HttpClient extends HttpMessageHandler {
     private _handler: HttpMessageHandler;
@@ -22,7 +22,7 @@ export class HttpClient extends HttpMessageHandler {
         this._handler = handler ?? new HttpClientHandler();
         this._disposeHandler = !handler; // If we created it, we dispose it
         this._defaultRequestHeaders = new HttpRequestHeaders();
-        this._timeout = new CsInt32(100000); // 100 sec default
+        this._timeout = CsInt32.From(100000); // 100 sec default
     }
 
     public get BaseAddress(): CsString | null {
@@ -64,7 +64,7 @@ export class HttpClient extends HttpMessageHandler {
             if (reqUri) {
                 const uriStr = reqUri.toString();
                 if (!uriStr.includes("://")) {
-                    request.RequestUri = new CsString(this._baseAddress.toString() + uriStr);
+                    request.RequestUri = CsString.From(this._baseAddress.toString() + uriStr);
                 }
             } else {
                 request.RequestUri = this._baseAddress;

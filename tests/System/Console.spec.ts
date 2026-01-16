@@ -1,5 +1,5 @@
 import { Console } from "../../src/System/Console";
-import { CsString } from "../../src/Domain/ValueObjects/CsString";
+import { CsString } from "../../src/System/Types/CsString";
 
 describe("System.Console", () => {
     let logSpy: jest.SpyInstance;
@@ -13,7 +13,7 @@ describe("System.Console", () => {
     });
 
     test("WriteLine(CsString) - Should call toString() on object", () => {
-        const str = new CsString("Hello");
+        const str = CsString.From("Hello");
         Console.WriteLine(str);
         expect(logSpy).toHaveBeenCalledWith("Hello");
     });

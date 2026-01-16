@@ -2,7 +2,7 @@ import { HttpClient } from "../../../../src/System/Net/Http/HttpClient";
 import { HttpClientHandler } from "../../../../src/System/Net/Http/HttpClientHandler";
 import { HttpMethod } from "../../../../src/System/Net/Http/HttpMethod";
 import { StringContent } from "../../../../src/System/Net/Http/StringContent";
-import { CsString } from "../../../../src/Domain/ValueObjects/CsString";
+import { CsString } from "../../../../src/System/Types/CsString";
 import { HttpStatusCode } from "../../../../src/System/Net/Http/HttpStatusCode";
 
 // Helper to mock fetch
@@ -138,7 +138,7 @@ describe("HttpClient Integration", () => {
         global.fetch = fetchMock;
 
         const client = new HttpClient();
-        client.BaseAddress = new CsString("https://api.base/");
+        client.BaseAddress = CsString.From("https://api.base/");
 
         // Test with relative path
         await client.GetAsync("v1/resource");

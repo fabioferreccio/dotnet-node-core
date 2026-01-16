@@ -1,11 +1,11 @@
 import { IEquatable } from "../../../Domain/Interfaces";
-import { CsString } from "../../../Domain/ValueObjects";
+import { CsString } from "../../../System/Types";
 
 export class HttpMethod implements IEquatable<HttpMethod> {
     private readonly _method: string;
 
     public get Method(): CsString {
-        return new CsString(this._method);
+        return CsString.From(this._method);
     }
 
     public constructor(method: string) {
@@ -44,7 +44,7 @@ export class HttpMethod implements IEquatable<HttpMethod> {
     }
 
     public ToString(): CsString {
-        return new CsString(this._method);
+        return CsString.From(this._method);
     }
 
     public static get Default(): HttpMethod {

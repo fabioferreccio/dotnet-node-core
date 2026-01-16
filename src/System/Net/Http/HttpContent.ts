@@ -1,6 +1,6 @@
 import { Stream } from "../../IO/Stream";
 import { HttpContentHeaders } from "./Headers/HttpContentHeaders";
-import { CsString } from "../../../Domain/ValueObjects";
+import { CsString } from "../../../System/Types";
 import { StreamReader } from "../../IO/StreamReader";
 import { IDisposable } from "../../../Domain/Interfaces";
 
@@ -35,7 +35,7 @@ export abstract class HttpContent implements IDisposable {
         // We will leave it for now or prefer disposing reader if we own it.
         reader.Dispose();
 
-        return new CsString(result);
+        return CsString.From(result);
     }
 
     public abstract ReadAsStreamAsync(): Promise<Stream>;
