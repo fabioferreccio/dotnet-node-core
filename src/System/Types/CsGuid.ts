@@ -34,6 +34,14 @@ export class CsGuid implements IEquatable<CsGuid> {
         return this._value;
     }
 
+    public toString(): string {
+        return this.ToString();
+    }
+
+    public toJSON(): string {
+        return this.ToString();
+    }
+
     public Equals(other: CsGuid): boolean {
         if (!other) return false;
         return this._value === other.ToString();

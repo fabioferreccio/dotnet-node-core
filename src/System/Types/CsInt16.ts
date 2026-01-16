@@ -42,4 +42,8 @@ export class CsInt16 implements IEquatable<CsInt16>, IComparable<CsInt16> {
     public ToString(): string {
         return this._value.toString();
     }
+
+    public toJSON(): number {
+        return this._value;
+    }
 }

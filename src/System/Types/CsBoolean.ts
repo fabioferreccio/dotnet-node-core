@@ -102,6 +102,10 @@ export class CsBoolean implements IEquatable<CsBoolean>, IComparable<CsBoolean> 
         return this._value;
     }
 
+    public toJSON(): boolean {
+        return this._value;
+    }
+
     public static Parse(value: boolean | string | number | CsString | CsInt16 | CsInt32 | CsInt64 | CsByte | CsSByte): CsBoolean {
         const result = CsBoolean.TryConvert(value);
         if (result.success) {

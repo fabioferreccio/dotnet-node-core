@@ -110,6 +110,7 @@ export class JsonStringWriter implements JsonWriter {
         // If the serializer is just `converter.Write(writer, val)`, and converter does `writer.WriteStringValue`,
         // We simply push the value.
         this._parts.push(raw);
+        this._markItemWritten();
     }
 
     private _escape(str: string): string {

@@ -67,4 +67,8 @@ export class CsInt32 implements IEquatable<CsInt32>, IComparable<CsInt32> {
     public ToString(): string {
         return this._value.toString();
     }
+
+    public toJSON(): number {
+        return this._value;
+    }
 }

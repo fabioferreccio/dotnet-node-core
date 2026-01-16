@@ -59,6 +59,10 @@ export class List<T> {
         return this._items.length > 0 ? this._items[0] : null;
     }
 
+    public toJSON(): T[] {
+        return this._items;
+    }
+
     public *[Symbol.iterator](): Iterator<T> {
         for (const item of this._items) {
             yield item;
