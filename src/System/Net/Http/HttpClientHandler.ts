@@ -6,7 +6,6 @@ import { Task } from "../../../Domain/Threading/Tasks/Task";
 import { HttpStatusCode } from "./HttpStatusCode";
 import { StringContent } from "./StringContent";
 import { CsString } from "../../../Domain/ValueObjects/CsString";
-import { Buffer } from "buffer";
 
 export class HttpClientHandler extends HttpMessageHandler {
     public override async SendAsync(

@@ -1,9 +1,9 @@
 // Polyfill for Symbol.dispose and Symbol.asyncDispose
-if (!(Symbol as any).dispose) {
-    (Symbol as any).dispose = Symbol("Symbol.dispose");
+if (!(Symbol as unknown as { dispose: symbol }).dispose) {
+    (Symbol as unknown as { dispose: symbol }).dispose = Symbol("Symbol.dispose");
 }
-if (!(Symbol as any).asyncDispose) {
-    (Symbol as any).asyncDispose = Symbol("Symbol.asyncDispose");
+if (!(Symbol as unknown as { asyncDispose: symbol }).asyncDispose) {
+    (Symbol as unknown as { asyncDispose: symbol }).asyncDispose = Symbol("Symbol.asyncDispose");
 }
 
 import { MemoryStream } from "../../../src/System/IO/MemoryStream";
@@ -118,7 +118,7 @@ describe("StreamReader", () => {
     test("DisposeAsync calls underlying DisposeAsync", async () => {
         const ms = new MemoryStream();
         let disposeAsyncCalled = false;
-        (ms as any).DisposeAsync = async () => {
+        (ms as unknown as { DisposeAsync: () => Promise<void> }).DisposeAsync = async () => {
             disposeAsyncCalled = true;
         };
 
@@ -135,7 +135,7 @@ describe("StreamReader", () => {
             Dispose: jest.fn(),
         };
 
-        const reader = new StreamReader(mockStream as any);
+        const reader = new StreamReader(mockStream as unknown as MemoryStream);
         await reader.DisposeAsync();
         // If mockStream is not a Stream instance, StreamReader assumes it has Close method?
         // StreamReader.ts:27: this._stream.Close();
@@ -160,20 +160,18 @@ describe("StreamReader", () => {
 
     test("Symbol.dispose works (using keyword)", () => {
         const ms = new MemoryStream();
-        let readerRef: StreamReader;
         {
             using reader = new StreamReader(ms);
-            readerRef = reader;
+            reader.Peek();
         }
         expect(ms.CanRead).toBe(false);
     });
 
     test("Symbol.asyncDispose works (await using keyword)", async () => {
         const ms = new MemoryStream();
-        let readerRef: StreamReader;
         {
             await using reader = new StreamReader(ms);
-            readerRef = reader;
+            reader.Peek();
         }
         expect(ms.CanRead).toBe(false);
     });

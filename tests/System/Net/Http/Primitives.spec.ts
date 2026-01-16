@@ -1,12 +1,13 @@
 // Polyfill for Symbol.dispose
-if (!(Symbol as any).dispose) {
-    (Symbol as any).dispose = Symbol("Symbol.dispose");
+if (!(Symbol as unknown as { dispose: symbol }).dispose) {
+    (Symbol as unknown as { dispose: symbol }).dispose = Symbol("Symbol.dispose");
 }
-if (!(Symbol as any).asyncDispose) {
-    (Symbol as any).asyncDispose = Symbol("Symbol.asyncDispose");
+if (!(Symbol as unknown as { asyncDispose: symbol }).asyncDispose) {
+    (Symbol as unknown as { asyncDispose: symbol }).asyncDispose = Symbol("Symbol.asyncDispose");
 }
 
 import { Version } from "../../../../src/System/Version";
+import { CsString } from "../../../../src/Domain/ValueObjects/CsString";
 import { HttpHeaders } from "../../../../src/System/Net/Http/Headers/HttpHeaders";
 import { StringContent } from "../../../../src/System/Net/Http/StringContent";
 import { HttpRequestMessage } from "../../../../src/System/Net/Http/HttpRequestMessage";
@@ -108,7 +109,7 @@ describe("System.Net.Http Primitives Coverage", () => {
 
         test("EnsureSuccessStatusCode - Failure", () => {
             const response = new HttpResponseMessage(HttpStatusCode.NotFound);
-            response.ReasonPhrase = { toString: () => "Not Found" } as any; // Mock if needed or use CsString if implemented fully public
+            response.ReasonPhrase = new CsString("Not Found");
 
             expect(() => response.EnsureSuccessStatusCode()).toThrow(HttpRequestException);
 

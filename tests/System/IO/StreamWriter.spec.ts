@@ -1,9 +1,9 @@
 // Polyfill for Symbol.dispose and Symbol.asyncDispose
-if (!(Symbol as any).dispose) {
-    (Symbol as any).dispose = Symbol("Symbol.dispose");
+if (!(Symbol as unknown as { dispose: symbol }).dispose) {
+    (Symbol as unknown as { dispose: symbol }).dispose = Symbol("Symbol.dispose");
 }
-if (!(Symbol as any).asyncDispose) {
-    (Symbol as any).asyncDispose = Symbol("Symbol.asyncDispose");
+if (!(Symbol as unknown as { asyncDispose: symbol }).asyncDispose) {
+    (Symbol as unknown as { asyncDispose: symbol }).asyncDispose = Symbol("Symbol.asyncDispose");
 }
 
 import { MemoryStream } from "../../../src/System/IO/MemoryStream";
@@ -42,7 +42,7 @@ describe("StreamWriter", () => {
     });
 
     test("AutoFlush false buffers data (until Flush/Dispose)", () => {
-        const ms = new MemoryStream();
+        const _ms = new MemoryStream();
         // StreamWriter default buffer implementation?
         // My implementation writes directly to stream in Write() ??
         // Wait, looking at StreamWriter.ts:
@@ -150,7 +150,7 @@ describe("StreamWriter", () => {
         // Mock stream with DisposeAsync
         const ms = new MemoryStream();
         let disposeAsyncCalled = false;
-        (ms as any).DisposeAsync = async () => {
+        (ms as unknown as { DisposeAsync: () => Promise<void> }).DisposeAsync = async () => {
             disposeAsyncCalled = true;
         };
 
@@ -178,7 +178,7 @@ describe("StreamWriter", () => {
             closeCalled = true;
         };
 
-        const writer = new StreamWriter(mockStream as any);
+        const writer = new StreamWriter(mockStream as unknown as MemoryStream); // Cast to MemoryStream to satisfy type
         await writer.DisposeAsync();
 
         expect(closeCalled).toBe(true);
@@ -186,10 +186,8 @@ describe("StreamWriter", () => {
 
     test("Symbol.dispose works (using keyword)", () => {
         const ms = new MemoryStream();
-        let writerRef: StreamWriter;
         {
             using writer = new StreamWriter(ms);
-            writerRef = writer;
             writer.Write("A");
         }
         expect(ms.CanWrite).toBe(false);
@@ -197,10 +195,8 @@ describe("StreamWriter", () => {
 
     test("Symbol.asyncDispose works (await using keyword)", async () => {
         const ms = new MemoryStream();
-        let writerRef: StreamWriter;
         {
             await using writer = new StreamWriter(ms);
-            writerRef = writer;
             writer.Write("B");
         }
         expect(ms.CanWrite).toBe(false);

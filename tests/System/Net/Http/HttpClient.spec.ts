@@ -17,7 +17,7 @@ function mockFetch(status: number, statusText: string, bodyText: string, headers
 }
 
 describe("HttpClient Integration", () => {
-    let originalFetch: any;
+    let originalFetch: typeof global.fetch;
 
     beforeAll(() => {
         originalFetch = global.fetch;

@@ -24,8 +24,9 @@ export abstract class HttpMessageHandler implements IDisposable {
         this.Dispose();
     }
 
-    protected DisposeInternal(disposing: boolean): void {
+    protected DisposeInternal(_disposing: boolean): void {
         // Override in subclasses
+        void _disposing;
     }
 
     protected CheckDisposed(): void {

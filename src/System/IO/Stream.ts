@@ -67,7 +67,8 @@ export abstract class Stream implements IDisposable, IAsyncDisposable {
         }
     }
 
-    public async CopyToAsync(destination: Stream, bufferSize: number = 81920, cancellationToken?: any): Task<void> {
+    public async CopyToAsync(destination: Stream, bufferSize: number = 81920, cancellationToken?: unknown): Task<void> {
+        void cancellationToken; // Prevent unused variable error
         if (!destination) throw new Exception("Destination stream cannot be null.");
         if (!this.CanRead) throw new NotSupportedException("Source stream does not support reading.");
         if (!destination.CanWrite) throw new NotSupportedException("Destination stream does not support writing.");

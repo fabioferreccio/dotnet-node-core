@@ -1,5 +1,4 @@
 import { CancellationToken } from "../../../src/System/Threading/CancellationToken";
-import { Exception } from "../../../src/Domain/SeedWork/Exception";
 
 describe("CancellationToken", () => {
     test("None returns a non-cancelled token", () => {

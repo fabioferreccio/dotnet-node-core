@@ -1,9 +1,9 @@
 // Polyfill for Symbol.dispose and Symbol.asyncDispose if not present
-if (!(Symbol as any).dispose) {
-    (Symbol as any).dispose = Symbol("Symbol.dispose");
+if (!(Symbol as unknown as { dispose: symbol }).dispose) {
+    (Symbol as unknown as { dispose: symbol }).dispose = Symbol("Symbol.dispose");
 }
-if (!(Symbol as any).asyncDispose) {
-    (Symbol as any).asyncDispose = Symbol("Symbol.asyncDispose");
+if (!(Symbol as unknown as { asyncDispose: symbol }).asyncDispose) {
+    (Symbol as unknown as { asyncDispose: symbol }).asyncDispose = Symbol("Symbol.asyncDispose");
 }
 
 import { MemoryStream } from "../../../src/System/IO/MemoryStream";
@@ -11,6 +11,7 @@ import { Stream } from "../../../src/System/IO/Stream";
 import { NotSupportedException } from "../../../src/System/NotSupportedException";
 
 describe("Stream Base Class (via MemoryStream)", () => {
+    // ... CopyTo tests ...
     test("CopyTo copies data correctly", () => {
         const source = new MemoryStream();
         const dest = new MemoryStream();
@@ -127,7 +128,7 @@ describe("Stream Base Class (via MemoryStream)", () => {
         expect(s.wasDisposing).toBe(true);
 
         const s2 = new MockStream();
-        // @ts-ignore call protected if needed, but here we override publically or call internal
+        // Call protected if needed, but here we override publically or call internal
         // The base Close calls Dispose(true).
         s2.Close();
         expect(s2.isDisposed).toBe(true);
@@ -205,7 +206,7 @@ describe("Stream Base Class (via MemoryStream)", () => {
     test("Stream[Symbol.dispose] calls Dispose(true)", () => {
         const ms = new MemoryStream();
         {
-            using s = ms;
+            using _s = ms;
         }
         expect(ms.CanRead).toBe(false);
     });
@@ -213,7 +214,7 @@ describe("Stream Base Class (via MemoryStream)", () => {
     test("Stream[Symbol.asyncDispose] calls DisposeAsync", async () => {
         const ms = new MemoryStream();
         {
-            await using s = ms;
+            await using _s = ms;
         }
         expect(ms.CanRead).toBe(false);
     });

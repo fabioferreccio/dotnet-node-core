@@ -21,7 +21,7 @@ export class StringContent extends HttpContent {
         return Promise.resolve(this._content);
     }
 
-    protected async SerializeToStreamAsync(stream: Stream, context?: any): Promise<void> {
+    protected async SerializeToStreamAsync(stream: Stream, _context?: unknown): Promise<void> {
         this._content.Position = 0;
         await this._content.CopyToAsync(stream);
     }

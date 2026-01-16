@@ -5,7 +5,7 @@ describe("Path", () => {
         const result = Path.Combine("a", "b", "c");
         // Normalize separators for cross-platform test consistency if needed, but path.join handles it.
         // On Windows it will be a\b\c
-        expect(result).toMatch(/a[\\\/]b[\\\/]c/);
+        expect(result).toMatch(/a[\\/]b[\\/]c/);
     });
 
     test("GetExtension returns extension", () => {
@@ -39,7 +39,7 @@ describe("Path", () => {
     });
 
     test("Private constructor throws", () => {
-        // @ts-ignore
+        // @ts-expect-error Testing private constructor
         expect(() => new Path()).toThrow("Path is a static class.");
     });
 });

@@ -40,7 +40,7 @@ export abstract class HttpContent implements IDisposable {
 
     public abstract ReadAsStreamAsync(): Promise<Stream>;
 
-    protected abstract SerializeToStreamAsync(stream: Stream, context?: any): Promise<void>;
+    protected abstract SerializeToStreamAsync(stream: Stream, context?: unknown): Promise<void>;
 
     public Dispose(): void {
         if (!this._disposed) {
@@ -53,8 +53,9 @@ export abstract class HttpContent implements IDisposable {
         this.Dispose();
     }
 
-    protected DisposeInternal(disposing: boolean): void {
+    protected DisposeInternal(_disposing: boolean): void {
         // Override in children
+        void _disposing;
     }
 
     protected CheckDisposed(): void {

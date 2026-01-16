@@ -1,9 +1,9 @@
 // Polyfill for Symbol.dispose
-if (!(Symbol as any).dispose) {
-    (Symbol as any).dispose = Symbol("Symbol.dispose");
+if (!(Symbol as unknown as { dispose: symbol }).dispose) {
+    (Symbol as unknown as { dispose: symbol }).dispose = Symbol("Symbol.dispose");
 }
-if (!(Symbol as any).asyncDispose) {
-    (Symbol as any).asyncDispose = Symbol("Symbol.asyncDispose");
+if (!(Symbol as unknown as { asyncDispose: symbol }).asyncDispose) {
+    (Symbol as unknown as { asyncDispose: symbol }).asyncDispose = Symbol("Symbol.asyncDispose");
 }
 
 import { ServiceCollection } from "../../../src/System/DependencyInjection/ServiceCollection";
@@ -154,8 +154,7 @@ describe("System.DependencyInjection", () => {
     test("ServiceProvider: Throws if used after dispose", () => {
         const services = new ServiceCollection();
         const provider = services.BuildServiceProvider();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (provider as any).Dispose();
+        (provider as unknown as IDisposable).Dispose();
 
         expect(() => provider.GetService(ServiceA)).toThrow();
     });
@@ -170,8 +169,10 @@ describe("System.DependencyInjection", () => {
             ImplementationInstance: undefined,
         };
         // Hack to inject invalid descriptor for testing defensive code
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        services.push(invalidDescriptor as any);
+        // Use public Add and cast to bypass type check for test
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        services.Add(invalidDescriptor as unknown as ServiceDescriptor);
 
         const provider = services.BuildServiceProvider();
         expect(() => provider.GetService("Invalid")).toThrow(/Invalid ServiceDescriptor/);
@@ -202,8 +203,7 @@ describe("System.DependencyInjection", () => {
         expect(svc.isDisposed).toBe(false);
 
         // Dispose provider
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (provider as any).Dispose();
+        (provider as unknown as IDisposable).Dispose();
 
         expect(svc.isDisposed).toBe(true);
     });
@@ -246,8 +246,12 @@ describe("System.DependencyInjection", () => {
 
         {
             using scope = root.CreateScope() as unknown as IDisposable;
-            d1 = (scope as unknown as any).ServiceProvider.GetRequiredService(DisposableService);
-            d2 = (scope as unknown as any).ServiceProvider.GetRequiredService(DisposableService2);
+            d1 = (scope as unknown as { ServiceProvider: IServiceProvider }).ServiceProvider.GetRequiredService(
+                DisposableService,
+            );
+            d2 = (scope as unknown as { ServiceProvider: IServiceProvider }).ServiceProvider.GetRequiredService(
+                DisposableService2,
+            );
 
             // Spy on Dispose
             jest.spyOn(d1, "Dispose");
@@ -269,7 +273,9 @@ describe("System.DependencyInjection", () => {
         let svc: DisposableService;
         {
             await using scope = root.CreateScope() as unknown as IAsyncDisposable;
-            svc = (scope as unknown as any).ServiceProvider.GetRequiredService(DisposableService);
+            svc = (scope as unknown as { ServiceProvider: IServiceProvider }).ServiceProvider.GetRequiredService(
+                DisposableService,
+            );
         }
         expect(svc!.isDisposed).toBe(true);
     });

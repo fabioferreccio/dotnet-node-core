@@ -1,6 +1,7 @@
 import { File } from "../../../src/System/IO/File";
 import { FileNotFoundException } from "../../../src/System/IO/FileNotFoundException";
 import * as path from "path";
+import * as fs from "fs";
 
 const TEST_DIR = path.join(__dirname, "file_tests");
 const TEST_FILE = path.join(TEST_DIR, "test.txt");
@@ -10,7 +11,7 @@ describe("File", () => {
         if (!File.Exists(TEST_DIR)) {
             // Use fs really or File.Exists? File.Exists wraps fs.existsSync
             // We need to make dir for verify
-            require("fs").mkdirSync(TEST_DIR, { recursive: true });
+            fs.mkdirSync(TEST_DIR, { recursive: true });
         }
     });
 
@@ -19,7 +20,7 @@ describe("File", () => {
     });
 
     afterAll(() => {
-        require("fs").rmSync(TEST_DIR, { recursive: true, force: true });
+        fs.rmSync(TEST_DIR, { recursive: true, force: true });
     });
 
     test("Negative Tests: ReadAllText throws FileNotFoundException", () => {
@@ -50,7 +51,7 @@ describe("File", () => {
     });
 
     test("Private constructor throws", () => {
-        // @ts-ignore
+        // @ts-expect-error Testing private constructor
         expect(() => new File()).toThrow("File is a static class.");
     });
 

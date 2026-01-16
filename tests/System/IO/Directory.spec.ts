@@ -1,9 +1,9 @@
 import { Directory } from "../../../src/System/IO/Directory";
 import { File } from "../../../src/System/IO/File";
-import { DirectoryNotFoundException } from "../../../src/System/IO/DirectoryNotFoundException";
 import * as path from "path";
 import * as fs from "fs";
 
+// Fix syntax error introduced by bad paste
 const TEST_DIR = path.join(__dirname, "directory_test_gap");
 
 describe("Directory Gap Coverage", () => {
@@ -38,7 +38,7 @@ describe("Directory Gap Coverage", () => {
     });
 
     test("Private constructor throws", () => {
-        // @ts-ignore
+        // @ts-expect-error Testing private constructor
         expect(() => new Directory()).toThrow("Directory is a static class.");
     });
 
