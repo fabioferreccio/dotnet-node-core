@@ -199,15 +199,15 @@ export class ServiceDescriptor {
 
     private static IsConstructor(func: unknown): boolean {
         if (!func || typeof func !== "function") return false;
-        
+
         // 1. Native Class Check
         const str = func.toString();
         if (str.startsWith("class ")) return true;
-        
+
         // 2. Transpiled Class / Function Constructor Check
         // Arrow functions do not have a prototype.
         if (func.prototype) return true;
-        
+
         return false;
     }
 }

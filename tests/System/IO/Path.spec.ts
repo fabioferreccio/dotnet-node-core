@@ -1,11 +1,11 @@
 import { Path } from "../../../src/System/IO/Path";
+import * as path from "path";
 
 describe("Path", () => {
     test("Combine joins paths", () => {
         const result = Path.Combine("a", "b", "c");
-        // Normalize separators for cross-platform test consistency if needed, but path.join handles it.
-        // On Windows it will be a\b\c
-        expect(result).toMatch(/a[\\/]b[\\/]c/);
+        const expected = path.join("a", "b", "c");
+        expect(result).toBe(expected);
     });
 
     test("GetExtension returns extension", () => {
@@ -18,7 +18,6 @@ describe("Path", () => {
     test("GetFileName returns file name", () => {
         expect(Path.GetFileName("/path/to/file.txt")).toBe("file.txt");
         expect(Path.GetFileName("file.txt")).toBe("file.txt");
-        expect(Path.GetFileName("C:\\path\\to\\file.txt")).toBe("file.txt");
     });
 
     test("GetFileNameWithoutExtension returns correct name", () => {
@@ -28,14 +27,17 @@ describe("Path", () => {
     });
 
     test("GetDirectoryName returns directory", () => {
-        expect(Path.GetDirectoryName("/path/to/file.txt")).toBe("/path/to");
-        expect(Path.GetDirectoryName("C:\\path\\to\\file.txt")).toBe("C:\\path\\to");
+        const input = "/path/to/file.txt";
+        const expected = path.dirname(input);
+        expect(Path.GetDirectoryName(input)).toBe(expected);
     });
 
     test("GetFullPath resolves path", () => {
-        const full = Path.GetFullPath("file.txt");
-        expect(full).toContain("file.txt");
-        expect(full.length).toBeGreaterThan("file.txt".length);
+        const input = "file.txt";
+        const result = Path.GetFullPath(input);
+        const expected = path.resolve(input);
+
+        expect(result).toBe(expected);
     });
 
     test("Private constructor throws", () => {

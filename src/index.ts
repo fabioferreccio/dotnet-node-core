@@ -8,11 +8,7 @@ export * from "./System/Types";
 // Primary Namespaces
 export * from "./System/IO";
 export * from "./System/Linq";
-export {
-    ServiceCollection,
-    ServiceProvider,
-    ServiceScope,
-} from "./System/DependencyInjection";
+export { ServiceCollection, ServiceProvider, ServiceScope } from "./System/DependencyInjection";
 export {
     ServiceDescriptor,
     ServiceLifetime,
@@ -20,11 +16,7 @@ export {
     ImplementationFactory,
     SelfBindingFactory,
 } from "./Domain/DependencyInjection";
-export {
-    JsonConverter,
-    JsonSerializer,
-    JsonSerializerOptions,
-} from "./System/Text/Json";
+export { JsonConverter, JsonSerializer, JsonSerializerOptions } from "./System/Text/Json";
 export * from "./System/Net/Http";
 
 // Collections (Explicit exports due to missing index)

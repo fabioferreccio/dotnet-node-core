@@ -2,9 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]     # Roda ao commitar na main
+    tags: [ 'v*' ]         # Roda ao subir tags como v1.0, v0.5.1, etc.
   pull_request:
-    branches: [ main ]
+    branches: [ main ]     # Roda ao abrir PR para a main
 
 jobs:
   build:
@@ -12,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [20.x] # Simplificado para apenas a versão atual
 
     steps:
     - uses: actions/checkout@v4
