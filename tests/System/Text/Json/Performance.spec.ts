@@ -2,7 +2,6 @@ import { CsString } from "../../../../src/System/Types/CsString";
 import { CsInt32 } from "../../../../src/System/Types/CsInt32";
 import { List } from "../../../../src/System/Collections/Generic/List";
 import { JsonSerializer } from "../../../../src/System/Text/Json/JsonSerializer";
-import { InternalPools } from "../../../../src/System/Runtime/Pooling/InternalPools";
 
 class LargeDto {
     public Name: CsString = CsString.Empty;

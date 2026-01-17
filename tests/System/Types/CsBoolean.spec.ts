@@ -1,10 +1,8 @@
 import { CsBoolean } from "../../../src/System/Types/CsBoolean";
 import { CsString } from "../../../src/System/Types/CsString";
-import { CsInt16 } from "../../../src/System/Types/CsInt16";
 import { CsInt32 } from "../../../src/System/Types/CsInt32";
 import { CsInt64 } from "../../../src/System/Types/CsInt64";
 import { CsByte } from "../../../src/System/Types/CsByte";
-import { CsSByte } from "../../../src/System/Types/CsSByte";
 
 describe("CsBoolean", () => {
     test("Constructor sets value correctly", () => {
@@ -43,8 +41,8 @@ describe("CsBoolean", () => {
     });
 
     test("Constructor throws on null/undefined", () => {
-        expect(() => CsBoolean.From(null as any)).toThrow();
-        expect(() => CsBoolean.From(undefined as any)).toThrow();
+        expect(() => CsBoolean.From(null as unknown as number)).toThrow();
+        expect(() => CsBoolean.From(undefined as unknown as number)).toThrow();
     });
 
     test("Equals works correctly", () => {
@@ -95,7 +93,7 @@ describe("CsBoolean", () => {
 
     test("Parse throws on invalid input", () => {
         expect(() => CsBoolean.Parse("invalid")).toThrow();
-        expect(() => CsBoolean.Parse(null as any)).toThrow();
+        expect(() => CsBoolean.Parse(null as unknown as string)).toThrow();
     });
 
     test("TryParse works correctly", () => {

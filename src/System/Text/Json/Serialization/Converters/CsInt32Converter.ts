@@ -8,21 +8,22 @@ export class CsInt32Converter extends JsonConverter<CsInt32> {
         return typeToConvert === CsInt32;
     }
 
-    public Read(reader: unknown, typeToConvert: Constructor, options: JsonSerializerOptions): CsInt32 {
+    public Read(reader: unknown, _typeToConvert: Constructor, _options: JsonSerializerOptions): CsInt32 {
         if (typeof reader === "number") {
             return CsInt32.From(reader);
         }
         if (typeof reader === "string") {
-            // Attempt strict parse if it's a number string
             const parsed = parseInt(reader, 10);
-            if (!isNaN(parsed)) {
-                return CsInt32.From(parsed);
+            if (isNaN(parsed)) {
+                throw new Error(`Cannot parse string '${reader}' to CsInt32.`);
             }
+            return CsInt32.From(parsed);
         }
-        throw new Error(`JsonTokenType was invalid, expected number for CsInt32.`);
+        throw new Error(`Expected number for CsInt32, got ${typeof reader}.`);
     }
 
-    public Write(writer: JsonWriter, value: CsInt32, options: JsonSerializerOptions): void {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public Write(writer: JsonWriter, value: CsInt32, _options: JsonSerializerOptions): void {
         writer.WriteNumberValue(value.Value);
     }
 }

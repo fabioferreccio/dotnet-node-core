@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { JsonSerializerOptions } from "../../../../src/System/Text/Json/JsonSerializerOptions";
 import { JsonConverter } from "../../../../src/System/Text/Json/Serialization/JsonConverter";
 import { CsStringConverter } from "../../../../src/System/Text/Json/Serialization/Converters/CsStringConverter";
-import { CsInt32Converter } from "../../../../src/System/Text/Json/Serialization/Converters/CsInt32Converter";
 
 describe("System.Text.Json.JsonSerializerOptions", () => {
     test("Constructor: Initializes default converters", () => {
@@ -26,10 +26,10 @@ describe("System.Text.Json.JsonSerializerOptions", () => {
             public CanConvert(typeToConvert: any): boolean {
                 return typeToConvert === MyCustomType;
             }
-            public Read(reader: any, typeToConvert: any, options: any): MyCustomType {
+            public Read(_reader: any, _typeToConvert: any, _options: any): MyCustomType {
                 throw new Error("Not implemented");
             }
-            public Write(writer: any, value: MyCustomType, options: any): void {
+            public Write(_writer: any, _value: MyCustomType, _options: any): void {
                 throw new Error("Not implemented");
             }
         }
@@ -69,10 +69,10 @@ describe("System.Text.Json.JsonSerializerOptions", () => {
             CanConvert(t: any) {
                 return t === TypeA;
             }
-            Read(reader: any, typeToConvert: any, options: any): TypeA {
+            Read(_reader: any, _typeToConvert: any, _options: any): TypeA {
                 throw 1;
             }
-            Write(writer: any, value: TypeA, options: any): void {
+            Write(_writer: any, _value: TypeA, _options: any): void {
                 throw 1;
             }
         }
@@ -80,10 +80,10 @@ describe("System.Text.Json.JsonSerializerOptions", () => {
             CanConvert(t: any) {
                 return t === TypeB;
             }
-            Read(reader: any, typeToConvert: any, options: any): TypeB {
+            Read(_reader: any, _typeToConvert: any, _options: any): TypeB {
                 throw 1;
             }
-            Write(writer: any, value: TypeB, options: any): void {
+            Write(_writer: any, _value: TypeB, _options: any): void {
                 throw 1;
             }
         }

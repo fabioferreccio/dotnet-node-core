@@ -20,7 +20,8 @@ import { CsGuid } from "../../Types/CsGuid";
 // ============================================================================
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Constructor<T = unknown> = Function & { prototype: T };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Constructor<T = unknown> = NewableFunction & { prototype: T; name: string };
 
 export class Dictionary<TKey, TValue> {
     private readonly _storage: Map<string, TValue>;

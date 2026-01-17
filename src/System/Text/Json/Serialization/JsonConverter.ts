@@ -3,7 +3,9 @@ import { JsonWriter } from "../JsonWriter";
 
 // Safe constructor type for instantiation
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Constructor<T = unknown> = Function & { prototype: T };
+// Safe constructor type for instantiation (structural match strictly for class definitions)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Constructor<T = unknown> = NewableFunction & { prototype: T; name: string };
 
 export abstract class JsonConverter<T> {
     /**

@@ -1,5 +1,6 @@
 import { ServiceCollection } from "../../../src/System/DependencyInjection/ServiceCollection";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 describe("System.DependencyInjection.ServiceCollection", () => {
     class MyService {
         public id = Math.random();
@@ -112,7 +113,7 @@ describe("System.DependencyInjection.ServiceCollection", () => {
     test("Throws on Self-Binding with Invalid Factory (Strict 0-args)", () => {
         const services = new ServiceCollection();
         expect(() => {
-            services.AddSingleton(MyService, (p: any) => new MyService());
+            services.AddSingleton(MyService, (_p: any) => new MyService());
         }).toThrow(/Factory function for Self-Binding must not accept arguments/);
     });
 

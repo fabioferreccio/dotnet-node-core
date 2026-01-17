@@ -25,7 +25,8 @@ describe("System.Net.Http.HttpRequestMessage", () => {
                 return Promise.resolve();
             }
             public ReadAsStreamAsync() {
-                return Promise.resolve(null as any);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                return Promise.resolve(null as unknown as any);
             }
 
             // Override DisposeInternal to track disposal

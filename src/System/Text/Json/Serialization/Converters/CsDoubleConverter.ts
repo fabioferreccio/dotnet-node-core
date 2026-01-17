@@ -8,14 +8,14 @@ export class CsDoubleConverter extends JsonConverter<CsDouble> {
         return typeToConvert === CsDouble;
     }
 
-    public Read(reader: unknown, typeToConvert: Constructor, options: JsonSerializerOptions): CsDouble {
+    public Read(reader: unknown, _typeToConvert: Constructor, _options: JsonSerializerOptions): CsDouble {
         if (typeof reader === "number") {
             return CsDouble.From(reader);
         }
         throw new Error(`Expected number for CsDouble, got ${typeof reader}.`);
     }
 
-    public Write(writer: JsonWriter, value: CsDouble, options: JsonSerializerOptions): void {
+    public Write(writer: JsonWriter, value: CsDouble, _options: JsonSerializerOptions): void {
         writer.WriteNumberValue(value.Value);
     }
 }

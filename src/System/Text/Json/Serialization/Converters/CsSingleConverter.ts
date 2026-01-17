@@ -8,14 +8,14 @@ export class CsSingleConverter extends JsonConverter<CsSingle> {
         return typeToConvert === CsSingle;
     }
 
-    public Read(reader: unknown, typeToConvert: Constructor, options: JsonSerializerOptions): CsSingle {
+    public Read(reader: unknown, _typeToConvert: Constructor, _options: JsonSerializerOptions): CsSingle {
         if (typeof reader === "number") {
             return CsSingle.From(reader);
         }
         throw new Error(`Expected number for CsSingle, got ${typeof reader}.`);
     }
 
-    public Write(writer: JsonWriter, value: CsSingle, options: JsonSerializerOptions): void {
+    public Write(writer: JsonWriter, value: CsSingle, _options: JsonSerializerOptions): void {
         writer.WriteNumberValue(value.Value);
     }
 }

@@ -6,10 +6,12 @@ export enum ServiceLifetime {
     Transient = 2,
 }
 
-export type Constructor<T = unknown> = new (...args: unknown[]) => T;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Constructor<T = unknown> = new (...args: any[]) => T;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AbstractConstructor<T = unknown> = abstract new (...args: any[]) => T;
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-export type ServiceIdentifier<T = unknown> = string | symbol | Constructor<T> | Function;
+export type ServiceIdentifier<T = unknown> = string | symbol | Constructor<T> | AbstractConstructor<T>;
 export type ImplementationFactory<T = unknown> = (provider: IServiceProvider) => T;
 // Strict factory for Self-Binding (0 args)
 export type SelfBindingFactory<T = unknown> = () => T;
@@ -158,7 +160,7 @@ export class ServiceDescriptor {
 
             if (isArg2Factory) {
                 // Enforce 0-arguments for Factory in Self-Binding
-                const fn = arg2 as Function;
+                const fn = arg2 as (...args: unknown[]) => unknown;
                 if (fn.length !== 0) {
                     throw new Error(
                         "Invalid Registration: Factory function for Self-Binding must not accept arguments (Strict 0-args).",

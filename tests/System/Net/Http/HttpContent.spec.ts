@@ -1,6 +1,7 @@
 import { HttpContent } from "../../../../src/System/Net/Http/HttpContent";
 import { MemoryStream } from "../../../../src/System/IO/MemoryStream";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 describe("System.Net.Http.HttpContent", () => {
     class MockContent extends HttpContent {
         private _data: string;
@@ -9,7 +10,7 @@ describe("System.Net.Http.HttpContent", () => {
             this._data = data;
         }
 
-        public override ReadAsStreamAsync(): Promise<any> {
+        public override ReadAsStreamAsync(): Promise<MemoryStream> {
             const ms = new MemoryStream();
             const buffer = Buffer.from(this._data);
             ms.Write(buffer, 0, buffer.length);
@@ -17,7 +18,7 @@ describe("System.Net.Http.HttpContent", () => {
             return Promise.resolve(ms);
         }
 
-        protected SerializeToStreamAsync(stream: any, context: any): Promise<void> {
+        protected SerializeToStreamAsync(stream: MemoryStream, _context: any): Promise<void> {
             const buffer = Buffer.from(this._data);
             stream.Write(buffer, 0, buffer.length);
             return Promise.resolve();

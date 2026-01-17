@@ -34,7 +34,7 @@ export class CsBoolean implements IEquatable<CsBoolean>, IComparable<CsBoolean> 
         return new CsBoolean(value);
     }
 
-    private static TryConvert(value: any): { success: boolean; value: boolean } {
+    private static TryConvert(value: unknown): { success: boolean; value: boolean } {
         if (value === null || value === undefined) return { success: false, value: false };
 
         if (typeof value === "boolean") {

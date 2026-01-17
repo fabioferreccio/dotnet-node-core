@@ -1,16 +1,19 @@
 import { isEquatable } from "../../../Domain/Interfaces";
 import { Enumerable } from "../../Linq/Enumerable";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Constructor<T = unknown> = NewableFunction & { prototype: T; name: string };
+
 export class List<T> {
     private _items: T[];
-    private readonly _elementType?: Function & { prototype: T };
+    private readonly _elementType?: Constructor<T>;
 
-    constructor(items?: T[], elementType?: Function & { prototype: T }) {
+    constructor(items?: T[], elementType?: Constructor<T>) {
         this._items = items ? [...items] : [];
         this._elementType = elementType;
     }
 
-    public get ElementType(): (Function & { prototype: T }) | undefined {
+    public get ElementType(): Constructor<T> | undefined {
         return this._elementType;
     }
 

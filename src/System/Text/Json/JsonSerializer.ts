@@ -10,13 +10,13 @@ export class JsonSerializer {
 
         // 1. Check if we have a converter for T directly.
         if (value !== null && value !== undefined) {
-            const type = (value as any).constructor as Constructor;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const type = Object.getPrototypeOf(value).constructor as Constructor;
             const converter = opts.GetConverter(type);
 
             if (converter) {
                 const writer = new JsonStringWriter();
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                converter.Write(writer, value as any, opts);
+                converter.Write(writer, value as unknown as T, opts);
                 return writer.toString();
             }
         }
@@ -68,7 +68,7 @@ export class JsonSerializer {
             try {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 instance = new (targetType as any)();
-            } catch (e) {
+            } catch (_e) {
                 throw new Error(
                     `Deserialization failed: Could not instantiate ${targetType.name}. Ensure it has a parameterless constructor or accessible factory.`,
                 );
@@ -120,7 +120,7 @@ export class JsonSerializer {
                             continue;
                         }
 
-                        const propType = (propVal as any).constructor as Constructor<unknown>;
+                        const propType = Object.getPrototypeOf(propVal).constructor as Constructor<unknown>;
                         const jsonVal = sourceObj[key];
 
                         const hydrated = JsonSerializer.PopulateObject(jsonVal, propType, options, context, propVal);
@@ -190,7 +190,7 @@ export class JsonSerializer {
                     const propVal = (instance as Record<string, unknown>)[key];
                     if (propVal === undefined) continue;
 
-                    const propType = (propVal as any).constructor as Constructor<unknown>;
+                    const propType = Object.getPrototypeOf(propVal).constructor as Constructor<unknown>;
                     const jsonVal = sourceObj[key];
 
                     const result = JsonSerializer.PopulateObject(

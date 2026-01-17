@@ -95,7 +95,7 @@ describe("System.Runtime.Pooling.ObjectPool", () => {
 
         const r1 = pool.Rent(); // i2
         const r2 = pool.Rent(); // i1 (Pool empty now)
-        const r3 = pool.Rent(); // New item (i4)
+        const _r3 = pool.Rent(); // New item (i4)
 
         expect(r1).toBe(i2);
         expect(r2).toBe(i1);
@@ -109,7 +109,7 @@ describe("System.Runtime.Pooling.ObjectPool", () => {
             () => {},
         );
         const i1 = pool.Rent();
-        const i2 = pool.Rent();
+        const _i2 = pool.Rent();
         pool.Return(i1);
 
         const r1 = pool.Rent();

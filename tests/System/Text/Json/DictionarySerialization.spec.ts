@@ -16,9 +16,9 @@ class ClientDto {
     public IsActive: CsBoolean = CsBoolean.From(false);
 }
 
-class ComplexListDto {
-    public ItemList: List<ClientDto> = new List<ClientDto>([], ClientDto);
-}
+// class ComplexListDto {
+//    public ItemList: List<ClientDto> = new List<ClientDto>([], ClientDto);
+// }
 
 describe("Dictionary Serialization", () => {
     test("Positive: serialized/deserializes Dictionary<CsString, CsInt32>", () => {
@@ -64,7 +64,7 @@ describe("Dictionary Serialization", () => {
     });
 
     test("Positive: Dictionary<CsString, List<ClientDto>>", () => {
-        const dict = new Dictionary(CsString, List);
+        const _dict = new Dictionary(CsString, List);
         // Note: Generic List type in constructor argument is tricky in TS runtime.
         // The Dictionary expects `Constructor<TValue>`.
         // `List` is the constructor. BUT deserializer needs to know ElementType of the List!
@@ -130,7 +130,7 @@ describe("Dictionary Serialization (Lists)", () => {
     });
 
     test("Negative: Missing Converter Registration", () => {
-        const dict = new Dictionary(CsString, CsInt32);
+        const _dict = new Dictionary(CsString, CsInt32);
         const options = new JsonSerializerOptions();
         // No converter added
 

@@ -8,7 +8,7 @@ export class CsDecimalConverter extends JsonConverter<CsDecimal> {
         return typeToConvert === CsDecimal;
     }
 
-    public Read(reader: unknown, typeToConvert: Constructor, options: JsonSerializerOptions): CsDecimal {
+    public Read(reader: unknown, _typeToConvert: Constructor, _options: JsonSerializerOptions): CsDecimal {
         // MVP: CsDecimal wraps number.
         if (typeof reader === "number") {
             return CsDecimal.From(reader);
@@ -16,7 +16,7 @@ export class CsDecimalConverter extends JsonConverter<CsDecimal> {
         throw new Error(`Expected number for CsDecimal, got ${typeof reader}.`);
     }
 
-    public Write(writer: JsonWriter, value: CsDecimal, options: JsonSerializerOptions): void {
+    public Write(writer: JsonWriter, value: CsDecimal, _options: JsonSerializerOptions): void {
         writer.WriteNumberValue(value.Value);
     }
 }
