@@ -31,7 +31,7 @@ describe("System.Version", () => {
         expect(new Version(1, 2, 3).ToString().toString()).toBe("1.2.3");
         expect(new Version(1, 2, 3, 4).ToString().toString()).toBe("1.2.3.4");
     });
-    
+
     // CompareTo block skipped in replacement as it was correct?
     // Wait, CompareTo used .toBe(1). That should be fine if CompareTo returns primitive number.
     // Version.ts: public CompareTo(other: Version | null): number
@@ -62,12 +62,12 @@ describe("System.Version", () => {
         const v1 = new Version(1, 0);
         const v2 = new Version(2, 0);
         const v3 = new Version(1, 1);
-        
+
         expect(v1.CompareTo(v2)).toBe(-1); // 1.0 < 2.0
-        expect(v2.CompareTo(v1)).toBe(1);  // 2.0 > 1.0
+        expect(v2.CompareTo(v1)).toBe(1); // 2.0 > 1.0
         expect(v1.CompareTo(v3)).toBe(-1); // 1.0 < 1.1
     });
-    
+
     test("Parse", () => {
         const v = Version.Parse("1.2.3.4");
         expect(v.Major.Value).toBe(1);

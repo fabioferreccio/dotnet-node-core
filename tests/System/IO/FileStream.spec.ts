@@ -203,11 +203,7 @@ describe("FileStream", () => {
 
         const readMock = fs.read as unknown as jest.Mock;
         readMock.mockImplementation((...args: unknown[]) => {
-            const callback = args[args.length - 1] as (
-                err: Error | null,
-                bytesRead: number,
-                buffer: unknown,
-            ) => void;
+            const callback = args[args.length - 1] as (err: Error | null, bytesRead: number, buffer: unknown) => void;
             callback(new Error("Simulated Read Error"), 0, null);
         });
 

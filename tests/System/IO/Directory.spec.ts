@@ -40,9 +40,9 @@ describe("Directory Gap Coverage", () => {
         Directory.CreateDirectory(subDir);
         File.WriteAllText(path.join(subDir, "file.txt"), "data");
 
-        // The shim might throw simple Error or IOException depending on implementation. 
+        // The shim might throw simple Error or IOException depending on implementation.
         // We ensure it throws and message implies built-in restriction.
-        expect(() => Directory.Delete(subDir, false)).toThrow(); 
+        expect(() => Directory.Delete(subDir, false)).toThrow();
     });
 
     test("Private constructor throws", () => {

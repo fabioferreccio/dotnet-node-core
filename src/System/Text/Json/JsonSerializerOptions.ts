@@ -13,9 +13,6 @@ import { CsSingleConverter } from "./Serialization/Converters/CsSingleConverter"
 import { CsDoubleConverter } from "./Serialization/Converters/CsDoubleConverter";
 import { CsDecimalConverter } from "./Serialization/Converters/CsDecimalConverter";
 
-
-
-
 export class JsonSerializerOptions {
     private _converters: List<JsonConverter<unknown>>;
     private _writeIndented: boolean;

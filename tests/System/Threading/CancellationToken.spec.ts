@@ -1,4 +1,3 @@
-
 import { CancellationToken } from "../../../src/System/Threading/CancellationToken";
 
 describe("CancellationToken", () => {
@@ -18,7 +17,4 @@ describe("CancellationToken", () => {
         expect(token.IsCancellationRequested).toBe(true);
         expect(() => token.ThrowIfCancellationRequested()).toThrow("OperationCancelledException");
     });
-
-
-
 });

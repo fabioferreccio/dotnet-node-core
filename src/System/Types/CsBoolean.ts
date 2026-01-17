@@ -16,7 +16,7 @@ export class CsBoolean implements IEquatable<CsBoolean>, IComparable<CsBoolean> 
     private constructor(value: boolean | string | number | CsString | CsInt16 | CsInt32 | CsInt64 | CsByte | CsSByte) {
         // Validation logic remains same
         if (value === null || value === undefined) {
-             throw new Error("Value cannot be null or undefined for CsBoolean");
+            throw new Error("Value cannot be null or undefined for CsBoolean");
         }
 
         const result = CsBoolean.TryConvert(value);
@@ -28,7 +28,9 @@ export class CsBoolean implements IEquatable<CsBoolean>, IComparable<CsBoolean> 
         Object.freeze(this);
     }
 
-    public static From(value: boolean | string | number | CsString | CsInt16 | CsInt32 | CsInt64 | CsByte | CsSByte): CsBoolean {
+    public static From(
+        value: boolean | string | number | CsString | CsInt16 | CsInt32 | CsInt64 | CsByte | CsSByte,
+    ): CsBoolean {
         return new CsBoolean(value);
     }
 
@@ -38,29 +40,29 @@ export class CsBoolean implements IEquatable<CsBoolean>, IComparable<CsBoolean> 
         if (typeof value === "boolean") {
             return { success: true, value: value };
         }
-        
+
         if (typeof value === "string") {
             const s = value.trim().toLowerCase();
             if (s === "true") return { success: true, value: true };
             if (s === "false") return { success: true, value: false };
             return { success: false, value: false };
         }
-        
+
         if (typeof value === "number") {
-             return { success: true, value: value !== 0 };
+            return { success: true, value: value !== 0 };
         }
-        
+
         if (value instanceof CsString) {
-             const s = value.toString().trim().toLowerCase();
-             if (s === "true") return { success: true, value: true };
-             if (s === "false") return { success: true, value: false };
-             return { success: false, value: false };
+            const s = value.toString().trim().toLowerCase();
+            if (s === "true") return { success: true, value: true };
+            if (s === "false") return { success: true, value: false };
+            return { success: false, value: false };
         }
-        
+
         if (value instanceof CsInt64) {
-             return { success: true, value: value.Value !== 0n };
+            return { success: true, value: value.Value !== 0n };
         }
-        
+
         if (
             value instanceof CsInt32 ||
             value instanceof CsInt16 ||
@@ -106,7 +108,9 @@ export class CsBoolean implements IEquatable<CsBoolean>, IComparable<CsBoolean> 
         return this._value;
     }
 
-    public static Parse(value: boolean | string | number | CsString | CsInt16 | CsInt32 | CsInt64 | CsByte | CsSByte): CsBoolean {
+    public static Parse(
+        value: boolean | string | number | CsString | CsInt16 | CsInt32 | CsInt64 | CsByte | CsSByte,
+    ): CsBoolean {
         const result = CsBoolean.TryConvert(value);
         if (result.success) {
             return CsBoolean.From(result.value);
@@ -116,7 +120,7 @@ export class CsBoolean implements IEquatable<CsBoolean>, IComparable<CsBoolean> 
 
     public static TryParse(
         value: boolean | string | number | CsString | CsInt16 | CsInt32 | CsInt64 | CsByte | CsSByte,
-        result: (val: CsBoolean) => void
+        result: (val: CsBoolean) => void,
     ): boolean {
         const conversion = CsBoolean.TryConvert(value);
         if (conversion.success) {

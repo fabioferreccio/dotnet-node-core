@@ -8,22 +8,14 @@ export class CsBooleanConverter extends JsonConverter<CsBoolean> {
         return typeToConvert === CsBoolean;
     }
 
-    public Read(
-        reader: unknown,
-        typeToConvert: Constructor,
-        options: JsonSerializerOptions
-    ): CsBoolean {
+    public Read(reader: unknown, typeToConvert: Constructor, options: JsonSerializerOptions): CsBoolean {
         if (typeof reader === "boolean") {
             return CsBoolean.From(reader);
         }
         throw new Error(`Expected boolean for CsBoolean, got ${typeof reader}.`);
     }
 
-    public Write(
-        writer: JsonWriter,
-        value: CsBoolean,
-        options: JsonSerializerOptions
-    ): void {
+    public Write(writer: JsonWriter, value: CsBoolean, options: JsonSerializerOptions): void {
         writer.WriteBooleanValue(value.Value);
     }
 }

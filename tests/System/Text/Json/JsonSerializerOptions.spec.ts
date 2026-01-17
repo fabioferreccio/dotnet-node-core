@@ -17,7 +17,7 @@ describe("System.Text.Json.JsonSerializerOptions", () => {
 
     test("Converters: Add and Resolve Custom Converter", () => {
         const opts = new JsonSerializerOptions();
-        
+
         // Mock a custom converter
         // We create a dummy class to act as the "TypeToConvert"
         class MyCustomType {}
@@ -55,25 +55,37 @@ describe("System.Text.Json.JsonSerializerOptions", () => {
         // We verify we can find it.
         // This exercises the 'if (converter.CanConvert)' true branch inside the loop.
         // And the loop continuation for false branches happens naturally.
-        
+
         // We need the constructor for CsInt32, which is tricky in TS if not exported/referenced as value.
-        // But the converters usually check strict type match or instanceof. 
+        // But the converters usually check strict type match or instanceof.
         // CsInt32Converter checks `typeToConvert === CsInt32`.
         // We need to import CsInt32 to test this properly, OR rely on the fact that existing converters work.
-        
+
         // Let's use our own mock chain to guarantee order and hits.
         class TypeA {}
         class TypeB {}
-        
+
         class ConvA extends JsonConverter<TypeA> {
-             CanConvert(t: any) { return t === TypeA; }
-             Read(reader: any, typeToConvert: any, options: any): TypeA { throw 1; }
-             Write(writer: any, value: TypeA, options: any): void { throw 1; }
+            CanConvert(t: any) {
+                return t === TypeA;
+            }
+            Read(reader: any, typeToConvert: any, options: any): TypeA {
+                throw 1;
+            }
+            Write(writer: any, value: TypeA, options: any): void {
+                throw 1;
+            }
         }
         class ConvB extends JsonConverter<TypeB> {
-             CanConvert(t: any) { return t === TypeB; }
-             Read(reader: any, typeToConvert: any, options: any): TypeB { throw 1; }
-             Write(writer: any, value: TypeB, options: any): void { throw 1; }
+            CanConvert(t: any) {
+                return t === TypeB;
+            }
+            Read(reader: any, typeToConvert: any, options: any): TypeB {
+                throw 1;
+            }
+            Write(writer: any, value: TypeB, options: any): void {
+                throw 1;
+            }
         }
 
         opts.Converters.Clear();
@@ -90,10 +102,10 @@ describe("System.Text.Json.JsonSerializerOptions", () => {
         const opts = new JsonSerializerOptions();
         // Default false
         expect(opts.WriteIndented).toBe(false);
-        
+
         opts.WriteIndented = true;
         expect(opts.WriteIndented).toBe(true);
-        
+
         opts.WriteIndented = false;
         expect(opts.WriteIndented).toBe(false);
     });
@@ -102,10 +114,10 @@ describe("System.Text.Json.JsonSerializerOptions", () => {
         const opts = new JsonSerializerOptions();
         // Default false
         expect(opts.PropertyNameCaseInsensitive).toBe(false);
-        
+
         opts.PropertyNameCaseInsensitive = true;
         expect(opts.PropertyNameCaseInsensitive).toBe(true);
-        
+
         opts.PropertyNameCaseInsensitive = false;
         expect(opts.PropertyNameCaseInsensitive).toBe(false);
     });

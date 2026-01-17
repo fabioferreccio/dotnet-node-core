@@ -1,5 +1,5 @@
 import { ServiceCollection } from "../../../src/System/DependencyInjection/ServiceCollection";
-import { ServiceDescriptor } from "../../../src/Domain/DependencyInjection/ServiceDescriptor";
+import { createServiceToken, ServiceDescriptor } from "../../../src/Domain/DependencyInjection/ServiceDescriptor";
 
 describe("System.DependencyInjection.ServiceCollection", () => {
     class MyService {}
@@ -15,7 +15,7 @@ describe("System.DependencyInjection.ServiceCollection", () => {
     // Contains, Remove, Clear are NOT part of ServiceCollection class definition in this codebase.
     // It extends Array<ServiceDescriptor>.
     // To check existence, we check array contents.
-    
+
     test("TryAddSingleton avoids duplicates", () => {
         const services = new ServiceCollection();
         services.AddSingleton(MyService, MyService);
@@ -27,11 +27,31 @@ describe("System.DependencyInjection.ServiceCollection", () => {
     test("Is Iterable", () => {
         const services = new ServiceCollection();
         services.AddSingleton(MyService, MyService);
-        
+
         let count = 0;
         for (const _d of services) {
             count++;
         }
         expect(count).toBe(1);
+    });
+
+    test("TryAddSingleton returns result", () => {
+        interface IMyTestService {
+            doSomething(): void;
+        }
+
+        const IMyTestService = createServiceToken<IMyTestService>("IMyTestService");
+
+        class MyTestService implements IMyTestService {
+            doSomething(): void { console.log("Done"); }
+        }
+
+
+        const services = new ServiceCollection();
+        services.AddSingleton(IMyTestService, MyTestService);
+        
+        const provider = services.BuildServiceProvider();
+        const service = provider.GetService(IMyTestService);
+        expect(service).toBeInstanceOf(IMyTestService);
     });
 });

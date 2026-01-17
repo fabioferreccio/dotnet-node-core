@@ -6,7 +6,7 @@ describe("System.Net.Http.Headers.HttpHeaders", () => {
     test("Add and TryGetValues", () => {
         const headers = new TestHeaders();
         headers.Add("User-Agent", "TestClient");
-        
+
         const values = headers.TryGetValues("User-Agent");
         expect(values).toBeDefined();
         expect(values).toContain("TestClient");

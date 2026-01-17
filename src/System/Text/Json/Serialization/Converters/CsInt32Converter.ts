@@ -8,11 +8,7 @@ export class CsInt32Converter extends JsonConverter<CsInt32> {
         return typeToConvert === CsInt32;
     }
 
-    public Read(
-        reader: unknown,
-        typeToConvert: Constructor,
-        options: JsonSerializerOptions
-    ): CsInt32 {
+    public Read(reader: unknown, typeToConvert: Constructor, options: JsonSerializerOptions): CsInt32 {
         if (typeof reader === "number") {
             return CsInt32.From(reader);
         }
@@ -26,11 +22,7 @@ export class CsInt32Converter extends JsonConverter<CsInt32> {
         throw new Error(`JsonTokenType was invalid, expected number for CsInt32.`);
     }
 
-    public Write(
-        writer: JsonWriter,
-        value: CsInt32,
-        options: JsonSerializerOptions
-    ): void {
+    public Write(writer: JsonWriter, value: CsInt32, options: JsonSerializerOptions): void {
         writer.WriteNumberValue(value.Value);
     }
 }

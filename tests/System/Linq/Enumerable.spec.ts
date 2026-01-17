@@ -65,7 +65,6 @@ describe("System.Linq.Enumerable", () => {
         expect(enumObj.FirstOrDefault((x) => x === 2)).toBe(2);
         // Cover FirstOrDefault returning null (predicate false for all)
         expect(enumObj.FirstOrDefault((x) => x > 5)).toBeNull();
-
     });
 
     // Last, Single, and their defaults are not implemented in Enumerable.ts yet.
@@ -103,5 +102,13 @@ describe("System.Linq.Enumerable", () => {
         const list = new List<CsInt32>([CsInt32.From(10), CsInt32.From(20)]);
         // The Sum implementation unwraps .Value if it detects it
         expect(list.AsEnumerable().Sum()).toBe(30);
+    });
+
+    test("First: Query with Select", () => {
+        const list = new List<CsInt32>([CsInt32.From(10), CsInt32.From(20)]);
+        const result = Enumerable.From(list)
+            .Where((x) => x.Value > 15)
+            .Select((x) => x.Value * 2);
+        expect(result.First()).toBe(40);
     });
 });

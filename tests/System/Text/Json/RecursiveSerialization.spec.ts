@@ -51,16 +51,16 @@ class AllTypesDto {
 
 class InvalidListDto {
     // Intentionally missing element type for negative test
-    public Items: List<ClientDto> = new List<ClientDto>(); 
+    public Items: List<ClientDto> = new List<ClientDto>();
 }
 
 describe("Recursive Serialization", () => {
     // --- EXISTING TESTS ---
-    
+
     test("Hydrates Simple DTO", () => {
         const json = '{"Name": "Alice"}';
         const result = JsonSerializer.Deserialize(json, SimpleDto);
-        
+
         expect(result).toBeInstanceOf(SimpleDto);
         expect(result.Name).toBeInstanceOf(CsString);
         expect(result.Name.toString()).toBe("Alice");
@@ -69,7 +69,7 @@ describe("Recursive Serialization", () => {
     test("Hydrates List<CsString>", () => {
         const json = '{"Items": ["A", "B"]}';
         const result = JsonSerializer.Deserialize(json, ListDto);
-        
+
         expect(result).toBeInstanceOf(ListDto);
         expect(result.Items).toBeInstanceOf(List);
         expect(result.Items.Count).toBe(2);
@@ -79,14 +79,14 @@ describe("Recursive Serialization", () => {
     test("Ignores Uninitialized Property", () => {
         const json = '{"Name": "Bob"}';
         const result = JsonSerializer.Deserialize(json, UninitializedDto);
-        
+
         expect(result.Name).toBeUndefined(); // Should NOT be hydrated
     });
 
     test("Hydrates Nested DTO", () => {
         const json = '{"Child": {"Name": "Charlie"}}';
         const result = JsonSerializer.Deserialize(json, NestedDto);
-        
+
         expect(result.Child).toBeInstanceOf(SimpleDto);
         expect(result.Child.Name.toString()).toBe("Charlie");
     });
@@ -99,18 +99,18 @@ describe("Recursive Serialization", () => {
             Supervisor: { Name: "Boss", Age: 50, IsWoman: true },
             ListClient: [
                 { Name: "Alice", Age: 25, IsWoman: true },
-                { Name: "Bob", Age: 30, IsWoman: false }
-            ]
+                { Name: "Bob", Age: 30, IsWoman: false },
+            ],
         });
-        
+
         const result = JsonSerializer.Deserialize(json, BankClientListDto);
-        
+
         expect(result).toBeInstanceOf(BankClientListDto);
-        
+
         // Assert System Type: AgencyName
         expect(result.AgencyName).toBeInstanceOf(CsString);
         expect(result.AgencyName.toString()).toBe("Downtown");
-        
+
         // Assert Nested Object: Supervisor
         expect(result.Supervisor).toBeInstanceOf(ClientDto);
         expect(result.Supervisor.Name).toBeInstanceOf(CsString);
@@ -130,7 +130,7 @@ describe("Recursive Serialization", () => {
         expect(person1.Name.toString()).toBe("Alice");
         expect(person1.Age.Value).toBe(25);
         expect(person1.IsWoman.Value).toBe(true);
-        
+
         // Check Element 2
         const person2 = result.ListClient.ToArray()[1];
         expect(person2).toBeInstanceOf(ClientDto);
@@ -146,7 +146,7 @@ describe("Recursive Serialization", () => {
             Int: 2147483647, // Max Int32
             Big: "9007199254740992", // Max Safe Integer + 1 (as string for safety)
             Date: dateString,
-            Bool: true
+            Bool: true,
         });
 
         const result = JsonSerializer.Deserialize(json, AllTypesDto);
@@ -179,9 +179,9 @@ describe("Recursive Serialization", () => {
     test("Throws on Invalid Primitive Type Mismatch", () => {
         // Attempt to pass a string "NotANumber" into CsInt16 field "Age"
         const json = JSON.stringify({
-             Name: "BadData",
-             Age: "NotANumber",
-             IsWoman: true 
+            Name: "BadData",
+            Age: "NotANumber",
+            IsWoman: true,
         });
 
         expect(() => {
@@ -192,7 +192,7 @@ describe("Recursive Serialization", () => {
     test("Throws when List ElementType is missing", () => {
         // Attempt to deserialize into InvalidListDto where List is initialized without type
         const json = JSON.stringify({
-            Items: [{ Name: "Ghost", Age: 0, IsWoman: false }]
+            Items: [{ Name: "Ghost", Age: 0, IsWoman: false }],
         });
 
         expect(() => {
@@ -200,4 +200,3 @@ describe("Recursive Serialization", () => {
         }).toThrow(/ElementType/); // Matches "ElementType is undefined" or similar validation error
     });
 });
-

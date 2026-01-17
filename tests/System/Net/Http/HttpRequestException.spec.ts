@@ -17,7 +17,7 @@ describe("System.Net.Http.HttpRequestException", () => {
         // Checking if the class supports status code (common extension)
         // Adjusting expectation based on standard .NET core or likely simplified implementation
         const ex = new HttpRequestException("Request failed");
-        // Verification: If StatusCode exists on the type, we'd test it. 
+        // Verification: If StatusCode exists on the type, we'd test it.
         // Assuming base implementation for now.
         expect(ex).toBeInstanceOf(HttpRequestException);
     });

@@ -14,19 +14,23 @@ describe("System.Text.Json.Serialization.Converters.CsStringConverter", () => {
 
     test("Read: Handles null inputs", () => {
         const converter = new CsStringConverter();
-        expect(() => converter.Read(null, CsString, new JsonSerializerOptions())).toThrow("Cannot convert null or undefined to CsString");
-        expect(() => converter.Read(undefined, CsString, new JsonSerializerOptions())).toThrow("Cannot convert null or undefined to CsString");
+        expect(() => converter.Read(null, CsString, new JsonSerializerOptions())).toThrow(
+            "Cannot convert null or undefined to CsString",
+        );
+        expect(() => converter.Read(undefined, CsString, new JsonSerializerOptions())).toThrow(
+            "Cannot convert null or undefined to CsString",
+        );
     });
 
     test("Write: Serializes CsString to JSON string", () => {
         const converter = new CsStringConverter();
         const options = new JsonSerializerOptions();
-        
+
         const writer = new JsonStringWriter();
         const value = CsString.From("hello");
-        
+
         converter.Write(writer, value, options);
-        
+
         expect(writer.toString()).toBe('"hello"');
     });
 
@@ -34,10 +38,10 @@ describe("System.Text.Json.Serialization.Converters.CsStringConverter", () => {
         const converter = new CsStringConverter();
         const options = new JsonSerializerOptions();
         const writer = new JsonStringWriter();
-        
+
         const value = CsString.From('Quote: "');
         converter.Write(writer, value, options);
-        
+
         expect(writer.toString()).toBe('"Quote: \\""');
     });
 });

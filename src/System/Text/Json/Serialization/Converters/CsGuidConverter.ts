@@ -8,22 +8,14 @@ export class CsGuidConverter extends JsonConverter<CsGuid> {
         return typeToConvert === CsGuid;
     }
 
-    public Read(
-        reader: unknown,
-        typeToConvert: Constructor,
-        options: JsonSerializerOptions
-    ): CsGuid {
+    public Read(reader: unknown, typeToConvert: Constructor, options: JsonSerializerOptions): CsGuid {
         if (typeof reader === "string") {
             return CsGuid.Parse(reader);
         }
         throw new Error(`Expected string for CsGuid, got ${typeof reader}.`);
     }
 
-    public Write(
-        writer: JsonWriter,
-        value: CsGuid,
-        options: JsonSerializerOptions
-    ): void {
+    public Write(writer: JsonWriter, value: CsGuid, options: JsonSerializerOptions): void {
         writer.WriteStringValue(value.ToString());
     }
 }

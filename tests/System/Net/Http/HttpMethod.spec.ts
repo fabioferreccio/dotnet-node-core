@@ -22,12 +22,12 @@ describe("System.Net.Http.HttpMethod", () => {
         const m2 = HttpMethod.Get;
         // Implementation normalizes to UpperCase, so "get" becomes "GET"
         const m3 = new HttpMethod("get");
-        
+
         expect(m1.Equals(m2)).toBe(true);
-        expect(m1.Equals(m3)).toBe(true); 
+        expect(m1.Equals(m3)).toBe(true);
         expect(m1.Equals(null)).toBe(false);
     });
-    
+
     test("ToString returns Method", () => {
         // ToString() returns CsString
         expect(HttpMethod.Get.ToString().toString()).toBe("GET");

@@ -31,13 +31,13 @@ describe("Dictionary Serialization", () => {
         options.Converters.Add(new DictionaryJsonConverter(CsString, CsInt32));
 
         const json = JsonSerializer.Serialize(dict, options);
-        
+
         // Assert JSON structure (roughly)
         expect(json).toContain('"A":10');
         expect(json).toContain('"B":20');
 
         const result = JsonSerializer.Deserialize(json, Dictionary, options) as Dictionary<CsString, CsInt32>;
-        
+
         expect(result).toBeInstanceOf(Dictionary);
         expect(result.Get(CsString.From("A"))?.Value).toBe(10);
         expect(result.Get(CsString.From("B"))?.Value).toBe(20);
@@ -66,27 +66,27 @@ describe("Dictionary Serialization", () => {
     test("Positive: Dictionary<CsString, List<ClientDto>>", () => {
         const dict = new Dictionary(CsString, List);
         // Note: Generic List type in constructor argument is tricky in TS runtime.
-        // The Dictionary expects `Constructor<TValue>`. 
+        // The Dictionary expects `Constructor<TValue>`.
         // `List` is the constructor. BUT deserializer needs to know ElementType of the List!
-        // Recursive hydration logic uses `existingValue` to determine types? 
+        // Recursive hydration logic uses `existingValue` to determine types?
         // OR `JsonSerializer` expects explicit types.
         // Wait, Dictionary deserializer calls `JsonSerializer.Deserialize(..., List, options)`.
-        // `JsonSerializer.Deserialize` creates `new List()`. 
+        // `JsonSerializer.Deserialize` creates `new List()`.
         // `List` constructor `new List()` creates empty list with undefined ElementType?
         // If ElementType is undefined, generic List deserialization FAILS (checked in previous phase).
-        
+
         // CRITICAL GAP: Nested List Deserialization requires `List` to know its `ElementType`.
         // But `JsonSerializer.Deserialize(json, List)` calls `new List()`. It doesn't pass ElementType.
         // We cannot pass generic arguments to runtime constructor.
-        
-        // Solution: Defines a concrete `ClientList` class? 
+
+        // Solution: Defines a concrete `ClientList` class?
         // OR we rely on `DictionaryJsonConverter` to instantiate the value?
         // But `DictionaryJsonConverter` calls `JsonSerializer.Deserialize(..., this._valueType)`.
         // If `_valueType` is `List`, we instantiate `List`.
-        
-        // To support `List<ClientDto>` as value, we effectively need a `ClientDtoList` class 
+
+        // To support `List<ClientDto>` as value, we effectively need a `ClientDtoList` class
         // that extends `List<ClientDto>` and sets the element type in constructor.
-        
+
         // Let's create `ClientDtoList` for this test.
     });
 });
@@ -101,9 +101,10 @@ describe("Dictionary Serialization (Lists)", () => {
     test("Positive: Dictionary<CsString, ClientDtoList>", () => {
         const dict = new Dictionary(CsString, ClientDtoList); // Use concrete type
         const list = new ClientDtoList();
-        const c = new ClientDto(); c.Name = CsString.From("Bob");
+        const c = new ClientDto();
+        c.Name = CsString.From("Bob");
         list.Add(c);
-        
+
         dict.Add(CsString.From("Key"), list);
 
         const options = new JsonSerializerOptions();
@@ -119,28 +120,28 @@ describe("Dictionary Serialization (Lists)", () => {
     });
 
     test("Negative: Invalid Key String", () => {
-         const json = '{ "Invalid-Guid": {} }';
-         const options = new JsonSerializerOptions();
-         options.Converters.Add(new DictionaryJsonConverter(CsGuid, ClientDto));
+        const json = '{ "Invalid-Guid": {} }';
+        const options = new JsonSerializerOptions();
+        options.Converters.Add(new DictionaryJsonConverter(CsGuid, ClientDto));
 
-         expect(() => {
-             JsonSerializer.Deserialize(json, Dictionary, options);
-         }).toThrow(); // Expect Parse error from CsGuid
+        expect(() => {
+            JsonSerializer.Deserialize(json, Dictionary, options);
+        }).toThrow(); // Expect Parse error from CsGuid
     });
-    
+
     test("Negative: Missing Converter Registration", () => {
         const dict = new Dictionary(CsString, CsInt32);
-        const options = new JsonSerializerOptions(); 
+        const options = new JsonSerializerOptions();
         // No converter added
 
         // Expect Serialize to fall back to JSON.stringify (empty object? or custom?)
         // Wait, JsonSerializer fallback is JSON.stringify(value).
         // Dictionary is an object. It has private _storage.
-        // JSON.stringify(dict) will serialize public properties. 
-        // _storage is private but usually emits if not excluded. 
+        // JSON.stringify(dict) will serialize public properties.
+        // _storage is private but usually emits if not excluded.
         // But Map serialization in JSON.stringify is {} (empty object).
         // So it won't throw, but it will be empty.
-        
+
         // But Deserialize?
         // Deserialize(json, Dictionary, options).
         // If no converter, it instantiates Dictionary via `new Dictionary()`.
@@ -148,9 +149,9 @@ describe("Dictionary Serialization (Lists)", () => {
         // `new Dictionary()` with 0 args will throw TS error or Runtime error?
         // In JS, args are undefined. `if (!keyType) throw`.
         // So deserialization will THROW because constructor fails.
-        
+
         expect(() => {
             JsonSerializer.Deserialize("{}", Dictionary, options);
-        }).toThrow(); 
+        }).toThrow();
     });
 });

@@ -100,11 +100,15 @@ describe("CsBoolean", () => {
 
     test("TryParse works correctly", () => {
         let result: CsBoolean | null = null;
-        const success = CsBoolean.TryParse("True", (val) => { result = val; });
+        const success = CsBoolean.TryParse("True", (val) => {
+            result = val;
+        });
         expect(success).toBe(true);
         expect(result!.Value).toBe(true);
 
-        const successNum = CsBoolean.TryParse(1, (val) => { result = val; });
+        const successNum = CsBoolean.TryParse(1, (val) => {
+            result = val;
+        });
         expect(successNum).toBe(true);
         expect(result!.Value).toBe(true);
 

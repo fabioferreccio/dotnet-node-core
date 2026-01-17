@@ -8,7 +8,10 @@ describe("System.Net.Http.HttpMessageHandler", () => {
     class MockHandler extends HttpMessageHandler {
         public wasCalled = false;
         // Base defines public abstract SendAsync
-        public async SendAsync(request: HttpRequestMessage, cancellationToken: CancellationToken): Promise<HttpResponseMessage> {
+        public async SendAsync(
+            request: HttpRequestMessage,
+            cancellationToken: CancellationToken,
+        ): Promise<HttpResponseMessage> {
             this.wasCalled = true;
             return new HttpResponseMessage();
         }

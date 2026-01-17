@@ -21,7 +21,7 @@ export abstract class JsonConverter<T> {
         reader: unknown,
         typeToConvert: Constructor,
         options: JsonSerializerOptions,
-        existingValue?: T
+        existingValue?: T,
     ): T;
 
     /**
@@ -30,9 +30,5 @@ export abstract class JsonConverter<T> {
      * @param value The value to convert to JSON.
      * @param options The serialization options.
      */
-    public abstract Write(
-        writer: JsonWriter,
-        value: T,
-        options: JsonSerializerOptions
-    ): void;
+    public abstract Write(writer: JsonWriter, value: T, options: JsonSerializerOptions): void;
 }

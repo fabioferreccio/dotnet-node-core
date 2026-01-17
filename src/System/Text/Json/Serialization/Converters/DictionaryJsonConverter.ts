@@ -20,12 +20,8 @@ export class DictionaryJsonConverter<TKey, TValue> extends JsonConverter<Diction
         return typeToConvert === Dictionary;
     }
 
-    public Read(
-        reader: unknown,
-        typeToConvert: Constructor,
-        options: JsonSerializerOptions
-    ): Dictionary<TKey, TValue> {
-        if (typeof reader !== 'object' || reader === null || Array.isArray(reader)) {
+    public Read(reader: unknown, typeToConvert: Constructor, options: JsonSerializerOptions): Dictionary<TKey, TValue> {
+        if (typeof reader !== "object" || reader === null || Array.isArray(reader)) {
             throw new Error("Dictionary deserialization expects a JSON object.");
         }
 
@@ -39,7 +35,7 @@ export class DictionaryJsonConverter<TKey, TValue> extends JsonConverter<Diction
             // 2. Inflate Value
             const jsonVal = sourceObj[jsonKey];
             const serializedVal = JSON.stringify(jsonVal);
-            
+
             const value = JsonSerializer.Deserialize(serializedVal, this._valueType, options);
 
             dict.Add(key, value);
@@ -48,11 +44,7 @@ export class DictionaryJsonConverter<TKey, TValue> extends JsonConverter<Diction
         return dict;
     }
 
-    public Write(
-        writer: JsonWriter,
-        value: Dictionary<TKey, TValue>,
-        options: JsonSerializerOptions
-    ): void {
+    public Write(writer: JsonWriter, value: Dictionary<TKey, TValue>, options: JsonSerializerOptions): void {
         writer.WriteStartObject();
 
         for (const [key, val] of value) {
@@ -76,7 +68,7 @@ export class DictionaryJsonConverter<TKey, TValue> extends JsonConverter<Diction
         if ((this._keyType as any) === CsString) {
             return CsString.From(keyStr) as unknown as TKey;
         }
-        
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if ((this._keyType as any) === CsGuid) {
             return CsGuid.Parse(keyStr) as unknown as TKey;

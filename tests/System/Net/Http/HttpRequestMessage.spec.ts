@@ -17,13 +17,17 @@ describe("System.Net.Http.HttpRequestMessage", () => {
 
     test("Content property and Disposal", () => {
         const req = new HttpRequestMessage();
-        
+
         // Mock Content
         class MockContent extends HttpContent {
             public disposed = false;
-            protected SerializeToStreamAsync() { return Promise.resolve(); }
-            public ReadAsStreamAsync() { return Promise.resolve(null as any); }
-            
+            protected SerializeToStreamAsync() {
+                return Promise.resolve();
+            }
+            public ReadAsStreamAsync() {
+                return Promise.resolve(null as any);
+            }
+
             // Override DisposeInternal to track disposal
             protected override DisposeInternal(disposing: boolean) {
                 this.disposed = true;
@@ -42,13 +46,13 @@ describe("System.Net.Http.HttpRequestMessage", () => {
         const req = new HttpRequestMessage();
         req.Method = HttpMethod.Put;
         expect(req.Method).toEqual(HttpMethod.Put);
-        
+
         // Setter expects CsString | null. String assignment via setter not supported if strict.
         // Assuming we need to convert if using setter directly, or check if setter allows string.
         // Source file says: public set RequestUri(value: CsString | null)
         // So we must use CsString.
         const uri = CsString.From("http://test");
-        req.RequestUri = uri; 
+        req.RequestUri = uri;
         expect(req.RequestUri).toBe(uri);
     });
 });

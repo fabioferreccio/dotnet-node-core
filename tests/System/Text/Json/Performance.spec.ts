@@ -8,7 +8,7 @@ class LargeDto {
     public Name: CsString = CsString.Empty;
     public Value: CsInt32 = CsInt32.From(0);
     public Children: List<LargeDto> = new List(undefined, LargeDto);
-    
+
     // deeply nested structure
 }
 
@@ -27,21 +27,19 @@ describe("JsonSerializer Performance & Safety", () => {
 
     test("Deserialize Large Payload (10k items) - Smoke Test", () => {
         const largeJson = generateLargeJson(10000);
-        
+
         const start = process.hrtime();
         const result = JsonSerializer.Deserialize(largeJson, ListOfLargeDto);
-        
 
-        
         const end = process.hrtime(start);
         const elapsed = end[0] * 1000 + end[1] / 1e6;
-        
+
         // Assertions
         expect(result).toBeDefined();
         // Check count?
         // We generated array. Deserializing to List.
         // The List deserializer logic handles array source.
-        
+
         console.log(`Deserialized 10k items in ${elapsed.toFixed(2)}ms`);
         // We don't assert time because CI variability, but it should be reasonable (<500ms).
     });
@@ -49,7 +47,7 @@ describe("JsonSerializer Performance & Safety", () => {
     test("Pooled DeserializationContext Reset Safety", () => {
         // Run multiple times to ensure context is reused and cleared
         const json = `{"Name":"Test","Value":123}`;
-        
+
         const r1 = JsonSerializer.Deserialize(json, LargeDto);
         const r2 = JsonSerializer.Deserialize(json, LargeDto);
         const r3 = JsonSerializer.Deserialize(json, LargeDto);
@@ -72,19 +70,19 @@ describe("JsonSerializer Performance & Safety", () => {
             Value: 1,
             Children: [
                 { Name: "Child1", Value: 2, Children: [] },
-                { Name: "Child2", Value: 3, Children: [{ Name: "Grandchild", Value: 4 }] }
-            ]
+                { Name: "Child2", Value: 3, Children: [{ Name: "Grandchild", Value: 4 }] },
+            ],
         });
 
         const root = JsonSerializer.Deserialize(nestedJson, LargeDto);
         expect(root.Name.toString()).toBe("Root");
         expect(root.Children.Count).toBe(2);
-        
-        const child1 = root.Children.FirstOrDefault(c => c.Name.toString() === "Child1");
+
+        const child1 = root.Children.FirstOrDefault((c) => c.Name.toString() === "Child1");
         expect(child1).toBeDefined();
         expect(child1!.Children.Count).toBe(0);
 
-        const child2 = root.Children.FirstOrDefault(c => c.Name.toString() === "Child2");
+        const child2 = root.Children.FirstOrDefault((c) => c.Name.toString() === "Child2");
         expect(child2).toBeDefined();
         expect(child2!.Children.FirstOrDefault()!.Name.toString()).toBe("Grandchild");
     });
@@ -92,11 +90,11 @@ describe("JsonSerializer Performance & Safety", () => {
 
 function generateLargeJson(count: number): string {
     const items = [];
-    for(let i=0; i<count; i++) {
+    for (let i = 0; i < count; i++) {
         items.push({
             Name: `Item ${i}`,
             Value: i,
-            Children: []
+            Children: [],
         });
     }
     return JSON.stringify(items);

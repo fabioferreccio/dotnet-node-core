@@ -8,11 +8,7 @@ export class CsDateTimeConverter extends JsonConverter<CsDateTime> {
         return typeToConvert === CsDateTime;
     }
 
-    public Read(
-        reader: unknown,
-        typeToConvert: Constructor,
-        options: JsonSerializerOptions
-    ): CsDateTime {
+    public Read(reader: unknown, typeToConvert: Constructor, options: JsonSerializerOptions): CsDateTime {
         // We assume ISO string from JSON.parse behavior
         if (typeof reader === "string") {
             // Native Date parse via CsDateTime constructor (which accepts string) or we can use From(new Date(reader))
@@ -24,11 +20,7 @@ export class CsDateTimeConverter extends JsonConverter<CsDateTime> {
         throw new Error(`Expected string (ISO 8601) for CsDateTime, got ${typeof reader}.`);
     }
 
-    public Write(
-        writer: JsonWriter,
-        value: CsDateTime,
-        options: JsonSerializerOptions
-    ): void {
+    public Write(writer: JsonWriter, value: CsDateTime, options: JsonSerializerOptions): void {
         // Use "round-trip" format "O" equivalent -> ISO string
         // Use "round-trip" format "O" equivalent -> ISO string
         writer.WriteStringValue(value.ToString("O"));

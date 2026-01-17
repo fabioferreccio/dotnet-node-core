@@ -10,11 +10,11 @@ describe("System.Net.Http.HttpContent", () => {
         }
 
         public override ReadAsStreamAsync(): Promise<any> {
-             const ms = new MemoryStream();
-             const buffer = Buffer.from(this._data);
-             ms.Write(buffer, 0, buffer.length);
-             ms.Position = 0;
-             return Promise.resolve(ms);
+            const ms = new MemoryStream();
+            const buffer = Buffer.from(this._data);
+            ms.Write(buffer, 0, buffer.length);
+            ms.Position = 0;
+            return Promise.resolve(ms);
         }
 
         protected SerializeToStreamAsync(stream: any, context: any): Promise<void> {
@@ -40,7 +40,7 @@ describe("System.Net.Http.HttpContent", () => {
 
     test("Dispose disposes resources", () => {
         const content = new MockContent("test");
-        content.Dispose(); 
+        content.Dispose();
         expect(true).toBe(true);
     });
 });

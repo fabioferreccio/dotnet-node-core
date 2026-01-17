@@ -8,11 +8,7 @@ export class CsInt64Converter extends JsonConverter<CsInt64> {
         return typeToConvert === CsInt64;
     }
 
-    public Read(
-        reader: unknown,
-        typeToConvert: Constructor,
-        options: JsonSerializerOptions
-    ): CsInt64 {
+    public Read(reader: unknown, typeToConvert: Constructor, options: JsonSerializerOptions): CsInt64 {
         // STRICT RULE: CsInt64 must come from String to avoid precision loss.
         if (typeof reader === "string") {
             return CsInt64.From(reader);
@@ -21,14 +17,12 @@ export class CsInt64Converter extends JsonConverter<CsInt64> {
         // "MUST accept ONLY the expected JSON primitive"
         // "CsInt64: MUST respect canonical representation... MUST NOT silently coerce bigint <-> number"
         // If canonical is String, we reject number.
-        throw new Error(`Expected string for CsInt64, got ${typeof reader}. BigInt serialization requires string transport.`);
+        throw new Error(
+            `Expected string for CsInt64, got ${typeof reader}. BigInt serialization requires string transport.`,
+        );
     }
 
-    public Write(
-        writer: JsonWriter,
-        value: CsInt64,
-        options: JsonSerializerOptions
-    ): void {
+    public Write(writer: JsonWriter, value: CsInt64, options: JsonSerializerOptions): void {
         // Serialize as String
         writer.WriteStringValue(value.ToString());
     }
