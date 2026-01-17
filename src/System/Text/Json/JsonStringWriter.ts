@@ -101,11 +101,10 @@ export class JsonStringWriter implements JsonWriter {
     }
     
     private _writeValue(raw: string) {
-        // If we are in an object and just wrote a property name, we append raw. 
         // If we are in an array, we verify comma.
-        // Since we aren't fully robustly tracking property names in `_state` complexity above,
-        // and our primary use case is "Serializer calls Converter -> Converter writes Value",
-        // Most usage will be SINGLE VALUE for now (Task: Serialize CsString -> "Hello").
+        if (this._currentState === 'ArrayItem') {
+            this._parts.push(",");
+        }
         
         // If the serializer is just `converter.Write(writer, val)`, and converter does `writer.WriteStringValue`,
         // We simply push the value.
