@@ -36,7 +36,7 @@ describe("System.DependencyInjection", () => {
 
     test("Singleton: Returns same instance", () => {
         const services = new ServiceCollection();
-        services.AddSingleton(ServiceA, ServiceA);
+        services.AddSingleton(ServiceA);
         const provider = services.BuildServiceProvider();
 
         const a1 = provider.GetRequiredService<ServiceA>(ServiceA);
@@ -48,7 +48,7 @@ describe("System.DependencyInjection", () => {
 
     test("Transient: Returns different instances", () => {
         const services = new ServiceCollection();
-        services.AddTransient(ServiceB, ServiceB);
+        services.AddTransient(ServiceB);
         const provider = services.BuildServiceProvider();
 
         const b1 = provider.GetRequiredService<ServiceB>(ServiceB);
@@ -60,7 +60,7 @@ describe("System.DependencyInjection", () => {
 
     test("Scoped: Different per scope, same within scope", () => {
         const services = new ServiceCollection();
-        services.AddScoped(ServiceC, ServiceC);
+        services.AddScoped(ServiceC);
         const root = services.BuildServiceProvider();
         const rootFactory = root as unknown as IServiceScopeFactory;
 
@@ -78,14 +78,15 @@ describe("System.DependencyInjection", () => {
 
     test("Factory Injection: Resolves dependencies", () => {
         const services = new ServiceCollection();
-        services.AddSingleton(ServiceA, ServiceA);
-        services.AddTransient(ServiceWithDep, (provider: IServiceProvider) => {
+        services.AddSingleton(ServiceA);
+        // Use string token to allow Factory with Provider (Self-Binding strict rule bans factory args)
+        services.AddTransient("IServiceWithDep", (provider: IServiceProvider) => {
             const dep = provider.GetRequiredService<ServiceA>(ServiceA);
             return new ServiceWithDep(dep);
         });
 
         const provider = services.BuildServiceProvider();
-        const svc = provider.GetRequiredService<ServiceWithDep>(ServiceWithDep);
+        const svc = provider.GetRequiredService<ServiceWithDep>("IServiceWithDep");
 
         expect(svc).toBeInstanceOf(ServiceWithDep);
         expect(svc.dependency).toBeInstanceOf(ServiceA);
@@ -94,7 +95,7 @@ describe("System.DependencyInjection", () => {
     test("Instance Registration", () => {
         const services = new ServiceCollection();
         const instance = new ServiceA();
-        services.AddSingleton(ServiceA, instance);
+        services.AddSingleton(ServiceA, () => instance);
 
         const provider = services.BuildServiceProvider();
         expect(provider.GetService(ServiceA)).toBe(instance);
@@ -134,7 +135,7 @@ describe("System.DependencyInjection", () => {
 
     test("Scope Disposal: Clears resources and prevents access", () => {
         const services = new ServiceCollection();
-        services.AddScoped(ServiceC, ServiceC);
+        services.AddScoped(ServiceC);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const root = services.BuildServiceProvider() as any;
         const scope = root.CreateScope();
@@ -180,7 +181,7 @@ describe("System.DependencyInjection", () => {
 
     test("Scoped Service implementing IDisposable is disposed when scope is disposed", () => {
         const services = new ServiceCollection();
-        services.AddScoped(DisposableService, DisposableService);
+        services.AddScoped(DisposableService);
         const root = services.BuildServiceProvider();
         const factory = root as unknown as IServiceScopeFactory;
 
@@ -196,7 +197,7 @@ describe("System.DependencyInjection", () => {
 
     test("Singleton Service implementing IDisposable is disposed when provider is disposed", () => {
         const services = new ServiceCollection();
-        services.AddSingleton(DisposableService, DisposableService);
+        services.AddSingleton(DisposableService);
         const provider = services.BuildServiceProvider();
 
         const svc = provider.GetRequiredService(DisposableService);
@@ -210,7 +211,7 @@ describe("System.DependencyInjection", () => {
 
     test("ServiceProvider can be used with 'using'", () => {
         const services = new ServiceCollection();
-        services.AddSingleton(DisposableService, DisposableService);
+        services.AddSingleton(DisposableService);
 
         let svcRef: DisposableService;
         {
@@ -223,8 +224,8 @@ describe("System.DependencyInjection", () => {
     });
     test("Multiple Scoped Services are disposed when scope is disposed", () => {
         const services = new ServiceCollection();
-        services.AddScoped(DisposableService, DisposableService);
-        services.AddScoped(DisposableService, DisposableService); // Added twice? No, same type.
+        services.AddScoped(DisposableService);
+        services.AddScoped(DisposableService); // Added twice? No, same type.
         // Need distinct types or Transient to simulate multiple instances if Scoped?
         // Logic: Get service twice -> same instance (Scoped).
         // To test multiple *different* services, register another class.
@@ -237,7 +238,7 @@ describe("System.DependencyInjection", () => {
                 this.Dispose();
             }
         }
-        services.AddScoped(DisposableService2, DisposableService2);
+        services.AddScoped(DisposableService2);
 
         const root = services.BuildServiceProvider() as unknown as IServiceScopeFactory;
 
@@ -267,7 +268,7 @@ describe("System.DependencyInjection", () => {
 
     test("ServiceScope.DisposeAsync calls Dispose and disposes services", async () => {
         const services = new ServiceCollection();
-        services.AddScoped(DisposableService, DisposableService);
+        services.AddScoped(DisposableService);
         const root = services.BuildServiceProvider() as unknown as IServiceScopeFactory;
 
         let svc: DisposableService;
@@ -282,7 +283,7 @@ describe("System.DependencyInjection", () => {
 
     test("ServiceProvider.DisposeAsync calls Dispose and disposes singletons", async () => {
         const services = new ServiceCollection();
-        services.AddSingleton(DisposableService, DisposableService);
+        services.AddSingleton(DisposableService);
         const provider = services.BuildServiceProvider();
 
         const svc = provider.GetRequiredService(DisposableService);

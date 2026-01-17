@@ -51,7 +51,7 @@ Unlike JavaScript strings, `System.String` is a Value Object. Modifications crea
 ```typescript
 import { System } from './src/System';
 
-const original = new System.String("  dotnet-node-core  ");
+const original = System.String.From("  dotnet-node-core  ");
 const clean = original.Trim().ToUpper();
 
 System.Console.WriteLine(original); // Prints: "  dotnet-node-core  " (Unchanged)
@@ -71,7 +71,7 @@ const content = "Hello World";
 System.IO.File.WriteAllText(path, content);
 
 // Read using Stream
-const stream = System.IO.File.OpenRead(path);
+const stream = System.IO.File.ReadAllText(path);
 // ... operations
 ```
 
@@ -80,12 +80,12 @@ Use standard LINQ operators on collections.
 
 ```typescript
 const numbers = new System.Collections.Generic.List<System.Int32>();
-numbers.Add(new System.Int32(10));
-numbers.Add(new System.Int32(20));
+numbers.Add(System.Int32.From(10));
+numbers.Add(System.Int32.From(20));
 
 const query = System.Linq.Enumerable.From(numbers)
-    .Where(x => x.GreaterThan(15))
-    .Select(x => x.ToString());
+    .Where(x => x.Value > 15)
+    .Select(x => x.Value.ToString());
     
 System.Console.WriteLine(query.First()); // "20"
 ```
@@ -98,11 +98,11 @@ import { System } from './src/System';
 
 // Register Services
 const services = new System.DependencyInjection.ServiceCollection();
-// services.AddSingleton(IMyService, MyService);
+// services.AddSingleton(MyService);
 
 // Build Provider
 const provider = services.BuildServiceProvider();
-// const myService = provider.GetService(IMyService);
+// const myService = provider.GetService(MyService);
 ```
 
 ---
