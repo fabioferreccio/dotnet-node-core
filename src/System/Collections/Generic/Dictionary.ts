@@ -24,7 +24,9 @@ import { CsGuid } from "../../Types/CsGuid";
 export type Constructor<T = unknown> = NewableFunction & { prototype: T; name: string };
 
 export class Dictionary<TKey, TValue> {
-    private readonly _storage: Map<string, TValue>;
+    // Optimization: Store the original key object and the value.
+    // This allows iteration without re-parsing keys from strings (CPU heavy for Guids).
+    private readonly _storage: Map<string, { k: TKey; v: TValue }>;
     private readonly _keyType: Constructor<TKey>;
     private readonly _valueType: Constructor<TValue>;
 
@@ -33,7 +35,8 @@ export class Dictionary<TKey, TValue> {
             throw new Error("Dictionary must be initialized with keyType and valueType constructors.");
         }
 
-        this._storage = new Map<string, TValue>();
+        // Initialize map
+        this._storage = new Map<string, { k: TKey; v: TValue }>();
         this._keyType = keyType;
         this._valueType = valueType;
 
@@ -47,12 +50,15 @@ export class Dictionary<TKey, TValue> {
             throw new Error(`An item with the same key has already been added. Key: ${stringKey}`);
         }
 
-        this._storage.set(stringKey, value);
+        // Optimization: Cache the original key instance.
+        this._storage.set(stringKey, { k: key, v: value });
     }
 
     public Get(key: TKey): TValue | undefined {
         const stringKey = this.ValidateAndStringifyKey(key);
-        return this._storage.get(stringKey);
+        // Optimization: Access .v directly
+        const entry = this._storage.get(stringKey);
+        return entry ? entry.v : undefined;
     }
 
     private ValidateAndStringifyKey(key: TKey): string {
@@ -102,34 +108,10 @@ export class Dictionary<TKey, TValue> {
     }
 
     public *[Symbol.iterator](): Iterator<[TKey, TValue]> {
-        // We need to reconstruct TKey from string key if we stored it as string in Map
-        // Map keys are strings.
-        // _storage = Map<string, TValue>.
-        // We need to parse valid keys back or store original keys?
-        // Rules: Key MUST be convertible to string.
-        // If we only store string key, we strictly lose the original Key reference if it had other state (which it shouldn't for value types like String/Guid).
-        // But `Get(TKey)` stringifies.
-
-        // If we iterate, we yield [TKey, TValue].
-        // We need to re-hydrate the Key object from the string.
-        // This is expensive but correct for "System Type keys".
-
-        for (const [strKey, value] of this._storage) {
-            let key: TKey;
-
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            if ((this._keyType as any) === CsString) {
-                key = CsString.From(strKey) as unknown as TKey;
-            }
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            else if ((this._keyType as any) === CsGuid) {
-                key = CsGuid.Parse(strKey) as unknown as TKey;
-            } else {
-                // Should not happen due to Add check, but safety:
-                throw new Error("Unsupported key type in storage.");
-            }
-
-            yield [key, value];
+        // Optimization: Iterate directly over cached entries.
+        // No Guid.Parse or CsString reconstruction needed.
+        for (const entry of this._storage.values()) {
+            yield [entry.k, entry.v];
         }
     }
 }
