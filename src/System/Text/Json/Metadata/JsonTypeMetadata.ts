@@ -57,4 +57,45 @@ export class JsonTypeMetadata {
     public get Properties(): ReadonlyMap<string, JsonPropertyMetadata> {
         return this._properties;
     }
+
+    public Validate(): void {
+        // 1. Check for Duplicate JSON Names
+        const jsonNames = new Set<string>();
+        for (const meta of this._properties.values()) {
+            if (jsonNames.has(meta.JsonName)) {
+                throw new Error(
+                    `Invalid metadata for type '${this.TargetType.name}': Duplicate JSON property name '${meta.JsonName}'.`,
+                );
+            }
+            jsonNames.add(meta.JsonName);
+        }
+
+        // 2. Check Property Existence (if possible)
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const instance = new (this.TargetType as any)();
+            for (const prop of this._properties.keys()) {
+                if (!(prop in instance)) {
+                    throw new Error(
+                        `Invalid metadata for type '${this.TargetType.name}': Property '${prop}' does not exist on the type instance.`,
+                    );
+                }
+            }
+        } catch (e) {
+            // If instantiation fails, we cannot validate property existence.
+            // We propagate the error if it was our validation error, otherwise we might choose to warn?
+            // Strict approach: If we can't instantiate, we can't validate, but maybe the Type is valid but strict constructor?
+            // User requested "Behavior: MUST throw descriptive error at registration time".
+            // If the user registers metadata for a type that cannot be instantiated, deserialization will fail anyway.
+            // So failing here is good ("Fail Fast").
+            if (e instanceof Error && e.message.startsWith("Invalid metadata")) {
+                throw e;
+            }
+            // For other errors (e.g. constructor require args), we might wrap or rethrow.
+            // Let's assume fail-fast is desired.
+            throw new Error(
+                `Validation failed for type '${this.TargetType.name}': Could not instantiate to verify properties. Error: ${e}`,
+            );
+        }
+    }
 }

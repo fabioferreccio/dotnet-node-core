@@ -33,7 +33,7 @@ class CustomDateConverter extends JsonConverter<CsDateTime> {
         }
         return CsDateTime.From(0);
     }
-    public Write(writer: JsonWriter, value: CsDateTime, _options: JsonSerializerOptions): void {
+    public Write(writer: JsonWriter, _value: CsDateTime, _options: JsonSerializerOptions): void {
         writer.WriteStringValue("CustomEpoch");
     }
 }

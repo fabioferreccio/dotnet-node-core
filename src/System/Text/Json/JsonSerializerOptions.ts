@@ -72,6 +72,7 @@ export class JsonSerializerOptions {
     }
 
     public RegisterTypeMetadata(metadata: JsonTypeMetadata): void {
+        metadata.Validate();
         this._typeMetadata.set(metadata.TargetType, metadata);
     }
 

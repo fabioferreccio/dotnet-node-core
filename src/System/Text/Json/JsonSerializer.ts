@@ -1,7 +1,6 @@
 import { JsonSerializerOptions } from "./JsonSerializerOptions";
 import { Constructor } from "./Serialization/JsonConverter";
 import { JsonStringWriter } from "./JsonStringWriter";
-import { CsStringConverter } from "./Serialization/Converters/CsStringConverter";
 import { InternalPools } from "../../Runtime/Pooling/InternalPools";
 import { DeserializationContext } from "./DeserializationContext";
 import { JsonTypeMetadata } from "./Metadata/JsonTypeMetadata";
@@ -76,8 +75,13 @@ export class JsonSerializer {
         }
 
         // 3. toJSON Support (Standard JSON serialization behavior)
-        if (typeof (value as any).toJSON === "function") {
-            const jsonValue = (value as any).toJSON();
+        if (
+            value !== null &&
+            (typeof value === "object" || typeof value === "function") &&
+            "toJSON" in value &&
+            typeof (value as { toJSON: unknown }).toJSON === "function"
+        ) {
+            const jsonValue = (value as { toJSON: () => unknown }).toJSON();
             // Recurse with the result of toJSON.
             // We pass null for type because the type of the result (e.g. string or array)
             // should be inferred from the value itself.
