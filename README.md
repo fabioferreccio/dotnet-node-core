@@ -85,7 +85,7 @@ numbers.Add(System.Int32.From(20));
 
 const query = System.Linq.Enumerable.From(numbers)
     .Where(x => x.Value > 15)
-    .Select(x => x.Value.ToString());
+    .Select(x => x.ToString());
     
 System.Console.WriteLine(query.First()); // "20"
 ```
@@ -110,8 +110,10 @@ const provider = services.BuildServiceProvider();
 ## 🏗 Architecture & Governance
 This project follows strict architectural rules to ensure maintainability and compliance.
 
-- [ARCHITECTURE.md](ARCHITECTURE.md): The "Constitution" of the project. Details the folder structure, strict typing rules, and Facade pattern.
-- [.agent/rules/](.agent/rules/000-rules.md): Guidelines for AI Agents (Cursor/Copilot) to maintain code quality and prevent primitive obsession.
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md): The "Constitution" of the project.
+- [SERIALIZATION.md](docs/SERIALIZATION.md): JSON Usage, Metadata, & Diagnostics.
+- [DEPENDENCY_INJECTION.md](docs/DEPENDENCY_INJECTION.md): Service Lifetimes & Patterns.
+- [TYPES.md](docs/TYPES.md): CsString, CsInt32, and "No Primitives" Guide.
 
 ### Project Structure (Expanded)
 - [src/Domain](src/Domain): The Core. Conceptual Contracts and Interfaces.
@@ -121,6 +123,7 @@ This project follows strict architectural rules to ensure maintainability and co
     - `Linq`: Query operators.
     - `DependencyInjection`: DI Container implementation.
     - `Net`: HTTP Primitives (Headers, Methods).
+    - `Text.Json`: Serialization engine.
 
 ---
 

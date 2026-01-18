@@ -171,6 +171,30 @@ The DI system is split into **Contract** and **Implementation**.
 - **MAY** instantiate concrete System types.
 
 ### 7.2 Usage Rules
-- **Domain Objects:** **MUST NOT** depend on `ServiceProvider` (concrete). They MAY depend on `IServiceProvider` (interface).
-- **System Objects:** MAY use `ServiceCollection` to compose the runtime environment.
 - **Zero-Coupling:** The `System` layer provides the DI capability, but strictly implements the `Domain` interfaces. Current `ServiceDescriptor` in Domain is **ALLOWED** as long as it remains a logic-free definition.
+
+---
+
+## 8. API Stability & Versioning
+
+### 8.1 Semantic Versioning
+This project strictly follows [Semantic Versioning 2.0.0](https://semver.org/).
+
+- **MAJOR**: Incompatible API changes.
+- **MINOR**: Backward-compatible functionality.
+- **PATCH**: Backward-compatible bug fixes.
+
+### 8.2 Stability Guarantees
+- **Public API**: Defined as any type or member exported from `src/System/index.ts`.
+    - **Status**: **FROZEN**.
+    - **Guarantee**: Will not change within a MAJOR version.
+- **Internal API**: Any type or member NOT exported from `src/System/index.ts`.
+    - **Status**: **VOLATILE**.
+    - **Guarantee**: NONE. May change at any time.
+
+### 8.3 Design Non-Goals
+The following features are explicitly **OUT OF SCOPE** to maintain the "No Magic" philosophy:
+
+1.  **Automatic Domain Hydration**: We do not magically hydrate private fields. Use Constructors.
+2.  **Polymorphic Serialization**: We do not include `$type` fields automatically. Use `JsonTypeMetadata`.
+3.  **Implicit Reflection**: We do not scan the Validation of types. All mappings must be explicit.

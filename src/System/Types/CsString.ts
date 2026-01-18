@@ -62,6 +62,10 @@ export class CsString implements IEquatable<CsString>, IComparable<CsString> {
         return this._value;
     }
 
+    public ToString(): string {
+        return this.toString();
+    }
+
     public toJSON(): string {
         return this._value;
     }
