@@ -3,8 +3,10 @@ import { Constructor } from "./Serialization/JsonConverter";
 import { JsonStringWriter } from "./JsonStringWriter";
 import { InternalPools } from "../../Runtime/Pooling/InternalPools";
 import { DeserializationContext } from "./DeserializationContext";
+
 import { JsonTypeMetadata } from "./Metadata/JsonTypeMetadata";
 import { NullHandling } from "./Metadata/NullHandling";
+import { JsonSerializationContext } from "./Diagnostics/JsonSerializationContext";
 
 export class JsonSerializer {
     public static Serialize<T>(value: T, options?: JsonSerializerOptions): string {
@@ -21,7 +23,33 @@ export class JsonSerializer {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const type = proto ? (proto.constructor as Constructor) : (value as any).constructor;
 
-        JsonSerializer.WriteObject(writer, value, type, opts);
+        // Diagnostics: Start
+        let diagContext: JsonSerializationContext | undefined;
+        if (opts.Diagnostics) {
+            diagContext = {
+                TargetType: type,
+                IsMetadataEnabled: !!opts.GetTypeMetadata(type),
+                Depth: 0,
+                NodeCount: 0,
+                StartTime: Date.now(),
+            };
+            if (opts.Diagnostics.OnSerializeStart) {
+                opts.Diagnostics.OnSerializeStart(diagContext);
+            }
+        }
+
+        try {
+            JsonSerializer.WriteObject(writer, value, type, opts, diagContext);
+        } finally {
+            // Diagnostics: End
+            if (opts.Diagnostics && diagContext) {
+                diagContext.EndTime = Date.now();
+                if (opts.Diagnostics.OnSerializeEnd) {
+                    opts.Diagnostics.OnSerializeEnd(diagContext);
+                }
+            }
+        }
+
         return writer.toString();
     }
 
@@ -30,11 +58,35 @@ export class JsonSerializer {
         const parsed: unknown = JSON.parse(json);
 
         // Rent Context
+
         const context = InternalPools.DeserializationContextPool.Rent();
 
+        // Diagnostics: Start
+        let diagContext: JsonSerializationContext | undefined;
+        if (opts.Diagnostics) {
+            diagContext = {
+                TargetType: targetType,
+                IsMetadataEnabled: !!opts.GetTypeMetadata(targetType),
+                Depth: 0,
+                NodeCount: 0,
+                StartTime: Date.now(),
+            };
+            if (opts.Diagnostics.OnDeserializeStart) {
+                opts.Diagnostics.OnDeserializeStart(diagContext);
+            }
+        }
+
         try {
-            return JsonSerializer.DeserializeObject(parsed, targetType, opts, context);
+            return JsonSerializer.DeserializeObject(parsed, targetType, opts, context, diagContext);
         } finally {
+            // Diagnostics: End
+            if (opts.Diagnostics && diagContext) {
+                diagContext.EndTime = Date.now();
+                if (opts.Diagnostics.OnDeserializeEnd) {
+                    opts.Diagnostics.OnDeserializeEnd(diagContext);
+                }
+            }
+
             // Return Context
             InternalPools.DeserializationContextPool.Return(context);
         }
@@ -45,116 +97,152 @@ export class JsonSerializer {
         value: unknown,
         type: Constructor<unknown> | null,
         options: JsonSerializerOptions,
+        diagContext?: JsonSerializationContext,
     ): void {
-        if (value === null || value === undefined) {
-            writer.WriteNullValue();
-            return;
+        if (diagContext) {
+            diagContext.NodeCount++;
+            diagContext.Depth++;
         }
 
-        // 1. Primitives (Fast Path)
-        if (typeof value === "string") {
-            writer.WriteStringValue(value);
-            return;
-        }
-        if (typeof value === "number") {
-            writer.WriteNumberValue(value);
-            return;
-        }
-        if (typeof value === "boolean") {
-            writer.WriteBooleanValue(value);
-            return;
-        }
-
-        // 2. Converters
-        if (type) {
-            const converter = options.GetConverter(type);
-            if (converter) {
-                converter.Write(writer, value, options);
+        try {
+            if (value === null || value === undefined) {
+                writer.WriteNullValue();
                 return;
             }
-        }
 
-        // 3. toJSON Support (Standard JSON serialization behavior)
-        if (
-            value !== null &&
-            (typeof value === "object" || typeof value === "function") &&
-            "toJSON" in value &&
-            typeof (value as { toJSON: unknown }).toJSON === "function"
-        ) {
-            const jsonValue = (value as { toJSON: () => unknown }).toJSON();
-            // Recurse with the result of toJSON.
-            // We pass null for type because the type of the result (e.g. string or array)
-            // should be inferred from the value itself.
-            JsonSerializer.WriteObject(writer, jsonValue, null, options);
-            return;
-        }
-
-        // 3. Arrays
-        if (Array.isArray(value)) {
-            writer.WriteStartArray();
-            for (const item of value) {
-                // Infer type of item? Or just pass unknown.
-                let itemType: Constructor<unknown> | null = null;
-                if (item !== null && item !== undefined) {
-                    itemType = Object.getPrototypeOf(item).constructor as Constructor<unknown>;
-                }
-                JsonSerializer.WriteObject(writer, item, itemType, options);
+            // 1. Primitives (Fast Path)
+            if (typeof value === "string") {
+                writer.WriteStringValue(value);
+                return;
             }
-            writer.WriteEndArray();
-            return;
-        }
+            if (typeof value === "number") {
+                writer.WriteNumberValue(value);
+                return;
+            }
+            if (typeof value === "boolean") {
+                writer.WriteBooleanValue(value);
+                return;
+            }
 
-        // 4. Objects (Metadata Aware)
-        // Check metadata
-        let metadata: JsonTypeMetadata | undefined;
-        if (type) {
-            metadata = options.GetTypeMetadata(type);
-        }
+            // 2. Converters
+            if (type) {
+                const converter = options.GetConverter(type);
+                if (converter) {
+                    // Diagnostics: Converter Used
+                    if (options.Diagnostics?.OnConverterUsed && diagContext) {
+                        options.Diagnostics.OnConverterUsed(type, converter);
+                    }
 
-        writer.WriteStartObject();
-        const keys = Object.keys(value as object);
-        for (const key of keys) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const propVal = (value as any)[key];
-
-            // Metadata resolution
-            let jsonName = key;
-            let propConverter: import("./Serialization/JsonConverter").JsonConverter<unknown> | null = null;
-            let nullHandling = NullHandling.Default;
-
-            if (metadata) {
-                const propMeta = metadata.GetProperty(key);
-                if (propMeta) {
-                    jsonName = propMeta.JsonName;
-                    propConverter = propMeta.Converter;
-                    nullHandling = propMeta.NullHandling;
+                    converter.Write(writer, value, options);
+                    return;
                 }
             }
 
-            // Null Handling Checks
-            if (propVal === null || propVal === undefined) {
-                if (nullHandling === NullHandling.Ignore) {
-                    continue;
-                }
-                if (nullHandling === NullHandling.Disallow) {
-                    throw new Error(`Property '${key}' is null but configured as DisallowNull.`);
-                }
-                // Allow or Default -> Emit null
+            // 3. toJSON Support (Standard JSON serialization behavior)
+            if (
+                value !== null &&
+                (typeof value === "object" || typeof value === "function") &&
+                "toJSON" in value &&
+                typeof (value as { toJSON: unknown }).toJSON === "function"
+            ) {
+                const jsonValue = (value as { toJSON: () => unknown }).toJSON();
+                // Recurse with the result of toJSON.
+                // We pass null for type because the type of the result (e.g. string or array)
+                // should be inferred from the value itself.
+                JsonSerializer.WriteObject(writer, jsonValue, null, options, diagContext);
+                return;
             }
 
-            writer.WritePropertyName(jsonName);
-
-            if (propConverter) {
-                propConverter.Write(writer, propVal, options);
-            } else {
-                let propType: Constructor<unknown> | null = null;
-                if (propVal !== null && propVal !== undefined) {
-                    propType = Object.getPrototypeOf(propVal).constructor as Constructor<unknown>;
+            // 3. Arrays
+            if (Array.isArray(value)) {
+                writer.WriteStartArray();
+                for (const item of value) {
+                    // Infer type of item? Or just pass unknown.
+                    let itemType: Constructor<unknown> | null = null;
+                    if (item !== null && item !== undefined) {
+                        itemType = Object.getPrototypeOf(item).constructor as Constructor<unknown>;
+                    }
+                    JsonSerializer.WriteObject(writer, item, itemType, options, diagContext);
                 }
-                JsonSerializer.WriteObject(writer, propVal, propType, options);
+                writer.WriteEndArray();
+                return;
+            }
+
+            // 4. Objects (Metadata Aware)
+            // Check metadata
+            let metadata: JsonTypeMetadata | undefined;
+            if (type) {
+                metadata = options.GetTypeMetadata(type);
+            }
+
+            writer.WriteStartObject();
+            const keys = Object.keys(value as object);
+            for (const key of keys) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const propVal = (value as any)[key];
+
+                // Metadata resolution
+                let jsonName = key;
+                let propConverter: import("./Serialization/JsonConverter").JsonConverter<unknown> | null = null;
+                let nullHandling = NullHandling.Default;
+
+                if (metadata) {
+                    const propMeta = metadata.GetProperty(key);
+                    if (propMeta) {
+                        jsonName = propMeta.JsonName;
+                        propConverter = propMeta.Converter;
+                        nullHandling = propMeta.NullHandling;
+
+                        // Diagnostics: Metadata Applied
+                        if (options.Diagnostics?.OnMetadataApplied && diagContext && type) {
+                            options.Diagnostics.OnMetadataApplied(type, key);
+                        }
+                    }
+                }
+
+                // Null Handling Checks
+                if (propVal === null || propVal === undefined) {
+                    if (nullHandling === NullHandling.Ignore) {
+                        continue;
+                    }
+                    if (nullHandling === NullHandling.Disallow) {
+                        throw new Error(`Property '${key}' is null but configured as DisallowNull.`);
+                    }
+                    // Allow or Default -> Emit null
+                }
+
+                writer.WritePropertyName(jsonName);
+
+                if (propConverter) {
+                    // Diagnostics: Converter Used (Property Level)
+                    // Note: We might be missing the exact runtime type here if value is null, but we have propConverter.
+                    if (options.Diagnostics?.OnConverterUsed && diagContext && type) {
+                        // We pass 'type' as the parent container type? Or the property type?
+                        // The interface calls for (type, converter). Likely the Type being converted.
+                        // But we don't know the property type unless we infer it or have it from metadata.
+                        // Metadata doesn't strictly store property Type, only Converter.
+                        // We'll pass the container type or try to get value type.
+                        let valueType = type; // fallback
+                        if (propVal !== null && propVal !== undefined) {
+                            valueType = Object.getPrototypeOf(propVal).constructor as Constructor<unknown>;
+                        }
+                        options.Diagnostics.OnConverterUsed(valueType, propConverter);
+                    }
+                    propConverter.Write(writer, propVal, options);
+                } else {
+                    let propType: Constructor<unknown> | null = null;
+                    if (propVal !== null && propVal !== undefined) {
+                        propType = Object.getPrototypeOf(propVal).constructor as Constructor<unknown>;
+                    }
+                    JsonSerializer.WriteObject(writer, propVal, propType, options, diagContext);
+                }
+            }
+            writer.WriteEndObject();
+        } finally {
+            if (diagContext) {
+                diagContext.Depth--;
             }
         }
-        writer.WriteEndObject();
     }
 
     /**
@@ -165,9 +253,14 @@ export class JsonSerializer {
         targetType: Constructor<T>,
         options: JsonSerializerOptions,
         context: DeserializationContext,
+        diagContext?: JsonSerializationContext,
     ): T {
         // Safety: Track Depth
         context.Depth++;
+        if (diagContext) {
+            diagContext.Depth++;
+            diagContext.NodeCount++;
+        }
 
         try {
             // 1. Null Check
@@ -178,6 +271,10 @@ export class JsonSerializer {
             // 2. Check for Converter (Leaf System Types)
             const converter = options.GetConverter(targetType);
             if (converter) {
+                // Diagnostics: Converter Used
+                if (options.Diagnostics?.OnConverterUsed && diagContext) {
+                    options.Diagnostics.OnConverterUsed(targetType, converter);
+                }
                 return converter.Read(source, targetType, options) as T;
             }
 
@@ -209,7 +306,13 @@ export class JsonSerializer {
                     }
 
                     for (const item of source) {
-                        const deserializedItem = JsonSerializer.DeserializeObject(item, elemType, options, context);
+                        const deserializedItem = JsonSerializer.DeserializeObject(
+                            item,
+                            elemType,
+                            options,
+                            context,
+                            diagContext,
+                        );
                         listInstance.Add(deserializedItem);
                     }
                     return instance;
@@ -234,6 +337,11 @@ export class JsonSerializer {
                         if (found) {
                             dtoKey = found.PropertyName;
                             propMeta = found;
+
+                            // Diagnostics: Metadata Applied
+                            if (options.Diagnostics?.OnMetadataApplied && diagContext) {
+                                options.Diagnostics.OnMetadataApplied(targetType, found.PropertyName); // Use DTO name or JSON name? Requirement: "type, propertyName". Using Resolved PropertyName.
+                            }
                         }
                     }
 
@@ -267,6 +375,14 @@ export class JsonSerializer {
                                 Object.getPrototypeOf(propVal).constructor as Constructor<unknown>,
                                 options,
                             );
+
+                            // Diagnostics: Converter Used (Property)
+                            if (options.Diagnostics?.OnConverterUsed && diagContext) {
+                                // We have propVal, so we know the type
+                                const pType = Object.getPrototypeOf(propVal).constructor as Constructor<unknown>;
+                                options.Diagnostics.OnConverterUsed(pType, propMeta.Converter);
+                            }
+
                             (instance as Record<string, unknown>)[dtoKey] = converted;
                             continue;
                         }
@@ -282,7 +398,14 @@ export class JsonSerializer {
 
                         const propType = Object.getPrototypeOf(propVal).constructor as Constructor<unknown>;
 
-                        const hydrated = JsonSerializer.PopulateObject(jsonVal, propType, options, context, propVal);
+                        const hydrated = JsonSerializer.PopulateObject(
+                            jsonVal,
+                            propType,
+                            options,
+                            context,
+                            propVal,
+                            diagContext,
+                        );
 
                         if (hydrated !== undefined) {
                             (instance as Record<string, unknown>)[dtoKey] = hydrated;
@@ -293,8 +416,32 @@ export class JsonSerializer {
             }
 
             return instance;
+        } catch (error) {
+            // Diagnostics: Error
+            if (options.Diagnostics?.OnError && diagContext && error instanceof Error) {
+                // Enrich context
+                // Requirement: TargetType, PropertyPath (if available), MetadataApplied (yes/no)
+                // We can attach to error object.
+                // We don't have PropertyPath easily here without passing it down or reconstructing it.
+                // But we have TargetType.
+                Object.defineProperty(error, "context", {
+                    value: {
+                        ...diagContext,
+                        TargetType: targetType,
+                    },
+                    writable: true,
+                    enumerable: false,
+                    configurable: true,
+                });
+
+                options.Diagnostics.OnError(error, diagContext);
+            }
+            throw error;
         } finally {
             context.Depth--;
+            if (diagContext) {
+                diagContext.Depth--;
+            }
         }
     }
 
@@ -303,16 +450,34 @@ export class JsonSerializer {
         targetType: Constructor<T>,
         options: JsonSerializerOptions,
         context: DeserializationContext,
+
         existingValue?: T,
+        diagContext?: JsonSerializationContext,
     ): T {
+        if (diagContext) {
+            diagContext.NodeCount++; // Should PopulateObject count as a node? Yes, it's visiting an object.
+            // Depth? PopulateObject is recursive step usually, let's say yes. But wait, PopulateObject is called FROM DeserializeObject (visited).
+            // Actually PopulateObject is used when we have an existing value.
+            // Let's treat it similar to DeserializeObject.
+        }
         // If Leaf Converter Exists:
         const converter = options.GetConverter(targetType);
+
         if (converter) {
+            // Diagnostics: Converter
+            if (options.Diagnostics?.OnConverterUsed && diagContext) {
+                options.Diagnostics.OnConverterUsed(targetType, converter);
+            }
             return converter.Read(source, targetType, options, existingValue) as T;
         }
 
         // If List (detected by shape):
-        if (existingValue && "Add" in (existingValue as object) && "ElementType" in (existingValue as object)) {
+        if (
+            existingValue &&
+            typeof existingValue === "object" &&
+            "Add" in (existingValue as object) &&
+            "ElementType" in (existingValue as object)
+        ) {
             if (Array.isArray(source)) {
                 const listInstance = existingValue as unknown as {
                     Add(item: unknown): void;
@@ -323,7 +488,13 @@ export class JsonSerializer {
                     throw new Error(`Deserialization failed: List property does not define ElementType.`);
                 }
                 for (const item of source) {
-                    const deserializedItem = JsonSerializer.DeserializeObject(item, elemType, options, context);
+                    const deserializedItem = JsonSerializer.DeserializeObject(
+                        item,
+                        elemType,
+                        options,
+                        context,
+                        diagContext,
+                    );
                     listInstance.Add(deserializedItem);
                 }
                 return existingValue;
@@ -355,6 +526,10 @@ export class JsonSerializer {
                     if (found) {
                         dtoKey = found.PropertyName;
                         propMeta = found;
+                        // Diagnostics: Metadata Applied
+                        if (options.Diagnostics?.OnMetadataApplied && diagContext) {
+                            options.Diagnostics.OnMetadataApplied(targetType, found.PropertyName);
+                        }
                     }
                 }
 
@@ -388,6 +563,12 @@ export class JsonSerializer {
                             pType = Object.getPrototypeOf(propVal).constructor as Constructor<unknown>;
                         }
                         const converted = propMeta.Converter.Read(jsonVal, pType, options);
+
+                        // Diagnostics: Converter Used
+                        if (options.Diagnostics?.OnConverterUsed && diagContext) {
+                            options.Diagnostics.OnConverterUsed(pType, propMeta.Converter);
+                        }
+
                         (instance as Record<string, unknown>)[dtoKey] = converted;
                         continue;
                     }
@@ -402,6 +583,7 @@ export class JsonSerializer {
                         options,
                         context,
                         propVal as unknown,
+                        diagContext,
                     );
                     (instance as Record<string, unknown>)[dtoKey] = result;
                 }

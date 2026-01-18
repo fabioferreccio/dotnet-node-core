@@ -13,8 +13,10 @@ import { CsSingleConverter } from "./Serialization/Converters/CsSingleConverter"
 import { CsDoubleConverter } from "./Serialization/Converters/CsDoubleConverter";
 import { CsDecimalConverter } from "./Serialization/Converters/CsDecimalConverter";
 import { JsonTypeMetadata } from "./Metadata/JsonTypeMetadata";
+import { JsonSerializerDiagnostics } from "./Diagnostics/JsonSerializerDiagnostics";
 
 export class JsonSerializerOptions {
+    public Diagnostics?: JsonSerializerDiagnostics;
     private _converters: List<JsonConverter<unknown>>;
     private _typeMetadata: Map<Constructor<unknown>, JsonTypeMetadata>;
     private _writeIndented: boolean;
