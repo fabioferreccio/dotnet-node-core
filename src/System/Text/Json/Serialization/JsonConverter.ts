@@ -1,4 +1,5 @@
-import { JsonSerializerOptions } from "../JsonSerializerOptions";
+import type { JsonSerializerOptions } from "../JsonSerializerOptions";
+
 import { JsonWriter } from "../JsonWriter";
 
 // Safe constructor type for instantiation

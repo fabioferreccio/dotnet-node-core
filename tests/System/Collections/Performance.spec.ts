@@ -14,7 +14,7 @@ describe("Performance & Correctness Verification", () => {
             }
 
             expect(list.Count).toBe(count);
-            
+
             // Check content
             const array = list.ToArray();
             expect(array.length).toBe(count);
@@ -60,7 +60,7 @@ describe("Performance & Correctness Verification", () => {
             list.Add(1);
             list.Clear(); // Internal buffer might still have 1
             list.Add(2);
-            
+
             const arr = list.ToArray();
             expect(arr.length).toBe(1);
             expect(arr[0]).toBe(2);
@@ -72,11 +72,11 @@ describe("Performance & Correctness Verification", () => {
             list.Add(2);
             list.Add(3);
 
-            const even = list.Where(x => x % 2 === 0);
+            const even = list.Where((x) => x % 2 === 0);
             expect(even.Count).toBe(1);
             expect(even.ToArray()[0]).toBe(2);
 
-            const doubled = list.Select(x => x * 2);
+            const doubled = list.Select((x) => x * 2);
             expect(doubled.ToArray()).toEqual([2, 4, 6]);
         });
     });
@@ -115,7 +115,7 @@ describe("Performance & Correctness Verification", () => {
                 expect(k).toBeInstanceOf(CsString);
                 expect(k.toString()).toBe(keyStr);
                 expect(v).toBe(val);
-                
+
                 // If we implemented internal caching, k might strictly be 'key' if strictly equal.
                 // If we reconstruct, it might be a new instance but equal value.
                 // Optimizations aim to return ORIGINAL key if possible.
@@ -124,7 +124,7 @@ describe("Performance & Correctness Verification", () => {
         });
 
         test("Reusing Dict should work (if Clear existed, but it assumes fresh instance for now)", () => {
-            // Dictionary doesn't have Clear in the provided interface, 
+            // Dictionary doesn't have Clear in the provided interface,
             // but we ensure basic stability.
             const dict = new Dictionary(CsString, CsString);
             expect(() => dict.Add(CsString.From("a"), CsString.From("b"))).not.toThrow();

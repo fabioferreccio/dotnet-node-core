@@ -12,10 +12,13 @@ import { CsInt64Converter } from "./Serialization/Converters/CsInt64Converter";
 import { CsSingleConverter } from "./Serialization/Converters/CsSingleConverter";
 import { CsDoubleConverter } from "./Serialization/Converters/CsDoubleConverter";
 import { CsDecimalConverter } from "./Serialization/Converters/CsDecimalConverter";
+import { JsonTypeMetadata } from "./Metadata/JsonTypeMetadata";
 
 export class JsonSerializerOptions {
     private _converters: List<JsonConverter<unknown>>;
+    private _typeMetadata: Map<Constructor<unknown>, JsonTypeMetadata>;
     private _writeIndented: boolean;
+
     private _propertyNameCaseInsensitive: boolean;
 
     constructor() {
@@ -36,6 +39,7 @@ export class JsonSerializerOptions {
 
         this._writeIndented = false;
         this._propertyNameCaseInsensitive = false;
+        this._typeMetadata = new Map<Constructor<unknown>, JsonTypeMetadata>();
     }
 
     public get Converters(): List<JsonConverter<unknown>> {
@@ -65,5 +69,13 @@ export class JsonSerializerOptions {
 
     public set PropertyNameCaseInsensitive(value: boolean) {
         this._propertyNameCaseInsensitive = value;
+    }
+
+    public RegisterTypeMetadata(metadata: JsonTypeMetadata): void {
+        this._typeMetadata.set(metadata.TargetType, metadata);
+    }
+
+    public GetTypeMetadata(type: Constructor<unknown>): JsonTypeMetadata | undefined {
+        return this._typeMetadata.get(type);
     }
 }

@@ -1,27 +1,29 @@
 import { JsonSerializerOptions } from "./JsonSerializerOptions";
 import { Constructor } from "./Serialization/JsonConverter";
 import { JsonStringWriter } from "./JsonStringWriter";
+import { CsStringConverter } from "./Serialization/Converters/CsStringConverter";
 import { InternalPools } from "../../Runtime/Pooling/InternalPools";
 import { DeserializationContext } from "./DeserializationContext";
+import { JsonTypeMetadata } from "./Metadata/JsonTypeMetadata";
+import { NullHandling } from "./Metadata/NullHandling";
 
 export class JsonSerializer {
     public static Serialize<T>(value: T, options?: JsonSerializerOptions): string {
         const opts = options ?? new JsonSerializerOptions();
+        const writer = new JsonStringWriter();
 
-        // 1. Check if we have a converter for T directly.
-        if (value !== null && value !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const type = Object.getPrototypeOf(value).constructor as Constructor;
-            const converter = opts.GetConverter(type);
-
-            if (converter) {
-                const writer = new JsonStringWriter();
-                converter.Write(writer, value as unknown as T, opts);
-                return writer.toString();
-            }
+        if (value === null || value === undefined) {
+            return "null";
         }
 
-        return JSON.stringify(value);
+        // Determine type
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const proto = Object.getPrototypeOf(value);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const type = proto ? (proto.constructor as Constructor) : (value as any).constructor;
+
+        JsonSerializer.WriteObject(writer, value, type, opts);
+        return writer.toString();
     }
 
     public static Deserialize<T>(json: string, targetType: Constructor<T>, options?: JsonSerializerOptions): T {
@@ -37,6 +39,118 @@ export class JsonSerializer {
             // Return Context
             InternalPools.DeserializationContextPool.Return(context);
         }
+    }
+
+    private static WriteObject(
+        writer: JsonStringWriter,
+        value: unknown,
+        type: Constructor<unknown> | null,
+        options: JsonSerializerOptions,
+    ): void {
+        if (value === null || value === undefined) {
+            writer.WriteNullValue();
+            return;
+        }
+
+        // 1. Primitives (Fast Path)
+        if (typeof value === "string") {
+            writer.WriteStringValue(value);
+            return;
+        }
+        if (typeof value === "number") {
+            writer.WriteNumberValue(value);
+            return;
+        }
+        if (typeof value === "boolean") {
+            writer.WriteBooleanValue(value);
+            return;
+        }
+
+        // 2. Converters
+        if (type) {
+            const converter = options.GetConverter(type);
+            if (converter) {
+                converter.Write(writer, value, options);
+                return;
+            }
+        }
+
+        // 3. toJSON Support (Standard JSON serialization behavior)
+        if (typeof (value as any).toJSON === "function") {
+            const jsonValue = (value as any).toJSON();
+            // Recurse with the result of toJSON.
+            // We pass null for type because the type of the result (e.g. string or array)
+            // should be inferred from the value itself.
+            JsonSerializer.WriteObject(writer, jsonValue, null, options);
+            return;
+        }
+
+        // 3. Arrays
+        if (Array.isArray(value)) {
+            writer.WriteStartArray();
+            for (const item of value) {
+                // Infer type of item? Or just pass unknown.
+                let itemType: Constructor<unknown> | null = null;
+                if (item !== null && item !== undefined) {
+                    itemType = Object.getPrototypeOf(item).constructor as Constructor<unknown>;
+                }
+                JsonSerializer.WriteObject(writer, item, itemType, options);
+            }
+            writer.WriteEndArray();
+            return;
+        }
+
+        // 4. Objects (Metadata Aware)
+        // Check metadata
+        let metadata: JsonTypeMetadata | undefined;
+        if (type) {
+            metadata = options.GetTypeMetadata(type);
+        }
+
+        writer.WriteStartObject();
+        const keys = Object.keys(value as object);
+        for (const key of keys) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const propVal = (value as any)[key];
+
+            // Metadata resolution
+            let jsonName = key;
+            let propConverter: import("./Serialization/JsonConverter").JsonConverter<unknown> | null = null;
+            let nullHandling = NullHandling.Default;
+
+            if (metadata) {
+                const propMeta = metadata.GetProperty(key);
+                if (propMeta) {
+                    jsonName = propMeta.JsonName;
+                    propConverter = propMeta.Converter;
+                    nullHandling = propMeta.NullHandling;
+                }
+            }
+
+            // Null Handling Checks
+            if (propVal === null || propVal === undefined) {
+                if (nullHandling === NullHandling.Ignore) {
+                    continue;
+                }
+                if (nullHandling === NullHandling.Disallow) {
+                    throw new Error(`Property '${key}' is null but configured as DisallowNull.`);
+                }
+                // Allow or Default -> Emit null
+            }
+
+            writer.WritePropertyName(jsonName);
+
+            if (propConverter) {
+                propConverter.Write(writer, propVal, options);
+            } else {
+                let propType: Constructor<unknown> | null = null;
+                if (propVal !== null && propVal !== undefined) {
+                    propType = Object.getPrototypeOf(propVal).constructor as Constructor<unknown>;
+                }
+                JsonSerializer.WriteObject(writer, propVal, propType, options);
+            }
+        }
+        writer.WriteEndObject();
     }
 
     /**
@@ -105,28 +219,69 @@ export class JsonSerializer {
             // 5. DTO Handling (Object)
             if (typeof source === "object") {
                 const sourceObj = source as Record<string, unknown>;
+                const metadata = options.GetTypeMetadata(targetType);
 
-                // Optimization: We could use context to rent keys array here if we avoided Object.keys?
-                // For now, standard Object.keys iteration.
-                for (const key of Object.keys(sourceObj)) {
-                    if (key in (instance as object)) {
-                        const propVal = (instance as Record<string, unknown>)[key];
+                for (const jsonKey of Object.keys(sourceObj)) {
+                    let dtoKey = jsonKey;
+                    let propMeta: import("./Metadata/JsonPropertyMetadata").JsonPropertyMetadata | undefined;
+
+                    if (metadata) {
+                        const found = metadata.GetPropertyByJsonName(jsonKey);
+                        if (found) {
+                            dtoKey = found.PropertyName;
+                            propMeta = found;
+                        }
+                    }
+
+                    if (dtoKey in (instance as object)) {
+                        const propVal = (instance as Record<string, unknown>)[dtoKey];
+
+                        // NullHandling Check
+                        const jsonVal = sourceObj[jsonKey];
+                        if (jsonVal === null) {
+                            if (propMeta) {
+                                if (propMeta.NullHandling === NullHandling.Disallow) {
+                                    throw new Error(
+                                        `Property '${dtoKey}' (JSON '${jsonKey}') is null but configured as DisallowNull.`,
+                                    );
+                                }
+                                if (propMeta.NullHandling === NullHandling.Ignore) {
+                                    continue;
+                                }
+                            }
+                            // Else Allow or Default -> continue processing (PopulateObject or assignment handles null)
+                        }
 
                         if (propVal === undefined) {
                             continue;
                         }
 
+                        // Converter Override
+                        if (propMeta && propMeta.Converter) {
+                            const converted = propMeta.Converter.Read(
+                                jsonVal,
+                                Object.getPrototypeOf(propVal).constructor as Constructor<unknown>,
+                                options,
+                            );
+                            (instance as Record<string, unknown>)[dtoKey] = converted;
+                            continue;
+                        }
+
                         if (propVal === null) {
+                            // If propVal is null, we can't infer type easily unless we use reflection or it's a known type.
+                            // But we can't easily set it if it's null on the instance?
+                            // Existing logic skipped null propVals:
+                            // "if (propVal === null) continue;"
+                            // We preserve this behavior for now unless we know the type.
                             continue;
                         }
 
                         const propType = Object.getPrototypeOf(propVal).constructor as Constructor<unknown>;
-                        const jsonVal = sourceObj[key];
 
                         const hydrated = JsonSerializer.PopulateObject(jsonVal, propType, options, context, propVal);
 
                         if (hydrated !== undefined) {
-                            (instance as Record<string, unknown>)[key] = hydrated;
+                            (instance as Record<string, unknown>)[dtoKey] = hydrated;
                         }
                     }
                 }
@@ -185,13 +340,57 @@ export class JsonSerializer {
                 })();
 
             const sourceObj = source as Record<string, unknown>;
-            for (const key of Object.keys(sourceObj)) {
-                if (key in (instance as object)) {
-                    const propVal = (instance as Record<string, unknown>)[key];
+            const metadata = options.GetTypeMetadata(targetType);
+
+            for (const jsonKey of Object.keys(sourceObj)) {
+                let dtoKey = jsonKey;
+                let propMeta: import("./Metadata/JsonPropertyMetadata").JsonPropertyMetadata | undefined;
+
+                if (metadata) {
+                    const found = metadata.GetPropertyByJsonName(jsonKey);
+                    if (found) {
+                        dtoKey = found.PropertyName;
+                        propMeta = found;
+                    }
+                }
+
+                if (dtoKey in (instance as object)) {
+                    const propVal = (instance as Record<string, unknown>)[dtoKey];
+                    const jsonVal = sourceObj[jsonKey];
+
+                    // NullHandling Check
+                    if (jsonVal === null) {
+                        if (propMeta) {
+                            if (propMeta.NullHandling === NullHandling.Disallow) {
+                                throw new Error(
+                                    `Property '${dtoKey}' (JSON '${jsonKey}') is null but configured as DisallowNull.`,
+                                );
+                            }
+                            if (propMeta.NullHandling === NullHandling.Ignore) {
+                                continue;
+                            }
+                        }
+                    }
+
                     if (propVal === undefined) continue;
 
+                    // Converter Override
+                    if (propMeta && propMeta.Converter) {
+                        // Need propType for Read signature?
+                        // propMeta.Converter.Read(...)
+                        // If propVal is available, use its type.
+                        let pType: Constructor<unknown> = Object as unknown as Constructor<unknown>; // fallback
+                        if (propVal !== null) {
+                            pType = Object.getPrototypeOf(propVal).constructor as Constructor<unknown>;
+                        }
+                        const converted = propMeta.Converter.Read(jsonVal, pType, options);
+                        (instance as Record<string, unknown>)[dtoKey] = converted;
+                        continue;
+                    }
+
+                    if (propVal === null) continue; // Cannot hydrate null instance without type info
+
                     const propType = Object.getPrototypeOf(propVal).constructor as Constructor<unknown>;
-                    const jsonVal = sourceObj[key];
 
                     const result = JsonSerializer.PopulateObject(
                         jsonVal,
@@ -200,7 +399,7 @@ export class JsonSerializer {
                         context,
                         propVal as unknown,
                     );
-                    (instance as Record<string, unknown>)[key] = result;
+                    (instance as Record<string, unknown>)[dtoKey] = result;
                 }
             }
             return instance as T;
