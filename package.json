@@ -1,6 +1,6 @@
 {
   "name": "dotnet-node-core",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Foundational implementation of a C# Standard Library for Node.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,6 +13,7 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "build": "rimraf dist && tsc -p tsconfig.build.json",
+    "prepare": "npm run build",
     "prepublishOnly": "npm run lint && npm run test:coverage && npm run build",
     "pack:preview": "npm pack --dry-run",
     "typecheck": "tsc --noEmit --skipLibCheck",
