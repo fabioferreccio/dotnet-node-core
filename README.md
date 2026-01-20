@@ -22,7 +22,37 @@
 
 ---
 
-## 📦 System Types & Primitives (v0.5.0)
+## 📦 Installation
+
+This library cannot yet be installed through the official NPM registry, but it can be installed directly from the GitHub repository.
+
+### Option 1: Via GitHub
+To install the latest version directly from the GitHub repository:
+
+Latest Version
+```bash
+npm install github:fabioferreccio/dotnet-node-core
+```
+
+Previous Version
+```bash
+npm install github:fabioferreccio/dotnet-node-core#v0.6.1
+```
+
+### Option 2: Pré-compiled Package (.tgz)
+The "dotnet-node-core-v0.6.1.tgz" file available in the Assets section is a production-ready package. Unlike the source code (zip), it requires no compilation steps.
+
+How to install this file:
+1- Download the .tgz file.
+2- Run the following command in your project:
+
+```bash
+npm install ./path/to/dotnet-node-core-v0.6.1.tgz
+```
+
+---
+
+## 📦 System Types & Primitives (v0.6.1)
 
 Now supporting a comprehensive suite of .NET numerics and core types.
 
