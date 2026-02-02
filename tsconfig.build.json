@@ -6,7 +6,13 @@
         "declaration": true,
         "declarationMap": false,
         "sourceMap": true,
-        "stripInternal": true
+        "stripInternal": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "types": [
+            "node",
+            "reflect-metadata"
+        ]
     },
     "include": [
         "src/**/*"

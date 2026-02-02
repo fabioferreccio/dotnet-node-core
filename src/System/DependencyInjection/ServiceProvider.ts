@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import {
     IServiceProvider,
     IServiceScope,
@@ -152,16 +153,25 @@ export class ServiceProvider
             return descriptor.ImplementationFactory(this);
         }
 
-        // C. Implementation Type
+        // C. Implementation Type (Auto-Resolution)
         if (descriptor.ImplementationType) {
-            // Safe constructor invocation without any.
-            // descriptor.ImplementationType is Constructor<T>.
-            // We can invoke with new.
-            // TypeScript might object if it thinks arguments are missing, but strict assumption for DI is parameterless or handled (here parameterless logic or loose).
-            // Actually, we are NOT injecting dependencies here? 'new descriptor.ImplementationType()'.
-            // In a real DI, we recursively resolve arguments. v0.3 is simplified.
-            // Type assertions: 'as new () => unknown' covers parameterless.
             const Ctor = descriptor.ImplementationType as new (...args: unknown[]) => unknown;
+
+            // 1. Check for Design-Time Metadata (emitDecoratorMetadata)
+            const paramTypes = Reflect.getMetadata("design:paramtypes", Ctor);
+
+            if (paramTypes && Array.isArray(paramTypes)) {
+                // Auto-Resolve Dependencies
+                const args = paramTypes.map((paramType) => {
+                    // paramType is the Constructor of the dependency
+                    return this.GetRequiredService(paramType);
+                });
+                return new Ctor(...args);
+            }
+
+            // 2. Fallback: Parameterless Constructor
+            // If no metadata found, we assume 0 args.
+            // If the class actually requires args, this will likely fail or produce undefineds if not TS-checked.
             return new Ctor();
         }
 

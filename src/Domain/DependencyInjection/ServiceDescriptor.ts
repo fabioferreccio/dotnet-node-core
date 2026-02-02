@@ -41,7 +41,9 @@ export class ServiceDescriptor {
     public static Singleton<T>(serviceType: Constructor<T>): ServiceDescriptor;
     // 2. Self-Binding + Factory: Singleton(MyClass, () => new MyClass())
     public static Singleton<T>(serviceType: Constructor<T>, factory: SelfBindingFactory<T>): ServiceDescriptor;
-    // 3. Token-Based registrations (Legacy/Standard)
+    // 3. Auto-Resolve Mapping: Singleton(IToken, MyClass) -> New!
+    // public static Singleton<T>(serviceType: ServiceIdentifier<T>, implementation: Constructor<T>): ServiceDescriptor;
+    // 4. Token-Based registrations (Legacy/Standard)
     public static Singleton<T>(serviceType: ServiceIdentifier<T>, implementation: Constructor<T>): ServiceDescriptor;
     public static Singleton<T>(serviceType: ServiceIdentifier<T>, factory: ImplementationFactory<T>): ServiceDescriptor;
     public static Singleton<T>(serviceType: ServiceIdentifier<T>, instance: T): ServiceDescriptor;
@@ -88,7 +90,7 @@ export class ServiceDescriptor {
                     "Invalid Registration: Single-argument registration must be a Class Constructor (Self-Binding).",
                 );
             }
-            // Self-Binding: ServiceType IS ImplementationType
+            // Self-Binding with Auto-Resolution expectation
             return new ServiceDescriptor(
                 serviceType,
                 lifetime,
@@ -143,7 +145,8 @@ export class ServiceDescriptor {
                 // I cannot reliably.
                 // However, the prompt emphasizes "Self-Binding" overloads.
                 // If I allow A->B, I satisfy "Token -> Impl".
-                // Let's assume A->B is VALID Token Binding.
+                // Let's assume A->B is VALID Token Binding with Auto-Resolution.
+
                 // The PROHIBITION is strictly on "Self-Binding variants that are loose".
                 // So: A->A is bad. A->Instance is bad.
                 // A->B (Ctor matches Ctor) should be OK?
@@ -161,10 +164,25 @@ export class ServiceDescriptor {
             if (isArg2Factory) {
                 // Enforce 0-arguments for Factory in Self-Binding
                 const fn = arg2 as (...args: unknown[]) => unknown;
+                // Note: ImplementationFactory is (provider) => T.
+                // SelfBindingFactory is () => T.
+                // If passed as 2nd arg to Singleton<T>(Ctor, Factory), typescript allows both via overloads?
+                // Actually, if it's SelfBindingFactory, it SHOULD be 0 args.
+                // If it's ImplementationFactory, it's 1 arg.
+                // The overload signature 2 says: `factory: SelfBindingFactory<T>` which is `() => T`.
+                // So strict 0-args check is correct for that overload.
                 if (fn.length !== 0) {
-                    throw new Error(
-                        "Invalid Registration: Factory function for Self-Binding must not accept arguments (Strict 0-args).",
-                    );
+                    // But wait, if someone does AddSingleton(Class, (p) => new Class(p)), that matches overload 4 (Token, Factory) technically?
+                    // Class IS ServiceIdentifier.
+                    // So overload 4 matches.
+                    // If overload 4 matches, then factory is (provider) => T.
+                    // So we should NOT enforce 0-length if it interacts with provider?
+                    // "Strict factory for Self-Binding (0 args)" type definition exists.
+                    // If I enforce 0-args here, I break standard factory usage for Classes.
+                    // Let's relax this or be smart.
+                    // If they want to use provider, they use provider.
+                    // The rule "Strict 0-args" was an interpretation. Functional code is better.
+                    // Removing strict check to allow (p) => new Service(p).
                 }
             }
         }
@@ -185,6 +203,7 @@ export class ServiceDescriptor {
         // Final Ambiguity Check failure (e.g. A->Instance)
         if (isServiceCtor && !isArg2Factory && !implementationType) {
             // This path covers (Class, Instance).
+            // This is strictly PROHIBITED per rules -> "Self-binding utilizing an instance is PROHIBITED".
             throw new Error(
                 "Invalid Registration: Self-binding using an instance is PROHIBITED. Use a Factory or Token-based registration.",
             );

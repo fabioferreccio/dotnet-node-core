@@ -1,11 +1,23 @@
 {
     "compilerOptions": {
         "target": "ES2022",
+        "lib": [
+            "ES2022",
+            "ESNext.Disposable",
+            "DOM"
+        ],
         "module": "commonjs",
         "strict": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "types": [
+            "node",
+            "reflect-metadata",
+            "jest"
+        ]
     },
     "include": [
         "src/**/*"

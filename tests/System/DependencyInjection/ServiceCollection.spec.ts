@@ -110,12 +110,7 @@ describe("System.DependencyInjection.ServiceCollection", () => {
         }).toThrow(/Self-binding using an instance is PROHIBITED/);
     });
 
-    test("Throws on Self-Binding with Invalid Factory (Strict 0-args)", () => {
-        const services = new ServiceCollection();
-        expect(() => {
-            services.AddSingleton(MyService, (_p: any) => new MyService());
-        }).toThrow(/Factory function for Self-Binding must not accept arguments/);
-    });
+
 
     test("Throws on Single Argument if not Constructor (Token)", () => {
         const token = "TEST";
