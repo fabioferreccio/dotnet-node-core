@@ -49,9 +49,15 @@ class InternalColumn {
 export class Table {
     private readonly _columns: List<InternalColumn> = new List<InternalColumn>();
     private readonly _rows: List<List<CsString>> = new List<List<CsString>>();
+    private _showRowSeparators: boolean = false;
 
     public constructor() {
         Object.seal(this);
+    }
+
+    public EnableRowSeparators(): Table {
+        this._showRowSeparators = true;
+        return this;
     }
 
     public AddColumn(header: string | CsString | {
@@ -146,8 +152,12 @@ export class Table {
         console.WriteLine(midBorder);
 
         // Render Rows
-        for (const row of this._rows.ToArray()) {
-            this.RenderRow(console, row.ToArray(), colWidths);
+        const rows = this._rows.ToArray();
+        for (let i = 0; i < rows.length; i++) {
+            this.RenderRow(console, rows[i].ToArray(), colWidths);
+            if (this._showRowSeparators && i < rows.length - 1) {
+                console.WriteLine(midBorder);
+            }
         }
 
         // Render Bottom
