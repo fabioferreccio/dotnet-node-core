@@ -40,7 +40,7 @@ export class HelpBuilder {
 
         // 4. Options Table
         if (command.Options.Count > 0) {
-            this._console.Markup("[yellow]Options:[/]");
+            this._console.MarkupLine("[yellow]Options:[/]");
             const table = new Table();
             table.AddColumn("Option");
             table.AddColumn("Description");
@@ -61,7 +61,7 @@ export class HelpBuilder {
 
         // 5. Subcommands
         if (command.Subcommands.Count > 0) {
-            this._console.Markup("[yellow]Commands:[/]");
+            this._console.MarkupLine("[yellow]Commands:[/]");
             const table = new Table();
             table.AddColumn("Command");
             table.AddColumn("Description");

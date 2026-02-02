@@ -35,14 +35,14 @@ npm install github:fabioferreccio/dotnet-node-core
 ```
 
 ### Option 2: Pre-compiled Package (.tgz)
-The "dotnet-node-core-v0.6.4.tgz" file available in the Assets section is a production-ready package. Unlike the source code (zip), it requires no compilation steps.
+The "dotnet-node-core-v0.6.6.tgz" file available in the Assets section is a production-ready package. Unlike the source code (zip), it requires no compilation steps.
 
 How to install this file:
 1. Download the .tgz file.
 2. Run the following command in your project:
 
 ```bash
-npm install ./path/to/dotnet-node-core-v0.6.4.tgz
+npm install ./path/to/dotnet-node-core-v0.6.6.tgz
 ```
 
 ### 🔄 Updating (GitHub Installation)
@@ -53,7 +53,7 @@ If you installed via GitHub, NPM may cache the dependency. To force an update to
 npm install github:fabioferreccio/dotnet-node-core --force
 
 # Or switch to a specific tag
-npm install github:fabioferreccio/dotnet-node-core#v0.6.4
+npm install github:fabioferreccio/dotnet-node-core#v0.6.6
 ```
 
 ---
