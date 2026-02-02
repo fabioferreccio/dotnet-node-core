@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.6] - 2026-02-02
+
+### Added
+- **System.CommandLine (Experimental)**: Introduced a hardened CLI infrastructure following a strict Parsing/Binding/Execution separation.
+- **Hardened Pipeline**: Mandatory structural parsing decoupled from data binding and side-effect execution.
+- **Protected Symbol Identity**: Secured internal symbol identifiers to prevent identity leakage.
+- **Deterministic Help**: Standardized help rendering using `AnsiConsole` with support for hidden symbols.
+- **Minimal Type Resolution**: Support for `boolean`, `CsInt32`, `CsGuid`, and `CsString` resolution in `BindingContext`.
+- **Experimental Notice**: All CLI APIs are marked as preview and subject to change until 1.0.0.
+
 ## [0.6.5] - 2026-02-02
 
 ### Added

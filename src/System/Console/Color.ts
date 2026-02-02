@@ -16,8 +16,12 @@ export class Color implements IEquatable<Color> {
         Object.freeze(this);
     }
 
-    public get Number(): CsInt32 { return this._number; }
-    public get Name(): CsString { return this._name; }
+    public get Number(): CsInt32 {
+        return this._number;
+    }
+    public get Name(): CsString {
+        return this._name;
+    }
 
     /**
      * Creates a color from a standard ANSI color number (0-255).
@@ -45,5 +49,4 @@ export class Color implements IEquatable<Color> {
     public ToString(): string {
         return this._name.ToString();
     }
-
 }

@@ -27,6 +27,7 @@ import { Version as _Version } from "./Version";
 import * as _Net from "./Net/Http";
 import * as _Linq from "./Linq";
 import * as _Text from "./Text";
+import * as _CommandLine from "./CommandLine";
 
 // Registry Wiring
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -125,5 +126,8 @@ export namespace System {
     export import IO = _IO;
     export import Net = _Net;
     export import Text = _Text;
+
+    /** @experimental */
+    export import CommandLine = _CommandLine;
 }
 /* eslint-enable @typescript-eslint/no-namespace */

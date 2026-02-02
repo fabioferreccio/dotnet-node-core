@@ -2,7 +2,6 @@ import { CsString } from "../Types/CsString";
 import { List } from "../Collections/Generic/List";
 import { AnsiConsole } from "./AnsiConsole";
 
-
 /**
  * A simple table widget.
  * @experimental This API is in preview and may change.
@@ -47,7 +46,7 @@ export class Table {
             const text = cols[i].ToString();
             headerRow += text.padEnd(colWidth).substring(0, colWidth) + "│";
         }
-        
+
         // Top border
         console.WriteLine("┌" + ("─".repeat(colWidth) + "┬").repeat(colCount - 1) + "─".repeat(colWidth) + "┐");
         console.WriteLine(headerRow);

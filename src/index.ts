@@ -35,7 +35,6 @@ export { Rule } from "./System/Console/Rule";
 export { Panel } from "./System/Console/Panel";
 export { Table } from "./System/Console/Table";
 
-
 // Collections (Explicit exports due to missing index)
 export * from "./System/Collections/Generic/List";
 export * from "./System/Collections/Generic/Dictionary";

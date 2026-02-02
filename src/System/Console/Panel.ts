@@ -30,14 +30,14 @@ export class Panel {
             topBorder = "┌" + "─".repeat(innerWidth) + "┐";
         } else {
             const titleText = ` ${this._title.ToString()} `;
-            const remaining = innerWidth - titleText.length;
             const left = 1; // Minimum 1 dash on left
-            const right = innerWidth - titleText.length - left;
+            const right = Math.max(0, innerWidth - titleText.length - left);
             topBorder = "┌" + "─".repeat(left) + titleText + "─".repeat(right) + "┐";
         }
 
         if (this._style) {
-            console.WriteMarkup(`[${this._style}]${topBorder}[/]`);
+            console.Markup(`[${this._style}]${topBorder}[/]`);
+            console.WriteLine("");
         } else {
             console.WriteLine(topBorder);
         }
@@ -46,18 +46,19 @@ export class Panel {
         const lines = this._content.ToString().split("\n");
         for (const line of lines) {
             const paddedLine = line.padEnd(innerWidth).substring(0, innerWidth);
-            const contentLine = "│" + paddedLine + "│";
             if (this._style) {
-                console.WriteMarkup(`[${this._style}]│[/]${paddedLine}[${this._style}]│[/]`);
+                console.Markup(`[${this._style}]│[/]${paddedLine}[${this._style}]│[/]`);
+                console.WriteLine("");
             } else {
-                console.WriteLine(contentLine);
+                console.WriteLine("│" + paddedLine + "│");
             }
         }
 
         // Bottom border
         const bottomBorder = "└" + "─".repeat(innerWidth) + "┘";
         if (this._style) {
-            console.WriteMarkup(`[${this._style}]${bottomBorder}[/]`);
+            console.Markup(`[${this._style}]${bottomBorder}[/]`);
+            console.WriteLine("");
         } else {
             console.WriteLine(bottomBorder);
         }

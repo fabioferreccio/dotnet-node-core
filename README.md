@@ -58,7 +58,7 @@ npm install github:fabioferreccio/dotnet-node-core#v0.6.4
 
 ---
 
-## 📦 System Types & Primitives (v0.6.4)
+## 📦 System Types & Primitives (v0.6.6)
 
 Now supporting a comprehensive suite of .NET numerics and core types.
 
@@ -77,6 +77,7 @@ Now supporting a comprehensive suite of .NET numerics and core types.
 | **System.Linq** | `Enumerable` | Static query operators (`Where`, `Select`, `ToList`). |
 | **System.DI** | `ServiceCollection` | Strict Dependency Injection container / IoC. |
 | **System.Console** | `AnsiConsole` | Rich output with Markup, Tables, Panels, and Rules. |
+| **System.CommandLine** | `Parser` / `Binding` | Hardened CLI infrastructure with decoupled execution. |
 
 
 ---
@@ -166,6 +167,7 @@ This project follows strict architectural rules to ensure maintainability and co
 - [SERIALIZATION.md](docs/SERIALIZATION.md): JSON Usage, Metadata, & Diagnostics.
 - [DEPENDENCY_INJECTION.md](docs/DEPENDENCY_INJECTION.md): Service Lifetimes & Patterns.
 - [TYPES.md](docs/TYPES.md): CsString, CsInt32, and "No Primitives" Guide.
+- [COMMAND_LINE.md](docs/COMMAND_LINE.md): CLI Parsing, Binding, and Execution (Experimental).
 
 ### Project Structure (Expanded)
 - [src/Domain](src/Domain): The Core. Conceptual Contracts and Interfaces.
@@ -176,6 +178,7 @@ This project follows strict architectural rules to ensure maintainability and co
     - `DependencyInjection`: DI Container implementation.
     - `Net`: HTTP Primitives (Headers, Methods).
     - `Text.Json`: Serialization engine.
+    - `CommandLine`: Hardened CLI infrastructure.
 
 ---
 

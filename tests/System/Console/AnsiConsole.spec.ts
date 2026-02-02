@@ -1,8 +1,6 @@
 import { AnsiConsole } from "../../../src/System/Console/AnsiConsole";
 import { Rule } from "../../../src/System/Console/Rule";
 import { Panel } from "../../../src/System/Console/Panel";
-import { Table } from "../../../src/System/Console/Table";
-import { Console } from "../../../src/System/Console";
 import { CsString } from "../../../src/System/Types/CsString";
 
 describe("System.Console.AnsiConsole", () => {
@@ -119,14 +117,10 @@ describe("System.Console.Color", () => {
         expect(Color.Red.Number.Value).toBe(1);
     });
 
-
-
     test("ToString should return name", () => {
         expect(Color.Red.ToString()).toBe("Red");
         expect(Color.FromNumber(123).ToString()).toBe("Color_123");
     });
-
-
 });
 
 describe("System.Console.Internal.MarkupParser", () => {
@@ -140,13 +134,13 @@ describe("System.Console.Internal.MarkupParser", () => {
         logSpy.mockRestore();
     });
 
-   test("Parse should resolve all standard colors", () => {
-       const colors = ["green", "blue", "yellow", "magenta", "cyan", "white", "black"];
-       colors.forEach(c => {
-           AnsiConsole.Markup(`[${c}]Test[/]`);
-           expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(new RegExp(`\\u001b\\[\\d+mTest`)));
-       });
-   });
+    test("Parse should resolve all standard colors", () => {
+        const colors = ["green", "blue", "yellow", "magenta", "cyan", "white", "black"];
+        colors.forEach((c) => {
+            AnsiConsole.Markup(`[${c}]Test[/]`);
+            expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(new RegExp(`\\u001b\\[\\d+mTest`)));
+        });
+    });
 });
 
 describe("System.Console.AnsiConsole Singleton", () => {
@@ -172,6 +166,3 @@ describe("System.Console.AnsiConsole Singleton", () => {
         expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("\u001b[31mStatic"));
     });
 });
-
-
-

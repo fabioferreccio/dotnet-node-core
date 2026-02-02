@@ -19,7 +19,7 @@ describe("System.Console.Table (Phase 8 Public API)", () => {
         table.AddColumn("Head1").AddColumn("Head2");
         table.AddRow("R1C1", "R1C2");
         table.Render(AnsiConsole.Console);
-        
+
         // 80 width. colCount 2. innerWidth for each = floor((80-3)/2) = 38.
         const separator = "├" + "─".repeat(38) + "┼" + "─".repeat(38) + "┤";
         expect(logSpy).toHaveBeenCalledWith(separator);
@@ -32,7 +32,7 @@ describe("System.Console.Table (Phase 8 Public API)", () => {
         table.AddColumn("C1").AddColumn("C2");
         table.AddRow("OnlyOne");
         table.Render(AnsiConsole.Console);
-        
+
         // Calculate expected layout dynamically to avoid fragility
         const width = 80;
         const colCount = 2;

@@ -1,6 +1,6 @@
 {
   "name": "dotnet-node-core",
-  "version": "0.6.5",
+  "version": "0.6.6",
 
   "description": "Foundational implementation of a C# Standard Library for Node.js",
   "main": "dist/index.js",
@@ -28,7 +28,9 @@
     "lint:fix": "eslint src/**/*.ts tests/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts tests/**/*.ts",
     "examples:verify": "ts-node --transpile-only examples/verify.ts",
-    "examples:console": "ts-node --transpile-only examples/console_demo.ts"
+    "examples:di": "ts-node --transpile-only examples/di_autoresolve.ts",
+    "examples:console": "ts-node --transpile-only examples/console_demo.ts",
+    "examples:cli": "ts-node --transpile-only examples/cli-demo.ts"
   },
   "keywords": [
     "csharp",

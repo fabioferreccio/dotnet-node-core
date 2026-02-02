@@ -1,6 +1,5 @@
 import { CsString } from "../Types/CsString";
 import { AnsiConsole } from "./AnsiConsole";
-import { MarkupParser } from "./Internal/MarkupParser";
 
 /**
  * A horizontal rule widget.
@@ -30,7 +29,7 @@ export class Rule {
             const remaining = width - titleText.length;
             const left = Math.floor(remaining / 2);
             const right = remaining - left;
-            
+
             line = "─".repeat(left) + titleText + "─".repeat(right);
         }
 
