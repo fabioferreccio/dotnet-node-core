@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.9] - 2026-02-02
+
+### Added
+- **Table Column Customization (Experimental)**: Enhanced `Table` widget with column-level layout control.
+  - `width`, `minWidth`, `maxWidth`: Explicit column width constraints.
+  - `alignment`: Left, center, and right text alignment.
+  - `padding`: Internal horizontal cell padding.
+  - `wrap`: Multi-line text wrapping support.
+- Deterministic layout algorithm with fixed/flexible column distribution.
+- Backward compatibility preserved: `AddColumn("Header")` continues to work unchanged.
+
 ## [0.6.8] - 2026-02-02
 
 ### Fixed
