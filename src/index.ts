@@ -13,6 +13,7 @@ export {
     ServiceDescriptor,
     ServiceLifetime,
     ServiceIdentifier,
+    Injectable,
     ImplementationFactory,
     SelfBindingFactory,
 } from "./Domain/DependencyInjection";
