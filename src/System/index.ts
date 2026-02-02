@@ -1,9 +1,4 @@
-import { Console as _Console } from "./Console";
-import { AnsiConsole as _AnsiConsole } from "./Console/AnsiConsole";
-import { Color as _Color } from "./Console/Color";
-import { Rule as _Rule } from "./Console/Rule";
-import { Panel as _Panel } from "./Console/Panel";
-import { Table as _Table } from "./Console/Table";
+import * as _ConsoleNamespace from "./Console";
 import { List as _List } from "./Collections/Generic/List";
 import { Enumerable as _Enumerable } from "./Linq/Enumerable";
 import * as _DependencyInjection from "./DependencyInjection";
@@ -75,34 +70,34 @@ export namespace System {
     export type Boolean = CsBoolean;
 
     // Console
-    export const Console = _Console;
-    export type Console = _Console;
+    export const Console = _ConsoleNamespace.Console;
+    export type Console = _ConsoleNamespace.Console;
 
     // Rich Console (Spectre-like) - Experimental
     /** @experimental */
-    export const AnsiConsole = _AnsiConsole;
+    export const AnsiConsole = _ConsoleNamespace.AnsiConsole;
     /** @experimental */
-    export type AnsiConsole = _AnsiConsole;
+    export type AnsiConsole = _ConsoleNamespace.AnsiConsole;
 
     /** @experimental */
-    export const Color = _Color;
+    export const Color = _ConsoleNamespace.Color;
     /** @experimental */
-    export type Color = _Color;
+    export type Color = _ConsoleNamespace.Color;
 
     /** @experimental */
-    export const Rule = _Rule;
+    export const Rule = _ConsoleNamespace.Rule;
     /** @experimental */
-    export type Rule = _Rule;
+    export type Rule = _ConsoleNamespace.Rule;
 
     /** @experimental */
-    export const Panel = _Panel;
+    export const Panel = _ConsoleNamespace.Panel;
     /** @experimental */
-    export type Panel = _Panel;
+    export type Panel = _ConsoleNamespace.Panel;
 
     /** @experimental */
-    export const Table = _Table;
+    export const Table = _ConsoleNamespace.Table;
     /** @experimental */
-    export type Table = _Table;
+    export type Table = _ConsoleNamespace.Table;
 
     // Version
     export const Version = _Version;

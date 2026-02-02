@@ -33,28 +33,36 @@ export class FileStream extends Stream implements IDisposable, IAsyncDisposable 
     private _path: string;
     private _canRead: boolean;
     private _canWrite: boolean;
+    private _canSeek: boolean;
     private _position: number;
     private _isOpen: boolean;
 
-    constructor(path: string, mode: FileMode, access: FileAccess = FileAccess.ReadWrite) {
+    constructor(pathOrFd: string | number, mode: FileMode = FileMode.Open, access: FileAccess = FileAccess.ReadWrite) {
         super();
-        this._path = path;
         this._position = 0;
         this._isOpen = true;
 
         this._canRead = access === FileAccess.Read || access === FileAccess.ReadWrite;
         this._canWrite = access === FileAccess.Write || access === FileAccess.ReadWrite;
 
-        const flags = this.GetNodeFlags(mode, access);
+        if (typeof pathOrFd === "number") {
+            this._fd = pathOrFd;
+            this._path = `FD:${pathOrFd}`;
+            this._canSeek = false; // FDs (stdin/out/err) are typically not seekable in this context
+        } else {
+            this._path = pathOrFd;
+            this._canSeek = true;
+            const flags = this.GetNodeFlags(mode, access);
 
-        try {
-            this._fd = fs.openSync(path, flags);
-        } catch (e: unknown) {
-            const err = e as { code?: string; message: string };
-            if (err.code === "ENOENT") {
-                throw new FileNotFoundException(`Could not find file '${path}'.`, path, err);
+            try {
+                this._fd = fs.openSync(pathOrFd, flags);
+            } catch (e: unknown) {
+                const err = e as { code?: string; message: string };
+                if (err.code === "ENOENT") {
+                    throw new FileNotFoundException(`Could not find file '${pathOrFd}'.`, pathOrFd, err);
+                }
+                throw new IOException(err.message, err);
             }
-            throw new IOException(err.message, err);
         }
     }
 
@@ -62,7 +70,7 @@ export class FileStream extends Stream implements IDisposable, IAsyncDisposable 
         return this._isOpen && this._canRead;
     }
     public get CanSeek(): boolean {
-        return this._isOpen;
+        return this._isOpen && this._canSeek;
     }
     public get CanWrite(): boolean {
         return this._isOpen && this._canWrite;
@@ -70,6 +78,7 @@ export class FileStream extends Stream implements IDisposable, IAsyncDisposable 
 
     public get Length(): number {
         this.EnsureNotDisposed();
+        if (!this._canSeek) throw new NotSupportedException("Stream does not support seeking (Length).");
         const stat = fs.fstatSync(this._fd);
         return stat.size;
     }
@@ -92,8 +101,12 @@ export class FileStream extends Stream implements IDisposable, IAsyncDisposable 
         this.EnsureNotDisposed();
         if (!this._canRead) throw new NotSupportedException("Stream does not support reading.");
 
-        const bytesRead = fs.readSync(this._fd, buffer, offset, count, this._position);
-        this._position += bytesRead;
+        const position = this._canSeek ? this._position : null;
+        const bytesRead = fs.readSync(this._fd, buffer, offset, count, position);
+        
+        if (this._canSeek) {
+            this._position += bytesRead;
+        }
         return bytesRead;
     }
 
@@ -101,8 +114,12 @@ export class FileStream extends Stream implements IDisposable, IAsyncDisposable 
         this.EnsureNotDisposed();
         if (!this._canWrite) throw new NotSupportedException("Stream does not support writing.");
 
-        const bytesWritten = fs.writeSync(this._fd, buffer, offset, count, this._position);
-        this._position += bytesWritten;
+        const position = this._canSeek ? this._position : null;
+        const bytesWritten = fs.writeSync(this._fd, buffer, offset, count, position);
+        
+        if (this._canSeek) {
+            this._position += bytesWritten;
+        }
     }
 
     public Seek(offset: number, origin: SeekOrigin): number {
@@ -140,13 +157,17 @@ export class FileStream extends Stream implements IDisposable, IAsyncDisposable 
         this.EnsureNotDisposed();
         if (!this._canRead) throw new NotSupportedException("Stream does not support reading.");
 
+        const position = this._canSeek ? this._position : null;
         const bytesRead = await new Promise<number>((resolve, reject) => {
-            fs.read(this._fd, buffer, offset, count, this._position, (err, bytes) => {
+            fs.read(this._fd, buffer, offset, count, position, (err, bytes) => {
                 if (err) reject(err);
                 else resolve(bytes);
             });
         });
-        this._position += bytesRead;
+
+        if (this._canSeek) {
+            this._position += bytesRead;
+        }
         return bytesRead;
     }
 
@@ -154,15 +175,17 @@ export class FileStream extends Stream implements IDisposable, IAsyncDisposable 
         this.EnsureNotDisposed();
         if (!this._canWrite) throw new NotSupportedException("Stream does not support writing.");
 
-        await new Promise<void>((resolve, reject) => {
-            fs.write(this._fd, buffer, offset, count, this._position, (err) => {
+        const position = this._canSeek ? this._position : null;
+        await new Promise<number>((resolve, reject) => {
+            fs.write(this._fd, buffer, offset, count, position, (err, written) => {
                 if (err) reject(err);
-                else resolve();
+                else resolve(written);
             });
+        }).then((written) => {
+            if (this._canSeek) {
+                this._position += written;
+            }
         });
-        this._position += count; // fs.write returns written bytes, safe to assume all written or error? fs.write callback has written bytes.
-        // Sync implementation assumed count. Let's correct Sync logic if needed, but for now matching existing behavior + async correctness.
-        // Actually fs.write returns (err, written, buffer).
     }
 
     public async FlushAsync(): Task<void> {

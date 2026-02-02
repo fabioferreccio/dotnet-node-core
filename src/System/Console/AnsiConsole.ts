@@ -4,6 +4,14 @@ import { AnsiConsoleOptions } from "./AnsiConsoleOptions";
 import { MarkupParser } from "./Internal/MarkupParser";
 
 /**
+ * Represents a rich console component that can be rendered.
+ * @experimental This API is in preview and may change.
+ */
+export interface IRenderable {
+    Render(console: AnsiConsole): void;
+}
+
+/**
  * Provides rich console output capabilities.
  * @experimental This API is in preview and may change.
  */
@@ -42,34 +50,37 @@ export class AnsiConsole {
     /**
      * Writes a value to the console.
      */
-    public static Write(value: CsString | string | { Render(console: AnsiConsole): void }): void {
+    public static Write(value: CsString | string | IRenderable): void {
         this.Console.Write(value);
     }
 
     /**
      * Writes a value to the console.
      */
-    public Write(value: CsString | string | { Render(console: AnsiConsole): void }): void {
+    public Write(value: CsString | string | IRenderable): void {
+        if (value === undefined || value === null) return;
+
         if (typeof value === "object" && "Render" in value) {
-            (value as any).Render(this);
+            value.Render(this);
         } else {
             const text = typeof value === "string" ? value : value.ToString();
-            Console.WriteLine(text); // For now, mapping to basic Console
+            Console.Write(text);
         }
     }
 
     /**
      * Writes a line to the console.
      */
-    public static WriteLine(value: CsString | string | { Render(console: AnsiConsole): void } = ""): void {
+    public static WriteLine(value: CsString | string | IRenderable | "" = ""): void {
         this.Console.WriteLine(value);
     }
 
     /**
      * Writes a line to the console.
      */
-    public WriteLine(value: CsString | string | { Render(console: AnsiConsole): void } = ""): void {
+    public WriteLine(value: CsString | string | IRenderable | "" = ""): void {
         this.Write(value);
+        Console.WriteLine();
     }
 
     /**

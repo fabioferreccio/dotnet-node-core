@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.7] - 2026-02-02 - System.Console.In & API Consolidation (Experimental)
+
+### Added
+- ✨ `System.Console.In`: Canonical entry point for interactive CLI input.
+- `StreamReader.FromStdIn()`: Factory to bind StreamReader to standard input (FD 0).
+- `FileStream` now supports initialization from raw File Descriptors.
+- `src/System/Console/index.ts`: Consolidated console infrastructure exports.
+
+### Changed
+- Relocated `System.Console` to `src/System/Console/Console.ts` for architectural alignment.
+- Consolidate framework root exports to eliminate API duplication.
+- `AnsiConsole.MarkupLine` now standardized for rich output.
+
+### Fixed
+- Resolved duplicate `AnsiConsole`, `Rule`, `Panel`, and `Table` exports in `src/index.ts`.
+- Corrected structural inconsistencies in the `CommandLine` invocation pipeline.
+
 ## [0.6.6] - 2026-02-02
 
 ### Added

@@ -3,6 +3,36 @@
 > [!WARNING]
 > This API is currently **experimental** and in preview. It may undergo significant breaking changes before a stable 1.0.0 release.
 
+## Interactive Input
+
+While `System.CommandLine` handles structured arguments (argv), some applications require interactive input during execution (e.g., prompts, confirmations).
+
+Use `System.Console.In` for this purpose. It is a `StreamReader` bound to standard input.
+
+### Canonical Example
+
+```typescript
+const rootCommand = new RootCommand("Interactive App")
+    .SetHandler(async (context) => {
+        AnsiConsole.Markup("[blue]Enter your name: [/]");
+        
+        // Synchronous read from stdin
+        const name = Console.In.ReadLine();
+        
+        if (name) {
+            AnsiConsole.WriteLine(`Hello, ${name}!`);
+        }
+    });
+```
+
+> [!IMPORTANT]
+> Interactive input should only be handled inside the Command Handler or within an `InvocationContext` boundary. Do not attempt to read from `Console.In` during the structural parsing phase.
+
+---
+
+## Experimental Status
+This API is currently marked as **@experimental**. While the architectural foundations are stable, method signatures and property names may evolve based on community feedback.
+
 ## Overview
 
 `System.CommandLine` is a robust, architecturally hardened infrastructure for building Command Line Interfaces (CLIs) in the `dotnet-node-core` framework. It follows a strict separation of concerns between structural parsing, data binding, and handler execution.

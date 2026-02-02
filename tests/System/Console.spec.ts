@@ -2,33 +2,33 @@ import { Console } from "../../src/System/Console";
 import { CsString } from "../../src/System/Types/CsString";
 
 describe("System.Console", () => {
-    let logSpy: jest.SpyInstance;
+    let stdoutSpy: jest.SpyInstance;
 
     beforeEach(() => {
-        logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+        stdoutSpy = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
     });
 
     afterEach(() => {
-        logSpy.mockRestore();
+        stdoutSpy.mockRestore();
     });
 
     test("WriteLine(CsString) - Should call toString() on object", () => {
         const str = CsString.From("Hello");
         Console.WriteLine(str);
-        expect(logSpy).toHaveBeenCalledWith("Hello");
+        expect(stdoutSpy).toHaveBeenCalledWith("Hello");
     });
 
     test("WriteLine(string) - Should handle primitive string", () => {
         Console.WriteLine("Primitive");
-        expect(logSpy).toHaveBeenCalledWith("Primitive");
+        expect(stdoutSpy).toHaveBeenCalledWith("Primitive");
     });
 
     test("WriteLine(null) - Should print empty string", () => {
         // Based on current implementation implementation: console.log(value ? ... : "")
         Console.WriteLine(null);
-        expect(logSpy).toHaveBeenCalledWith("");
+        expect(stdoutSpy).toHaveBeenCalledWith("");
 
         Console.WriteLine(undefined);
-        expect(logSpy).toHaveBeenCalledWith("");
+        expect(stdoutSpy).toHaveBeenCalledWith("");
     });
 });

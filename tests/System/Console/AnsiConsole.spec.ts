@@ -4,25 +4,25 @@ import { Panel } from "../../../src/System/Console/Panel";
 import { CsString } from "../../../src/System/Types/CsString";
 
 describe("System.Console.AnsiConsole", () => {
-    let logSpy: jest.SpyInstance;
+    let stdoutSpy: jest.SpyInstance;
 
     beforeEach(() => {
-        logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+        stdoutSpy = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
         AnsiConsole.Configure({ width: 80 }); // Deterministic width
     });
 
     afterEach(() => {
-        logSpy.mockRestore();
+        stdoutSpy.mockRestore();
     });
 
     test("Markup should correctly apply ANSI colors", () => {
         AnsiConsole.Markup("[red]Hello[/]");
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("\u001b[31mHello\u001b[0m"));
+        expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining("\u001b[31mHello\u001b[0m"));
     });
 
     test("Markup should handle nested colors", () => {
         AnsiConsole.Markup("[red]Red[blue]Blue[/]Red[/]");
-        const output = logSpy.mock.calls[0][0];
+        const output = stdoutSpy.mock.calls[0][0];
         expect(output).toContain("\u001b[31mRed");
         expect(output).toContain("\u001b[34mBlue");
         expect(output).toContain("\u001b[31mRed");
@@ -30,12 +30,12 @@ describe("System.Console.AnsiConsole", () => {
 
     test("Markup should handle unknown tags as default color", () => {
         AnsiConsole.Markup("[unknown]Text[/]");
-        expect(logSpy).toHaveBeenCalledWith("Text\u001b[0m");
+        expect(stdoutSpy).toHaveBeenCalledWith("Text\u001b[0m");
     });
 
     test("AnsiConsole.Write should handle CsString", () => {
         AnsiConsole.Write(CsString.From("Direct"));
-        expect(logSpy).toHaveBeenCalledWith("Direct");
+        expect(stdoutSpy).toHaveBeenCalledWith("Direct");
     });
 
     test("AnsiConsole.Width should return configured width", () => {
@@ -47,36 +47,36 @@ describe("System.Console.AnsiConsole", () => {
         AnsiConsole.Configure({ width: 80 });
         const rule = new Rule();
         rule.Render(AnsiConsole.Console);
-        expect(logSpy).toHaveBeenCalledWith("─".repeat(80));
+        expect(stdoutSpy).toHaveBeenCalledWith("─".repeat(80));
     });
 
     test("Rule with title and style should render combined markup", () => {
         const rule = new Rule("Title", "red");
         rule.Render(AnsiConsole.Console);
         // Expecting red ANSI code followed by the rule content
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("\u001b[31m"));
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("Title"));
+        expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining("\u001b[31m"));
+        expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining("Title"));
     });
 
     test("Panel should render bordered box", () => {
         const panel = new Panel("Content", "Title");
         panel.Render(AnsiConsole.Console);
         const top = "┌─ Title " + "─".repeat(70) + "┐";
-        expect(logSpy).toHaveBeenCalledWith(top);
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("│Content"));
-        expect(logSpy).toHaveBeenCalledWith("└" + "─".repeat(78) + "┘");
+        expect(stdoutSpy).toHaveBeenCalledWith(top);
+        expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining("│Content"));
+        expect(stdoutSpy).toHaveBeenCalledWith("└" + "─".repeat(78) + "┘");
     });
 
     test("Panel with style should apply markup", () => {
         const panel = new Panel("Content", "", "blue");
         panel.Render(AnsiConsole.Console);
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("\u001b[34m┌"));
+        expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining("\u001b[34m┌"));
     });
 
     test("Panel with style should apply markup", () => {
         const panel = new Panel("Content", "", "blue");
         panel.Render(AnsiConsole.Console);
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("\u001b[34m┌"));
+        expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining("\u001b[34m┌"));
     });
 });
 
@@ -124,35 +124,35 @@ describe("System.Console.Color", () => {
 });
 
 describe("System.Console.Internal.MarkupParser", () => {
-    let logSpy: jest.SpyInstance;
+    let stdoutSpy: jest.SpyInstance;
 
     beforeEach(() => {
-        logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+        stdoutSpy = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
     });
 
     afterEach(() => {
-        logSpy.mockRestore();
+        stdoutSpy.mockRestore();
     });
 
     test("Parse should resolve all standard colors", () => {
         const colors = ["green", "blue", "yellow", "magenta", "cyan", "white", "black"];
         colors.forEach((c) => {
             AnsiConsole.Markup(`[${c}]Test[/]`);
-            expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(new RegExp(`\\u001b\\[\\d+mTest`)));
+            expect(stdoutSpy).toHaveBeenCalledWith(expect.stringMatching(new RegExp(`\\u001b\\[\\d+mTest`)));
         });
     });
 });
 
 describe("System.Console.AnsiConsole Singleton", () => {
-    let logSpy: jest.SpyInstance;
+    let stdoutSpy: jest.SpyInstance;
 
     beforeEach(() => {
-        logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+        stdoutSpy = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
         AnsiConsole.Configure({ width: 80 });
     });
 
     afterEach(() => {
-        logSpy.mockRestore();
+        stdoutSpy.mockRestore();
     });
 
     test("Console getter should initialize instance if null", () => {
@@ -163,6 +163,6 @@ describe("System.Console.AnsiConsole Singleton", () => {
 
     test("Static Markup method should delegate", () => {
         AnsiConsole.Markup("[red]Static[/]");
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("\u001b[31mStatic"));
+        expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining("\u001b[31mStatic"));
     });
 });

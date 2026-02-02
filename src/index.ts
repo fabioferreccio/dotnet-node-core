@@ -28,12 +28,9 @@ export {
 } from "./Domain/Interfaces";
 export { JsonConverter, JsonSerializer, JsonSerializerOptions } from "./System/Text/Json";
 export * from "./System/Net/Http";
-export * from "./System/Net/Http";
-export { AnsiConsole } from "./System/Console/AnsiConsole";
-export { Color } from "./System/Console/Color";
-export { Rule } from "./System/Console/Rule";
-export { Panel } from "./System/Console/Panel";
-export { Table } from "./System/Console/Table";
+
+// Console Namespace (Re-exports from System index)
+export { Console, AnsiConsole, Color, Rule, Panel, Table } from "./System/Console";
 
 // Collections (Explicit exports due to missing index)
 export * from "./System/Collections/Generic/List";

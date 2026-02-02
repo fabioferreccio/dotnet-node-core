@@ -30,7 +30,8 @@
     "examples:verify": "ts-node --transpile-only examples/verify.ts",
     "examples:di": "ts-node --transpile-only examples/di_autoresolve.ts",
     "examples:console": "ts-node --transpile-only examples/console_demo.ts",
-    "examples:cli": "ts-node --transpile-only examples/cli-demo.ts"
+    "examples:cli": "ts-node --transpile-only examples/cli-demo.ts",
+    "examples:cli-interactive": "ts-node --transpile-only examples/cli-interactive.ts"
   },
   "keywords": [
     "csharp",

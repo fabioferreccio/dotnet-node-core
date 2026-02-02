@@ -1,4 +1,5 @@
 import { Stream } from "./Stream";
+import { FileStream, FileMode, FileAccess } from "./FileStream";
 import { ObjectDisposedException } from "../ObjectDisposedException";
 import { IDisposable, IAsyncDisposable } from "../../Domain/Interfaces";
 import { Exception } from "../../Domain/SeedWork";
@@ -17,6 +18,14 @@ export class StreamReader implements IDisposable, IAsyncDisposable {
         this._encoding = encoding;
         this._leaveOpen = leaveOpen;
         this._isOpen = true;
+    }
+
+    /**
+     * Creates a StreamReader bound to standard input (stdin / fd 0).
+     */
+    public static FromStdIn(): StreamReader {
+        const stream = new FileStream(0, FileMode.Open, FileAccess.Read);
+        return new StreamReader(stream);
     }
 
     public Close(): void {
@@ -50,6 +59,7 @@ export class StreamReader implements IDisposable, IAsyncDisposable {
 
     public get EndOfStream(): boolean {
         this.EnsureNotDisposed();
+        if (!this._stream.CanSeek) return false;
         return this._stream.Position >= this._stream.Length;
     }
 

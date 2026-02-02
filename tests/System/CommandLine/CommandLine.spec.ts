@@ -12,15 +12,15 @@ import { AnsiConsole } from "../../../src/System/Console/AnsiConsole";
 import { IServiceProvider } from "../../../src/Domain/Interfaces/IServiceProvider";
 
 describe("System.CommandLine Hardened Infrastructure", () => {
-    let logSpy: jest.SpyInstance;
+    let stdoutSpy: jest.SpyInstance;
 
     beforeEach(() => {
-        logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+        stdoutSpy = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
         AnsiConsole.Configure({ width: 80 });
     });
 
     afterEach(() => {
-        logSpy.mockRestore();
+        stdoutSpy.mockRestore();
     });
 
     describe("Symbol & Core Types (Hardened)", () => {
@@ -114,9 +114,9 @@ describe("System.CommandLine Hardened Infrastructure", () => {
             const builder = new HelpBuilder(AnsiConsole.Console);
             builder.Write(root);
 
-            expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("root"));
-            expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("Apps description"));
-            expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("--verbose"));
+            expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining("root"));
+            expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining("Apps description"));
+            expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining("--verbose"));
         });
 
         test("should render subcommands correctly", () => {
@@ -126,8 +126,8 @@ describe("System.CommandLine Hardened Infrastructure", () => {
             const builder = new HelpBuilder(AnsiConsole.Console);
             builder.Write(root);
 
-            expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("sub"));
-            expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("Sub description"));
+            expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining("sub"));
+            expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining("Sub description"));
         });
 
         test("should respect hidden symbols in help rendering", () => {
@@ -137,7 +137,7 @@ describe("System.CommandLine Hardened Infrastructure", () => {
             const builder = new HelpBuilder(AnsiConsole.Console);
             builder.Write(root);
 
-            expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining("--hidden"));
+            expect(stdoutSpy).not.toHaveBeenCalledWith(expect.stringContaining("--hidden"));
         });
     });
 
