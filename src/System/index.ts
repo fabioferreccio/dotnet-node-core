@@ -1,4 +1,9 @@
 import { Console as _Console } from "./Console";
+import { AnsiConsole as _AnsiConsole } from "./Console/AnsiConsole";
+import { Color as _Color } from "./Console/Color";
+import { Rule as _Rule } from "./Console/Rule";
+import { Panel as _Panel } from "./Console/Panel";
+import { Table as _Table } from "./Console/Table";
 import { List as _List } from "./Collections/Generic/List";
 import { Enumerable as _Enumerable } from "./Linq/Enumerable";
 import * as _DependencyInjection from "./DependencyInjection";
@@ -71,6 +76,32 @@ export namespace System {
     // Console
     export const Console = _Console;
     export type Console = _Console;
+
+    // Rich Console (Spectre-like) - Experimental
+    /** @experimental */
+    export const AnsiConsole = _AnsiConsole;
+    /** @experimental */
+    export type AnsiConsole = _AnsiConsole;
+
+    /** @experimental */
+    export const Color = _Color;
+    /** @experimental */
+    export type Color = _Color;
+
+    /** @experimental */
+    export const Rule = _Rule;
+    /** @experimental */
+    export type Rule = _Rule;
+
+    /** @experimental */
+    export const Panel = _Panel;
+    /** @experimental */
+    export type Panel = _Panel;
+
+    /** @experimental */
+    export const Table = _Table;
+    /** @experimental */
+    export type Table = _Table;
 
     // Version
     export const Version = _Version;

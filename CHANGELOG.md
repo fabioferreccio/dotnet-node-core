@@ -5,7 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.5] - 2026-02-02
+
+### Added
+- **Phase 8 Console Infrastructure (AnsiConsole)**: Introduced rich console output capabilities including colors, markup, and widgets.
+- **Rich Widgets**: Added `Rule`, `Panel`, and `Table` widgets for structured console presentation.
+- **Markup Engine**: Private internal engine for semantic styling (e.g., `[red]text[/]`).
+- **Deterministic Layout Policy**: Enforced an 80-character default width for stable, environment-independent rendering.
+
 ## [0.6.4] - 2026-02-02
+
 
 ### Added
 - **DI @Inject Decorator**: New `@Inject(token)` parameter decorator to handle TypeScript interface type erasure.

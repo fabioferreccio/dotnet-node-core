@@ -76,6 +76,8 @@ Now supporting a comprehensive suite of .NET numerics and core types.
 | **System.IO** | `Stream` | Abstract base for `FileStream` and `MemoryStream`. |
 | **System.Linq** | `Enumerable` | Static query operators (`Where`, `Select`, `ToList`). |
 | **System.DI** | `ServiceCollection` | Strict Dependency Injection container / IoC. |
+| **System.Console** | `AnsiConsole` | Rich output with Markup, Tables, Panels, and Rules. |
+
 
 ---
 

@@ -83,6 +83,21 @@ This document defines the **Anti-Escape Rules** for the project. These rules are
 - Consumers **MUST NOT** be forced to use deep imports (e.g., `import { X } from "package/dist/..."`).
 **Reason:** To ensure library discoverability, maintain a clean public API surface, and provide a consistent developer experience.
 
+### Rule 10: The Structured Release Commit Mandate
+**Requirement:** All commits intended for a version release **MUST** follow a specific structured format.
+**Enforcement:**
+- **Header:** `type(scope): brief summary (vX.X.X)`
+- **Body:** A bulleted list of significant changes, separated by a blank line from the header.
+- **Example:**
+  ```text
+  feat(di): auto-resolution support & security fixes (v0.6.2)
+
+  - Implemented @Injectable decorator for auto-resolution
+  - Refactored ServiceDescriptor/Collection/Provider for constructor injection
+  - Fixed build config (tsconfig) restoring 'node' and 'reflect-metadata' types
+  ```
+**Reason:** To ensure that the git history remains informative, mirrors the changelog, and is optimized for automated release notes generation.
+
 ---
 
 **AUTHORITY NOTE:**
