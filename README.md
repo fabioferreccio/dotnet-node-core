@@ -34,25 +34,31 @@ Latest Version
 npm install github:fabioferreccio/dotnet-node-core
 ```
 
-Previous Version
-```bash
-npm install github:fabioferreccio/dotnet-node-core#v0.6.1
-```
-
-### Option 2: Pré-compiled Package (.tgz)
-The "dotnet-node-core-v0.6.1.tgz" file available in the Assets section is a production-ready package. Unlike the source code (zip), it requires no compilation steps.
+### Option 2: Pre-compiled Package (.tgz)
+The "dotnet-node-core-v0.6.4.tgz" file available in the Assets section is a production-ready package. Unlike the source code (zip), it requires no compilation steps.
 
 How to install this file:
-1- Download the .tgz file.
-2- Run the following command in your project:
+1. Download the .tgz file.
+2. Run the following command in your project:
 
 ```bash
-npm install ./path/to/dotnet-node-core-v0.6.1.tgz
+npm install ./path/to/dotnet-node-core-v0.6.4.tgz
+```
+
+### 🔄 Updating (GitHub Installation)
+If you installed via GitHub, NPM may cache the dependency. To force an update to the latest release:
+
+```bash
+# Update to latest main
+npm install github:fabioferreccio/dotnet-node-core --force
+
+# Or switch to a specific tag
+npm install github:fabioferreccio/dotnet-node-core#v0.6.4
 ```
 
 ---
 
-## 📦 System Types & Primitives (v0.6.1)
+## 📦 System Types & Primitives (v0.6.4)
 
 Now supporting a comprehensive suite of .NET numerics and core types.
 
@@ -79,7 +85,7 @@ Now supporting a comprehensive suite of .NET numerics and core types.
 Unlike JavaScript strings, `System.String` is a Value Object. Modifications create new instances.
 
 ```typescript
-import { System } from './src/System';
+import { System } from 'dotnet-node-core';
 
 const original = System.String.From("  dotnet-node-core  ");
 const clean = original.Trim().ToUpper();
@@ -92,47 +98,61 @@ System.Console.WriteLine(clean);    // Prints: "DOTNET-NODE-CORE" (New Instance)
 Perform synchronized I/O with strict path handling and stream support.
 
 ```typescript
-import { System } from './src/System';
+import { System } from 'dotnet-node-core';
 
 const path = "./output.txt";
 const content = "Hello World";
 
 // Write to file
 System.IO.File.WriteAllText(path, content);
-
-// Read using Stream
-const stream = System.IO.File.ReadAllText(path);
-// ... operations
 ```
 
 ### 3. System.Linq (Querying)
 Use standard LINQ operators on collections.
 
 ```typescript
-const numbers = new System.Collections.Generic.List<System.Int32>();
-numbers.Add(System.Int32.From(10));
-numbers.Add(System.Int32.From(20));
+import { System, List, Int32, Enumerable } from 'dotnet-node-core';
 
-const query = System.Linq.Enumerable.From(numbers)
+const numbers = new List<Int32>();
+numbers.Add(Int32.From(10));
+numbers.Add(Int32.From(20));
+
+const query = Enumerable.From(numbers)
     .Where(x => x.Value > 15)
     .Select(x => x.ToString());
     
 System.Console.WriteLine(query.First()); // "20"
 ```
 
-### 4. Dependency Injection
-A clean, standards-compliant IoC container.
+### 4. Dependency Injection & @Inject
+A clean, standards-compliant IoC container with support for Interface resolution.
 
 ```typescript
-import { System } from './src/System';
+import { ServiceCollection, Injectable, Inject } from 'dotnet-node-core';
 
-// Register Services
-const services = new System.DependencyInjection.ServiceCollection();
-// services.AddSingleton(MyService);
+interface ILogger {
+    Log(message: string): void;
+}
 
-// Build Provider
+@Injectable()
+class MyLogger implements ILogger {
+    Log(message: string): void {
+        console.log(message);
+    }
+}
+
+@Injectable()
+class MyService {
+    // @Inject("Token") solves TypeScript interface erasure at runtime
+    constructor(@Inject("ILogger") private logger: ILogger) {}
+}
+
+const services = new ServiceCollection();
+services.AddSingleton("ILogger", MyLogger);
+services.AddTransient(MyService);
+
 const provider = services.BuildServiceProvider();
-// const myService = provider.GetService(MyService);
+const myService = provider.GetRequiredService(MyService);
 ```
 
 ---

@@ -5,8 +5,16 @@ export class ServiceScope implements IServiceScope, IDisposable, IAsyncDisposabl
     private readonly _serviceProvider: IServiceProvider;
     private _isDisposed: boolean = false;
 
-    constructor(serviceProvider: IServiceProvider) {
+    private constructor(serviceProvider: IServiceProvider) {
         this._serviceProvider = serviceProvider;
+    }
+
+    /**
+     * Internal factory for creating a ServiceScope instance.
+     * Required by Rule 6: Strict Construction Rule.
+     */
+    public static Create(serviceProvider: IServiceProvider): ServiceScope {
+        return new ServiceScope(serviceProvider);
     }
 
     public get ServiceProvider(): IServiceProvider {

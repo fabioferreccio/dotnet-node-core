@@ -6,7 +6,7 @@ describe("Domain.DependencyInjection.Injectable", () => {
         // Arrange
         @Injectable()
         class TestService {
-             constructor(public readonly name: string) {}
+            constructor(public readonly name: string) {}
         }
 
         // Act

@@ -1,9 +1,7 @@
 import "reflect-metadata";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function Injectable(): (target: new (...args: any[]) => any) => void {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (target: new (...args: any[]) => any) => {
+export function Injectable(): ClassDecorator {
+    return (target: object) => {
         // This decorator forces TypeScript to emit metadata
         // specifically "design:paramtypes" which is used for auto-resolution.
         // No runtime logic needed here, the existence of the decorator is enough.

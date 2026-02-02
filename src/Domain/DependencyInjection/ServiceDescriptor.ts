@@ -146,7 +146,6 @@ export class ServiceDescriptor {
                 // However, the prompt emphasizes "Self-Binding" overloads.
                 // If I allow A->B, I satisfy "Token -> Impl".
                 // Let's assume A->B is VALID Token Binding with Auto-Resolution.
-
                 // The PROHIBITION is strictly on "Self-Binding variants that are loose".
                 // So: A->A is bad. A->Instance is bad.
                 // A->B (Ctor matches Ctor) should be OK?

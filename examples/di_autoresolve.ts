@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { ServiceCollection } from "../src/System/DependencyInjection/ServiceCollection";
 import { Injectable } from "../src/Domain/DependencyInjection/Injectable";
+import { Inject } from "../src/Domain/DependencyInjection/Inject";
 
 // 1. Define Dependencies
 @Injectable()
@@ -20,7 +21,7 @@ class UserService {
     }
 }
 
-// 3. Define Interface/Token Binding
+// 3. Define Interface/Token Binding (The Interface Erasure Problem)
 abstract class IFileService {
     abstract read(): void;
 }
@@ -35,7 +36,19 @@ class FileService extends IFileService {
     }
 }
 
-// 4. Test Logic
+// 4. Case: Manual resolution via @Inject for Interfaces
+@Injectable()
+class FileManager {
+    // IFileService would normally resolve to Object due to JS erasure.
+    // @Inject("IFileService") forces resolution by the registered token.
+    constructor(@Inject("IFileService") private readonly fileService: IFileService) {}
+
+    process() {
+        this.fileService.read();
+    }
+}
+
+// 5. Test Logic
 function run() {
     console.log("--- DI Auto-Resolution Test ---");
     
@@ -48,7 +61,10 @@ function run() {
     services.AddTransient(UserService);
 
     // Register FileService (Token Binding + Auto-Resolve -> Logger)
-    services.AddTransient(IFileService, FileService);
+    services.AddTransient("IFileService", FileService);
+
+    // Register FileManager (Uses @Inject to find IFileService)
+    services.AddTransient(FileManager);
 
     const provider = services.BuildServiceProvider();
 
@@ -56,9 +72,9 @@ function run() {
     const userService = provider.GetRequiredService(UserService);
     userService.greet("User");
 
-    console.log("2. Resolving IFileService...");
-    const fileService = provider.GetRequiredService(IFileService);
-    fileService.read();
+    console.log("2. Resolving FileManager (via @Inject)...");
+    const fileManager = provider.GetRequiredService(FileManager);
+    fileManager.process();
 
     console.log("--- SUCCESS ---");
 }

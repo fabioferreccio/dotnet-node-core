@@ -14,9 +14,18 @@ export {
     ServiceLifetime,
     ServiceIdentifier,
     Injectable,
+    Inject,
     ImplementationFactory,
     SelfBindingFactory,
 } from "./Domain/DependencyInjection";
+export {
+    IServiceProvider,
+    IServiceCollection,
+    IServiceScope,
+    IServiceScopeFactory,
+    IDisposable,
+    IAsyncDisposable,
+} from "./Domain/Interfaces";
 export { JsonConverter, JsonSerializer, JsonSerializerOptions } from "./System/Text/Json";
 export * from "./System/Net/Http";
 

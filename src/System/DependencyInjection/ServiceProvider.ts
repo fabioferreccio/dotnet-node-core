@@ -7,7 +7,12 @@ import {
     IAsyncDisposable,
 } from "../../Domain/Interfaces";
 import { Task } from "../../Domain/Threading/Tasks/Task";
-import { ServiceDescriptor, ServiceLifetime, ServiceIdentifier } from "../../Domain/DependencyInjection";
+import {
+    ServiceDescriptor,
+    ServiceLifetime,
+    ServiceIdentifier,
+    INJECT_METADATA_KEY,
+} from "../../Domain/DependencyInjection";
 import { ServiceScope } from "./ServiceScope";
 
 export class ServiceProvider
@@ -19,9 +24,9 @@ export class ServiceProvider
     private readonly _root: ServiceProvider;
     private _isDisposed = false;
 
-    constructor(descriptors: Map<ServiceIdentifier, ServiceDescriptor>);
-    constructor(descriptors: Map<ServiceIdentifier, ServiceDescriptor>, root: ServiceProvider);
-    constructor(descriptors: Map<ServiceIdentifier, ServiceDescriptor>, root?: ServiceProvider) {
+    private constructor(descriptors: Map<ServiceIdentifier, ServiceDescriptor>);
+    private constructor(descriptors: Map<ServiceIdentifier, ServiceDescriptor>, root: ServiceProvider);
+    private constructor(descriptors: Map<ServiceIdentifier, ServiceDescriptor>, root?: ServiceProvider) {
         this._descriptors = descriptors;
 
         if (root) {
@@ -35,6 +40,14 @@ export class ServiceProvider
             this._singletons = new Map<ServiceIdentifier, unknown>();
             this._scopedInstances = new Map<ServiceIdentifier, unknown>(); // Root scope
         }
+    }
+
+    /**
+     * Internal factory for creating a ServiceProvider instance.
+     * Required by Rule 6: Strict Construction Rule.
+     */
+    public static Create(descriptors: Map<ServiceIdentifier, ServiceDescriptor>): ServiceProvider {
+        return new ServiceProvider(descriptors);
     }
 
     // --- IServiceScope Implementation ---
@@ -138,10 +151,9 @@ export class ServiceProvider
     public CreateScope(): IServiceScope {
         // Create a new ServiceProvider that shares the same root (singletons) but has a new scoped cache.
         const scopedProvider = new ServiceProvider(this._descriptors, this._root);
-        return new ServiceScope(scopedProvider);
+        return ServiceScope.Create(scopedProvider);
     }
 
-    // ... CreateInstance Logic ...
     private CreateInstance(descriptor: ServiceDescriptor): unknown {
         // A. Instance
         if (descriptor.ImplementationInstance !== undefined) {
@@ -158,20 +170,35 @@ export class ServiceProvider
             const Ctor = descriptor.ImplementationType as new (...args: unknown[]) => unknown;
 
             // 1. Check for Design-Time Metadata (emitDecoratorMetadata)
-            const paramTypes = Reflect.getMetadata("design:paramtypes", Ctor);
+            const paramTypes = Reflect.getMetadata("design:paramtypes", Ctor) || [];
 
-            if (paramTypes && Array.isArray(paramTypes)) {
+            // 2. Check for Manual Injections (@Inject)
+            const manualInjections: Record<number, unknown> = Reflect.getOwnMetadata(INJECT_METADATA_KEY, Ctor) || {};
+
+            if (paramTypes.length > 0 || Object.keys(manualInjections).length > 0) {
                 // Auto-Resolve Dependencies
-                const args = paramTypes.map((paramType) => {
-                    // paramType is the Constructor of the dependency
-                    return this.GetRequiredService(paramType);
+                const args = paramTypes.map((paramType: unknown, index: number) => {
+                    // Highest priority: @Inject token
+                    const manualToken = manualInjections[index];
+                    if (manualToken !== undefined) {
+                        return this.GetRequiredService(manualToken as ServiceIdentifier);
+                    }
+
+                    // Fallback: captured paramType
+                    if (paramType === Object) {
+                        console.warn(
+                            `[DI Warning]: Dependency at index ${index} of ${Ctor.name} resolved as 'Object'. ` +
+                                `This usually happens due to TypeScript interface erasure. ` +
+                                `Consider using @Inject("Token") to resolve this dependency.`,
+                        );
+                    }
+
+                    return this.GetRequiredService(paramType as ServiceIdentifier);
                 });
                 return new Ctor(...args);
             }
 
-            // 2. Fallback: Parameterless Constructor
-            // If no metadata found, we assume 0 args.
-            // If the class actually requires args, this will likely fail or produce undefineds if not TS-checked.
+            // 3. Fallback: Parameterless Constructor
             return new Ctor();
         }
 

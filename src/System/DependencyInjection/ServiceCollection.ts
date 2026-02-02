@@ -105,6 +105,6 @@ export class ServiceCollection extends Array<ServiceDescriptor> implements IServ
             // For simple GetService, we usually allow overwriting in the map.
             map.set(desc.ServiceType, desc);
         }
-        return new ServiceProvider(map);
+        return ServiceProvider.Create(map);
     }
 }

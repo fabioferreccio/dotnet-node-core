@@ -110,8 +110,6 @@ describe("System.DependencyInjection.ServiceCollection", () => {
         }).toThrow(/Self-binding using an instance is PROHIBITED/);
     });
 
-
-
     test("Throws on Single Argument if not Constructor (Token)", () => {
         const token = "TEST";
         const services = new ServiceCollection();

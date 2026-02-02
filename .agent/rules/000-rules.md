@@ -76,6 +76,13 @@ This document defines the **Anti-Escape Rules** for the project. These rules are
 - Tests **MUST NOT** violate encapsulation to inspect private state.
 **Reason:** To ensure tests validate the *contract*, not the *implementation*.
 
+### Rule 9: The Public API Exposure Axiom
+**Requirement:** All new features, core types, and public interfaces **MUST** be explicitly exported from the library's root entry point (`src/index.ts`).
+**Enforcement:**
+- Any newly added class, decorator, or interface intended for consumer use **MUST** have a corresponding export in `src/index.ts`.
+- Consumers **MUST NOT** be forced to use deep imports (e.g., `import { X } from "package/dist/..."`).
+**Reason:** To ensure library discoverability, maintain a clean public API surface, and provide a consistent developer experience.
+
 ---
 
 **AUTHORITY NOTE:**
