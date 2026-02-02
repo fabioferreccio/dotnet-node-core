@@ -1,6 +1,6 @@
 {
   "name": "dotnet-node-core",
-  "version": "0.6.9",
+  "version": "0.6.10",
 
   "description": "Foundational implementation of a C# Standard Library for Node.js",
   "main": "dist/index.js",

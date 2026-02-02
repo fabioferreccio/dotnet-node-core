@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.10] - 2026-02-02
+
+### Fixed
+- **Table Layout Algorithm**: Corrected width constraint handling.
+  - `maxWidth` now properly constrains columns with explicit `width` values.
+  - `maxWidth` now correctly limits flexible column expansion.
+  - Improved layout calculation to apply `min`/`max` constraints consistently across all column types.
+  - Fixed border alignment issues when using custom widths.
+
 ## [0.6.9] - 2026-02-02
 
 ### Added

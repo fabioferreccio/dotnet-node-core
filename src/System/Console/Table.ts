@@ -87,43 +87,49 @@ export class Table {
 
         // 1. Calculate Layout
         const availableWidth = consoleWidth - (colCount + 1); // Border characters: colCount + 1
-        let usedWidth = 0;
-        let flexibleColsCount = 0;
         const colWidths: number[] = new Array(colCount);
+        const columns = this._columns.ToArray();
 
-        // First pass: Allocate fixed widths
+        // First pass: Determine effective widths
+        let fixedTotal = 0;
+        let flexibleCount = 0;
+
         for (let i = 0; i < colCount; i++) {
-            const col = this._columns.ToArray()[i];
+            const col = columns[i];
+            
             if (col.width !== undefined) {
-                // Fixed allocation
-                colWidths[i] = col.width;
-                usedWidth += colWidths[i];
+                // Fixed width: apply max constraint if present
+                let w = col.width;
+                if (col.maxWidth !== undefined) w = Math.min(w, col.maxWidth);
+                if (col.minWidth !== undefined) w = Math.max(w, col.minWidth);
+                colWidths[i] = w;
+                fixedTotal += w;
             } else {
-                flexibleColsCount++;
+                flexibleCount++;
             }
         }
 
-        // Second pass: Distribute flexible space
-        if (flexibleColsCount > 0) {
-            const remaining = Math.max(0, availableWidth - usedWidth);
-            const perFlexCol = Math.floor(remaining / flexibleColsCount);
+        // Second pass: Distribute remaining space to flexible columns
+        if (flexibleCount > 0) {
+            const remaining = Math.max(0, availableWidth - fixedTotal);
+            const perFlexCol = Math.floor(remaining / flexibleCount);
 
             for (let i = 0; i < colCount; i++) {
-                const col = this._columns.ToArray()[i];
+                const col = columns[i];
                 if (col.width === undefined) {
                     let w = perFlexCol;
                     // Apply min/max constraints
                     if (col.minWidth !== undefined) w = Math.max(w, col.minWidth);
                     if (col.maxWidth !== undefined) w = Math.min(w, col.maxWidth);
                     colWidths[i] = w;
-                    usedWidth += w; // Note: We might overflow if minimums exceed space, but we clamp anyway
                 }
             }
         }
 
-        // Final check: clamp widths to prevent overflow or underflow constraints
-        // We prioritize left-to-right rendering if space exhausted, or layout logic from prompt: "Truncate visually"
-        // But individual column widths are settled.
+        // Final validation: ensure no negative widths
+        for (let i = 0; i < colCount; i++) {
+            colWidths[i] = Math.max(0, colWidths[i]);
+        }
 
         // Border Strings
         const topBorder = "┌" + colWidths.map(w => "─".repeat(Math.max(0, w))).join("┬") + "┐";
