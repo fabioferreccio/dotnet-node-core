@@ -28,22 +28,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Bugfix**: Exported `@Injectable` decorator which was missing from the named exports in version 0.6.1.
 
+## [0.6.1] - 2026-01-20
+
+### Added
+- **System Types Expansion**: Added comprehensive numeric support: `CsByte`, `CsSByte`, `CsInt16`, `CsInt64`, `CsSingle`, `CsDouble`, `CsDecimal`.
+- **Core Primitives**: Added `CsBoolean` value object.
+
 ## [0.6.0] - 2026-01-18
 
 ### Added
-- **Public API Freeze**: Explicit export of `System.Text` and children. All other APIs are now Internal.
+- **Public API Freeze**: Explicit export of `System.Text` and children. All other APIs are now Internal by default.
 - **Serialization Metadata**: `System.Text.Json.Metadata` for strict type mapping and polymorphic support.
 - **Diagnostics**: `System.Text.Json.Diagnostics` for performance tracing and error logging.
-- **Documentation**: New authoritative guides in `docs/`:
-    - `ARCHITECTURE.md` (Constitutional rules)
-    - `SERIALIZATION.md` (JsonSerializer usage)
-    - `DEPENDENCY_INJECTION.md` (IoC container usage)
-    - `TYPES.md` (Type system philosophy)
+- **Authoritative Guides**: Added `ARCHITECTURE.md`, `SERIALIZATION.md`, `DEPENDENCY_INJECTION.md`, and `TYPES.md` to `docs/`.
 
 ### Changed
-- **Moved**: `ARCHITECTURE.md` moved from root to `docs/ARCHITECTURE.md`.
-- **Api Stability**: Public APIs (exported via `System`) are now guaranteed stable within Major versions.
-- **Internal Visibility**: Non-exported types are considered volatile and subject to change.
+- **Governance**: Implemented Anti-Escape rules for Domain Purity and System Runtime.
 
-### Locked
-- **Dependencies**: No new dependencies added. Project remains zero-dependency (excluding devDependencies).
+## [0.5.1] - 2026-01-17
+
+### Fixed
+- **Test Alignment**: Standardized test suites to follow `ARCHITECTURE.md` requirements.
+- **Bugfixes**: Resolved minor issues in LINQ enumerators.
+
+## [0.5.0] - 2026-01-16
+
+### Added
+- **System.IO**: Initial implementation of `File` and `Directory` static utilities.
+- **System.Linq**: Basic LINQ operators: `Where`, `Select`, `ToList`, `First`, `FirstOrDefault`.
+
+## [0.4.0] - 2026-01-16
+
+### Added
+- **Internal Pooling**: Implemented `ObjectPool` for `JsonSerializer` to reduce GC pressure during high-throughput deserialization.
+
+## [0.3.0] - 2026-01-16
+
+### Added
+- **System.Text.Json**: Initial implementation of the `JsonSerializer`.
+
+## [0.2.0] - 2026-01-15
+
+### Added
+- **Core Types**: Initial implementation of `CsString`, `CsGuid`, and `CsDateTime`.
+
+## [0.1.0] - 2026-01-14
+
+### Added
+- **Project Structure**: Initial setup of Domain and System layers.
+- **Base Interfaces**: Definition of `IDisposable`, `IServiceProvider`, and `IEnumerable`.
