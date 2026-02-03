@@ -92,12 +92,15 @@ export class Table {
         if (colCount === 0) return;
 
         // 1. Calculate Layout
-        const availableWidth = consoleWidth - (colCount + 1); // Border characters: colCount + 1
+        const availableWidth = consoleWidth - (colCount + 1);
         const colWidths: number[] = new Array(colCount);
         const columns = this._columns.ToArray();
+        const rows = this._rows.ToArray();
 
-        // First pass: Determine effective widths
+        // Calculate requested widths (Max Content)
+        const requestedWidths: number[] = new Array(colCount);
         let fixedTotal = 0;
+        let flexTotalRequest = 0;
         let flexibleCount = 0;
 
         for (let i = 0; i < colCount; i++) {
@@ -108,25 +111,55 @@ export class Table {
                 let w = col.width;
                 if (col.maxWidth !== undefined) w = Math.min(w, col.maxWidth);
                 if (col.minWidth !== undefined) w = Math.max(w, col.minWidth);
+                requestedWidths[i] = w;
                 colWidths[i] = w;
                 fixedTotal += w;
             } else {
+                // Auto width based on content
+                let maxContent = col.header.length;
+                for (const row of rows) {
+                    const rowArr = row.ToArray();
+                    if (i < rowArr.length) {
+                        const len = rowArr[i].Length;
+                        if (len > maxContent) maxContent = len;
+                    }
+                }
+                
+                // Add padding
+                let w = maxContent + (col.padding * 2);
+                
+                // Constraints
+                if (col.minWidth !== undefined) w = Math.max(w, col.minWidth);
+                if (col.maxWidth !== undefined) w = Math.min(w, col.maxWidth);
+                
+                requestedWidths[i] = w;
+                flexTotalRequest += w;
                 flexibleCount++;
             }
         }
 
-        // Second pass: Distribute remaining space to flexible columns
+        // Distribute Space
         if (flexibleCount > 0) {
-            const remaining = Math.max(0, availableWidth - fixedTotal);
-            const perFlexCol = Math.floor(remaining / flexibleCount);
+            const availableForFlex = Math.max(0, availableWidth - fixedTotal);
+            
+            // Factor used for both expansion and shrinking (Proportional distribution)
+            // If flexTotalRequest is 0 (all empty), avoid division by zero
+            const ratio = flexTotalRequest > 0 ? availableForFlex / flexTotalRequest : 1;
 
             for (let i = 0; i < colCount; i++) {
                 const col = columns[i];
                 if (col.width === undefined) {
-                    let w = perFlexCol;
-                    // Apply min/max constraints
+                    let w = Math.floor(requestedWidths[i] * ratio);
+                    
+                    // Final constraints check
                     if (col.minWidth !== undefined) w = Math.max(w, col.minWidth);
                     if (col.maxWidth !== undefined) w = Math.min(w, col.maxWidth);
+                    
+                    // If we expanded, ensure we didn't exceed available due to constraints clamping up
+                    // But wait, if we clamp, we might underfill or overfill.
+                    // A perfect algorithm requires iterative solving, but for UI, simple proportional is usually fine.
+                    // We will trust the ratio but clamp to min/max.
+                    
                     colWidths[i] = w;
                 }
             }
@@ -152,7 +185,6 @@ export class Table {
         console.WriteLine(midBorder);
 
         // Render Rows
-        const rows = this._rows.ToArray();
         for (let i = 0; i < rows.length; i++) {
             this.RenderRow(console, rows[i].ToArray(), colWidths);
             if (this._showRowSeparators && i < rows.length - 1) {

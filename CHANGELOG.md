@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.12] - 2026-02-02
+
+### Changed
+- **Smart Auto-Sizing Layout**: The table layout algorithm is now content-aware.
+  - Columns without explicit width now automatically calculate their required width based on content (Headers + Data).
+  - Available terminal space is distributed proportionally to content length, optimizing space usage for varying data sizes (e.g., UUIDs get more space than booleans).
+  - Constraints (`minWidth`, `maxWidth`) are strictly respected during this auto-sizing process.
+
 ## [0.6.11] - 2026-02-02
 
 ### Added
