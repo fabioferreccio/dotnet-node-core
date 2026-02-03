@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.13] - 2026-02-02
+
+### Fixed
+- **Test Suite Alignment**: Updated legacy tests to align with the new Smart Auto-Sizing algorithm.
+  - `Table.spec.ts` now tests for proportional width distribution instead of strict equality.
+  - `TableCustomization.spec.ts` adjusted to ensure valid test scenarios for `maxWidth` constraints under the new layout logic.
+
 ## [0.6.12] - 2026-02-02
 
 ### Changed

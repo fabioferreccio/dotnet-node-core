@@ -30,18 +30,26 @@ describe("System.Console.Table (Phase 8 Public API)", () => {
         // Inherited from the uneven rows test
         const table = new Table();
         table.AddColumn("C1").AddColumn("C2");
-        table.AddRow("OnlyOne");
+        table.AddRow("OnlyOne"); // "OnlyOne"(7) > "C2"(2). Ratio ~3.5
         table.Render(AnsiConsole.Console);
 
-        // Calculate expected layout dynamically to avoid fragility
-        const width = 80;
-        const colCount = 2;
-        const colWidth = Math.floor((width - (colCount + 1)) / colCount); // 38
-        const c1 = "OnlyOne".padEnd(colWidth);
-        const c2 = "".padEnd(colWidth);
-        const expected = "│" + c1 + "│" + c2 + "│";
-
-        expect(stdoutSpy).toHaveBeenCalledWith(expected);
+        // Smart layout allocates space proportionally.
+        // C1 should be much wider than C2.
+        // We verify that both exist and widths sum up to available space roughly.
+        
+        // Use regex to capture widths
+        // Pattern: ┌(dashes)┬(dashes)┐
+        const call = stdoutSpy.mock.calls.find(c => c[0].startsWith("┌"));
+        expect(call).toBeDefined();
+        
+        const line = call![0];
+        const parts = line.substring(1, line.length - 1).split("┬");
+        const w1 = parts[0].length;
+        const w2 = parts[1].length;
+        
+        expect(w1 + w2).toBeLessThanOrEqual(77); // 80 - 3 borders
+        // W1 should be > W2
+        expect(w1).toBeGreaterThan(w2);
     });
 
     test("handles_mixed_csstring_inputs", () => {

@@ -97,29 +97,21 @@ describe("Table Customization", () => {
 
     test("should respect minWidth and maxWidth", () => {
          // Console width 80.
-         // Flexible space distribution.
+         // Flexible space distribution is content-aware.
          const table = new Table();
          // Col 1: min 50.
          // Col 2: max 5.
-         // Space: 80 - 3 (borders) = 77
-         // Even split: 38.5 -> 38 each.
-         // Col 1 needs 50 -> takes 50.
-         // Col 2 needs 38 but max is 5 -> takes 5?
-         // Let's trace algorithm:
-         // perFlexCol = 38.
-         // Col 1: max(38, 50) = 50.
-         // Col 2: min(38, 5) = 5.
-         // Total used: 55. Fits in 77.
          
          table.AddColumn({ header: "Min", minWidth: 50 });
-         table.AddColumn({ header: "Max", maxWidth: 5 });
+         // Ensure content is large enough so that Smart Alg allocates > 5, forcing cap.
+         table.AddColumn({ header: "Maxim", maxWidth: 5 }); // 5 chars -> * ratio > 5
          table.AddRow("A", "B");
          
          table.Render(AnsiConsole.Console);
          const output = getOutput();
          
-         // Verify Col 1 width approx 50 chars of ─
-         // "─".repeat(50)
+         // Verify Col 1 width approx > 50 chars
+         // Verify Col 2 is capped at 5
          const separatorLine = output.split("\n")[0];
          expect(separatorLine).toContain("─".repeat(50));
          expect(separatorLine).toContain("─────┐"); // 5 chars
